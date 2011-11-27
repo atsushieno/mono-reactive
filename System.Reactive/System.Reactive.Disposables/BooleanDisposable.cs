@@ -10,7 +10,8 @@ namespace System.Reactive.Disposables
 	{
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (!IsDisposed)
+				IsDisposed = true;
 		}
 		
 		public bool IsDisposed { get; private set; }

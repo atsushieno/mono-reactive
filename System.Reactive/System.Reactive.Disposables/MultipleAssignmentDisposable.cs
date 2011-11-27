@@ -10,11 +10,25 @@ namespace System.Reactive.Disposables
 	{
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (IsDisposed)
+				return;
+			IsDisposed = true; // set to true before call to d.Dispose().
+			if (d != null)
+				d.Dispose ();
 		}
 		
 		public bool IsDisposed { get; private set; }
 
-		public IDisposable Disposable { get; set; }
+		IDisposable d;
+		public IDisposable Disposable {
+			get { return d; }
+			set {
+				// null is allowed.
+				d = value;
+				// Immediately dispose if this instance is already disposed.
+				if (IsDisposed && d != null)
+					d.Dispose ();
+			}
+		}
 	}
 }

@@ -8,24 +8,31 @@ namespace System.Reactive.Disposables
 {
 	public sealed class CancellationDisposable : IDisposable
 	{
+		CancellationTokenSource cts;
+		
 		public CancellationDisposable ()
+			: this (new CancellationTokenSource ())
 		{
-			throw new NotImplementedException ();
 		}
 		
 		public CancellationDisposable (CancellationTokenSource cts)
 		{
-			throw new NotImplementedException ();
+			if (cts == null)
+				throw new ArgumentNullException ("cts");
+			this.cts = cts;
 		}
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (!IsDisposed) {
+				IsDisposed = true;
+				cts.Cancel ();
+			}
 		}
 		
 		public bool IsDisposed { get; private set; }
 		
 		public CancellationToken Token {
-			get { throw new NotImplementedException (); }
+			get { return cts.Token; }
 		}
 	}
 }

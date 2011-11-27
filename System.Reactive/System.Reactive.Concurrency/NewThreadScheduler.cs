@@ -8,12 +8,18 @@ namespace System.Reactive.Concurrency
 	public sealed class NewThreadScheduler : IScheduler
 	{
 		public NewThreadScheduler ()
+			: this ((t => new Thread (t)))
 		{
 		}
 		
 		public NewThreadScheduler (Func<ThreadStart, Thread> threadFactory)
 		{
+			if (threadFactory == null)
+				throw new ArgumentNullException ("threadFactory");
+			this.thread_factory = threadFactory;
 		}
+		
+		Func<ThreadStart, Thread> thread_factory;
 		
 		public DateTimeOffset Now {
 			get { return Scheduler.Now; }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Reactive.Concurrency;
 
@@ -9,23 +10,26 @@ namespace System.Reactive.Disposables
 	public sealed class CompositeDisposable
 		: ICollection<IDisposable>, IEnumerable<IDisposable>, IEnumerable, IDisposable
 	{
+		// FIXME: not sure if simple stupid List is applicable...
+		List<IDisposable> items;
+		
 		public CompositeDisposable (IEnumerable<IDisposable> disposables)
 		{
-			throw new NotImplementedException ();
+			items = new List<IDisposable> (disposables);
 		}
 		
 		public CompositeDisposable (params IDisposable[] disposables)
 		{
-			throw new NotImplementedException ();
+			items = new List<IDisposable> (disposables);
 		}
 		
 		public CompositeDisposable (int capacity)
 		{
-			throw new NotImplementedException ();
+			items = new List<IDisposable> (capacity);
 		}
 		
 		public int Count {
-			get { throw new NotImplementedException (); }
+			get { return items.Count (); }
 		}
 		
 		public bool IsReadOnly {
@@ -34,42 +38,44 @@ namespace System.Reactive.Disposables
 		
 		IEnumerator IEnumerable.GetEnumerator ()
 		{
-			return GetEnumerator ();
+			foreach (var i in items)
+				yield return i;
 		}
 		
 		public void Add (IDisposable item)
 		{
-			throw new NotImplementedException ();
+			items.Add (item);
 		}
 		
 		public void Clear ()
 		{
-			throw new NotImplementedException ();
+			items.Clear ();
 		}
 		
 		public bool Contains (IDisposable item)
 		{
-			throw new NotImplementedException ();
+			return items.Contains (item);
 		}
 		
 		public void CopyTo (IDisposable [] array, int arrayIndex)
 		{
-			throw new NotImplementedException ();
+			items.CopyTo (array, arrayIndex);
 		}
 		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			foreach (var item in items)
+				item.Dispose ();
 		}
 		
 		public IEnumerator<IDisposable> GetEnumerator ()
 		{
-			throw new NotImplementedException ();
+			return GetEnumerator ();
 		}
 		
 		public bool Remove (IDisposable item)
 		{
-			throw new NotImplementedException ();
+			return items.Remove (item);
 		}
 	}
 }

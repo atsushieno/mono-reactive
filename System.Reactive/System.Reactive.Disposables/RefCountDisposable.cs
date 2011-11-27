@@ -8,21 +8,37 @@ namespace System.Reactive.Disposables
 {
 	public sealed class RefCountDisposable : IDisposable
 	{
+		IDisposable disposable;
+		
 		public RefCountDisposable (IDisposable disposable)
 		{
-			throw new NotImplementedException ();
+			if (disposable == null)
+				throw new ArgumentNullException ("disposable");
+			this.disposable = disposable;
 		}
 		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			dispose_invoked = true;
+			if (IsDisposed || count > 0)
+				return;
+			IsDisposed = true;
+			disposable.Dispose ();
 		}
 		
 		public bool IsDisposed { get; private set; }
 		
+		bool dispose_invoked;
+		int count;
+		
 		public IDisposable GetDisposable ()
 		{
-			throw new NotImplementedException ();
+			count++;
+			return Disposable.Create (() => {
+				count--;
+				if (count == 0 && dispose_invoked)
+					Dispose ();
+			});
 		}
 	}
 }

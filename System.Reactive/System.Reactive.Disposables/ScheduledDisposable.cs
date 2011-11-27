@@ -10,11 +10,20 @@ namespace System.Reactive.Disposables
 	{
 		public ScheduledDisposable (IScheduler scheduler, IDisposable disposable)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			if (disposable == null)
+				throw new ArgumentNullException ("disposable");
+			this.Scheduler = scheduler;
+			this.Disposable = disposable;
 		}
 		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (IsDisposed)
+				return;
+			IsDisposed = true;
+			Scheduler.Schedule (() => Disposable.Dispose ());
 		}
 		
 		public bool IsDisposed { get; private set; }

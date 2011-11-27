@@ -8,13 +8,34 @@ namespace System.Reactive.Disposables
 {
 	public static class Disposable
 	{
+		static readonly IDisposable empty = new SimpleActionDisposable (() => {});
+		
 		public static IDisposable Empty {
-			get { throw new NotImplementedException (); }
+			get { return empty; }
 		}
 		
 		public static IDisposable Create (Action dispose)
 		{
-			throw new NotImplementedException ();
+			if (dispose == null)
+				throw new ArgumentNullException ("dispose");
+			return new SimpleActionDisposable (dispose);
+		}
+		
+		class SimpleActionDisposable : IDisposable
+		{
+			Action dispose;
+			
+			public SimpleActionDisposable (Action dispose)
+			{
+				this.dispose = dispose;
+			}
+			
+			public void Dispose ()
+			{
+				if (dispose != null)
+					dispose ();
+				dispose = null;
+			}
 		}
 	}
 }

@@ -8,13 +8,30 @@ namespace System.Reactive.Disposables
 {
 	public class SingleAssignmentDisposable : IDisposable
 	{
+		IDisposable d;
+		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (IsDisposed)
+				return;
+			IsDisposed = true;
+			if (d != null)
+				d.Dispose ();
 		}
 		
 		public bool IsDisposed { get; private set; }
 		
-		public IDisposable Disposable { get; private set; }
+		public IDisposable Disposable {
+			get { return d; }
+			set {
+				if (IsDisposed) {
+					if (value != null)
+						value.Dispose ();
+				}
+				else if (d != null)
+					throw new InvalidOperationException ("Target disposable is already set to this instance");
+				d = value;
+			}
+		}
 	}
 }

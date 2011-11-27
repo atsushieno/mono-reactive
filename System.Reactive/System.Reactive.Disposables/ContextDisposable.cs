@@ -8,14 +8,29 @@ namespace System.Reactive.Disposables
 {
 	public sealed class ContextDisposable : IDisposable
 	{
+		IDisposable disposable;
+		
 		public ContextDisposable (SynchronizationContext context, IDisposable disposable)
 		{
-			throw new NotImplementedException ();
+			if (context == null)
+				throw new ArgumentNullException ("context");
+			if (disposable == null)
+				throw new ArgumentNullException ("disposable");
+			this.Context = context;
+			this.disposable = disposable;
 		}
 		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			if (IsDisposed)
+				return;
+			IsDisposed = true;
+			/* async. To verify that it is not sync (Send()), try following lines:
+				var d = new ContextDisposable(new SynchronizationContext (), Disposable.Create(() => { Thread.Sleep(10000); Console.WriteLine("OK"); }));
+				d.Dispose();
+				Console.WriteLine(d.IsDisposed);
+			*/
+			Context.Post ((o) => disposable.Dispose (), null);
 		}
 		
 		public bool IsDisposed { get; private set; }
