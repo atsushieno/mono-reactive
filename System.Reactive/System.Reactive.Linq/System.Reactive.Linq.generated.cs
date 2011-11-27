@@ -94,17 +94,6 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<T1, IObservable<TResult>> ToAsync<T1, TResult> (Func<T1, TResult> function)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static Func<T1, IObservable<TResult>> ToAsync<T1, TResult> (Func<T1, TResult> function, IScheduler scheduler)
-		{
-			throw new NotImplementedException ();
-		}
-		
-
 		public static Func<T1, T2, IObservable<TResult>> ToAsync<T1, T2, TResult> (Func<T1, T2, TResult> function)
 		{
 			throw new NotImplementedException ();

@@ -28,7 +28,7 @@ namespace System.Reactive.Linq
 		", s);
 		}
 
-		for (int i = 1; i <= 16; i++) {
+		for (int i = 2; i <= 16; i++) {
 			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
 			Console.WriteLine (@"
 		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (Func<{0}, TResult> function)

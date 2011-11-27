@@ -7,17 +7,17 @@ namespace System.Reactive
 	{
 		public static Notification<T> CreateOnCompleted<T> ()
 		{
-			throw new NotImplementedException ();
+			return new Notification<T>.Completed ();
 		}
 		
 		public static Notification<T> CreateOnError<T> (Exception error)
 		{
-			throw new NotImplementedException ();
+			return new Notification<T>.Error (error);
 		}
 		
 		public static Notification<T> CreateOnNext<T> (T value)
 		{
-			throw new NotImplementedException ();
+			return new Notification<T>.Next (value);
 		}
 	}
 }

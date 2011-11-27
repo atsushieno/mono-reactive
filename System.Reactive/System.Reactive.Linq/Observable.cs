@@ -5,13 +5,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Joins;
 using System.Reactive.Subjects;
 using System.Threading;
 
 namespace System.Reactive.Linq
 {
-	public static class Observable
+	public static partial class Observable
 	{
 		public static IObservable<TSource> Aggregate<TSource> (
 			this IObservable<TSource> source,
@@ -192,10 +193,14 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
-		{ throw new NotImplementedException (); }
+		{
+			return new SimpleActionObservable<TSource> (subscribe);
+		}
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, IDisposable> subscribe)
-		{ throw new NotImplementedException (); }
+		{
+			return new SimpleDisposableObservable<TSource> (subscribe);
+		}
 		
 		public static IObservable<TSource> DefaultIfEmpty<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }

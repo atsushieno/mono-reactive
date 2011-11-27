@@ -7,35 +7,43 @@ namespace System.Reactive
 	{
 		public static IObserver<T> AsObserver<T> (this IObserver<T> observer)
 		{
-			throw new NotImplementedException ();
+			if (observer == null)
+				throw new ArgumentNullException ("observer");
+			return new WrappedObserver<T> (observer);
 		}
 		
 		public static IObserver<T> Create<T> (Action<T> onNext)
 		{
-			throw new NotImplementedException ();
+			return Create (onNext, () => {});
 		}
 		
 		public static IObserver<T> Create<T> (Action<T> onNext, Action onCompleted)
 		{
-			throw new NotImplementedException ();
+			return Create (onNext, (ex) => {}, onCompleted);
 		}
 		
 		public static IObserver<T> Create<T> (Action<T> onNext, Action <Exception> onError)
 		{
-			throw new NotImplementedException ();
+			return Create (onNext, onError, () => {});
 		}
 		
 		public static IObserver<T> Create<T> (Action<T> onNext, Action<Exception> onError, Action onCompleted)
 		{
-			throw new NotImplementedException ();
+			if (onNext == null)
+				throw new ArgumentNullException ("onNext");
+			if (onError == null)
+				throw new ArgumentNullException ("onError");
+			if (onCompleted == null)
+				throw new ArgumentNullException ("onCompleted");
+			return new DefaultObserver<T> (onNext, onError, onCompleted);
 		}
 		
 		public static IObserver<T> Synchronize<T> (IObserver<T> observer)
 		{
-			throw new NotImplementedException ();
+			return Synchronize (observer, new object ());
 		}
 		
-		public static IObserver<T> Synchronize<T> (IObserver<T> observer, Object gate)
+		public static IObserver<T> Synchronize<T> (IObserver<T> observer, object gate)
 		{
 			throw new NotImplementedException ();
 		}

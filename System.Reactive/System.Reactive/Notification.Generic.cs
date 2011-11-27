@@ -6,6 +6,10 @@ namespace System.Reactive
 	[SerializableAttribute]
 	public abstract class Notification<T> : IEquatable<Notification<T>>
 	{
+		internal Notification ()
+		{
+		}
+
 		public abstract Exception Exception { get; }
 		public abstract bool HasValue { get; }
 		public abstract NotificationKind Kind { get; }
@@ -41,6 +45,136 @@ namespace System.Reactive
 		public IObservable<T> ToObservable (IScheduler scheduler)
 		{
 			throw new NotImplementedException ();
+		}
+
+		internal class Completed : Notification<T>
+		{
+			public override Exception Exception {
+				get { return null; }
+			}
+			public override bool HasValue {
+				get { return false; }
+			}
+			public override NotificationKind Kind {
+				get { return NotificationKind.OnCompleted; }
+			}
+			public override T Value {
+				get { return default (T); }
+			}
+			
+			public override void Accept (IObserver<T> observer)
+			{
+				if (observer == null)
+					throw new ArgumentNullException ("observer");
+				observer.OnCompleted ();
+			}
+			
+			public override void Accept (Action<T> onNext, Action<Exception> onError, Action onCompleted)
+			{
+				onCompleted ();
+			}
+			
+			public override TResult Accept<TResult> (Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
+			{
+				return onCompleted ();
+			}
+			
+			public override bool Equals (Notification<T> other)
+			{
+				return object.ReferenceEquals (this, other);
+			}
+		}
+
+		internal class Error : Notification<T>
+		{
+			Exception error;
+			
+			public Error (Exception error)
+			{
+				this.error = error;
+			}
+			
+			public override Exception Exception {
+				get { return error; }
+			}
+			public override bool HasValue {
+				get { return false; }
+			}
+			public override NotificationKind Kind {
+				get { return NotificationKind.OnError; }
+			}
+			public override T Value {
+				get { return default (T); }
+			}
+			
+			public override void Accept (IObserver<T> observer)
+			{
+				if (observer == null)
+					throw new ArgumentNullException ("observer");
+				observer.OnError (error);
+			}
+			
+			public override void Accept (Action<T> onNext, Action<Exception> onError, Action onCompleted)
+			{
+				onError (error);
+			}
+			
+			public override TResult Accept<TResult> (Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
+			{
+				return onError (error);
+			}
+			
+			public override bool Equals (Notification<T> other)
+			{
+				var e = other as Error;
+				return (object) e != null && error.Equals (e.error);
+			}
+		}
+
+		internal class Next : Notification<T>
+		{
+			T value;
+			
+			public Next (T value)
+			{
+				this.value = value;
+			}
+			
+			public override Exception Exception {
+				get { return null; }
+			}
+			public override bool HasValue {
+				get { return true; }
+			}
+			public override NotificationKind Kind {
+				get { return NotificationKind.OnNext; }
+			}
+			public override T Value {
+				get { return value; }
+			}
+			
+			public override void Accept (IObserver<T> observer)
+			{
+				if (observer == null)
+					throw new ArgumentNullException ("observer");
+				observer.OnNext (value);
+			}
+			
+			public override void Accept (Action<T> onNext, Action<Exception> onError, Action onCompleted)
+			{
+				onNext (value);
+			}
+			
+			public override TResult Accept<TResult> (Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
+			{
+				return onNext (value);
+			}
+			
+			public override bool Equals (Notification<T> other)
+			{
+				var n = other as Next;
+				return (object) n != null && value.Equals (n.value);
+			}
 		}
 	}
 }

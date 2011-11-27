@@ -4,8 +4,12 @@ namespace System.Reactive.Concurrency
 {
 	public sealed class ImmediateScheduler : IScheduler
 	{
+		internal ImmediateScheduler ()
+		{
+		}
+		
 		public DateTimeOffset Now {
-			get { throw new NotImplementedException (); }
+			get { return Scheduler.Now; }
 		}
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
