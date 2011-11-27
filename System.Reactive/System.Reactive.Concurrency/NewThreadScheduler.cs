@@ -27,7 +27,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (state, Scheduler.Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
@@ -37,7 +37,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (state, Scheduler.Now + Scheduler.Normalize (dueTime), action);
 		}
 	}
 }

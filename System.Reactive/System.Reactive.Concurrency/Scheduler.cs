@@ -73,12 +73,12 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule (this IScheduler scheduler, Action action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (scheduler, Now, action);
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, Action<Action> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (scheduler, Now, action);
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action action)
@@ -91,16 +91,6 @@ namespace System.Reactive.Concurrency
 			throw new NotImplementedException ();
 		}
 		
-		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action action)
-		{
-			throw new NotImplementedException ();
-		}
-		
-		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action<Action> action)
-		{
-			throw new NotImplementedException ();
-		}
-		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, Action<TState, Action<TState>> action)
 		{
 			throw new NotImplementedException ();
@@ -109,6 +99,16 @@ namespace System.Reactive.Concurrency
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, DateTimeOffset dueTime, Action<TState, Action<TState, DateTimeOffset>> action)
 		{
 			throw new NotImplementedException ();
+		}
+		
+		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action action)
+		{
+			return Schedule (scheduler, Now + Normalize (dueTime), action);
+		}
+		
+		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action<Action> action)
+		{
+			return Schedule (scheduler, Now + Normalize (dueTime), action);
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, TimeSpan dueTime, Action<TState, Action<TState, TimeSpan>> action)

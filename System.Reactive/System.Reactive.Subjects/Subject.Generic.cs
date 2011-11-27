@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reactive.Concurrency;
@@ -10,26 +11,36 @@ namespace System.Reactive.Subjects
 	{
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			foreach (var s in subscribed) {
+				var d = s as IDisposable;
+				if (d != null)
+					d.Dispose ();
+			}
 		}
 		
 		public void OnCompleted ()
 		{
-			throw new NotImplementedException ();
+			foreach (var s in subscribed)
+				s.OnCompleted ();
 		}
 		
 		public void OnError (Exception error)
 		{
-			throw new NotImplementedException ();
+			foreach (var s in subscribed)
+				s.OnError (error);
 		}
 		
 		public void OnNext (T value)
 		{
-			throw new NotImplementedException ();
+			foreach (var s in subscribed)
+				s.OnNext (value);
 		}
+		
+		List<IObserver<T>> subscribed = new List<IObserver<T>> ();
 		
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
+			subscribed.Add (observer);
 			throw new NotImplementedException ();
 		}
 	}

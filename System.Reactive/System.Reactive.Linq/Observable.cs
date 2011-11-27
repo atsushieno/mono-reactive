@@ -696,8 +696,8 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IConnectableObservable<TResult> Multicast<TSource, TResult> (
-	this IObservable<TSource> source,
-	ISubject<TSource, TResult> subject)
+			this IObservable<TSource> source,
+			ISubject<TSource, TResult> subject)
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> Multicast<TSource, TIntermediate, TResult> (
