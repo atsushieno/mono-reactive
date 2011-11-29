@@ -7,24 +7,21 @@ namespace System.Reactive.Concurrency
 		: IScheduler
 	{
 		protected VirtualTimeSchedulerBase ()
+			: this (default (TAbsolute), Comparer<TAbsolute>.Default)
 		{
-			throw new NotImplementedException ();
 		}
 		
 		protected VirtualTimeSchedulerBase (TAbsolute initialClock, IComparer<TAbsolute> comparer)
 		{
-			throw new NotImplementedException ();
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			Clock = initialClock;
+			Comparer = comparer;
 		}
 		
-		public TAbsolute Clock {
-			get { throw new NotImplementedException (); }
-			protected set { throw new NotImplementedException (); }
-		}
+		public TAbsolute Clock { get; protected set; }
 		
-		protected IComparer<TAbsolute> Comparer {
-			get { throw new NotImplementedException (); }
-			private set { throw new NotImplementedException (); }
-		}
+		protected IComparer<TAbsolute> Comparer { get; private set; }
 		
 		protected bool IsEnabled {
 			get { throw new NotImplementedException (); }
@@ -32,43 +29,43 @@ namespace System.Reactive.Concurrency
 		}
 		
 		public DateTimeOffset Now {
-			get { throw new NotImplementedException (); }
+			get { return Scheduler.Now; }
 		}
 		
 		protected abstract TAbsolute Add (TAbsolute absolute, TRelative relative);
 		
 		public void AdvanceBy (TRelative time)
 		{
-			throw new NotImplementedException ();
+			Clock = Add (Clock, time);
 		}
 		
 		public void AdvanceTo (TAbsolute time)
 		{
-			throw new NotImplementedException ();
+			Clock = time;
 		}
 		
 		protected abstract IScheduledItem<TAbsolute> GetNext ();
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule<TState> (state, TimeSpan.Zero, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule<TState> (state, dueTime - DateTimeOffset.Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return ScheduleRelative<TState> (state, ToRelative (Scheduler.Normalize (dueTime)), action);
 		}
 		
 		public abstract IDisposable ScheduleAbsolute<TState> (TState state, TAbsolute dueTime, Func<IScheduler, TState, IDisposable> action);
 		
 		public IDisposable ScheduleRelative<TState> (TState state, TRelative dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return ScheduleAbsolute<TState> (state, Add (Clock, dueTime), action);
 		}
 		
 		public void Start ()

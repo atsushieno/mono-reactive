@@ -8,12 +8,11 @@ namespace System.Reactive.Concurrency
 	{
 		protected VirtualTimeScheduler ()
 		{
-			throw new NotImplementedException ();
 		}
 		
 		protected VirtualTimeScheduler (TAbsolute initialClock, IComparer<TAbsolute> comparer)
+			: base (initialClock, comparer)
 		{
-			throw new NotImplementedException ();
 		}
 		
 		protected override IScheduledItem<TAbsolute> GetNext ()
