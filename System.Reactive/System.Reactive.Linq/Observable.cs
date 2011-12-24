@@ -1158,12 +1158,16 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return TimeInterval (source, Scheduler.GetDefault (source));
+		}
 		
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (
 			this IObservable<TSource> source,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return new TimeIntervalObservable<TSource> (source, scheduler);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,

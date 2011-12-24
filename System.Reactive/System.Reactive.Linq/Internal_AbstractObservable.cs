@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Linq
 {
@@ -7,34 +11,50 @@ namespace System.Reactive.Linq
 	{
 		IScheduler scheduler;
 		List<IObserver<T>> observers = new List<IObserver<T>> ();
-		// registerer is used to create an IDisposable for an observer that is to be subscribed.
-		Func<IObserver<T>,IDisposable> registerer;
 		
-		protected AbstractObservable (IScheduler scheduler, Func<IObserver<T>,IDisposable> registerer)
+		protected AbstractObservable (IScheduler scheduler)
 		{
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
-			if (registerer == null)
-				throw new ArgumentNullException ("registerer");
 			this.scheduler = scheduler;
-			this.registerer = registerer;
 		}
 
 		public IScheduler Scheduler {
 			get { return scheduler; }
 		}
 		
+		bool disposed;
+
+		public void Dispose ()
+		{
+			disposed = true;
+		}
+		
+		void CheckDisposed ()
+		{
+			if (disposed)
+				throw new ObjectDisposedException ("observable");
+		}
+		
 		public virtual IDisposable Subscribe (IObserver<T> observer)
 		{
-			var dis = registerer (observer);
-			registerer.Add (observer);
-			return dis;
+			CheckDisposed ();
+			observers.Add (observer);
+			return Disposable.Create (() => observers.Remove (observer));
 		}
 	}
 	
-	internal class TimerObservable : AbstractDisposable<long>
+	internal class TimerObservable : AbstractObservable<long>
 	{
-		public TimerObservable (IScheduler scheduler)
+		public TimerObservable (DateTimeOffset dueTime, IScheduler scheduler)
+			: base (scheduler)
+		{
+		}
+	}
+	
+	internal class TimeIntervalObservable<T> : AbstractObservable<TimeInterval<T>>
+	{
+		public TimeIntervalObservable (IObservable<T> source, IScheduler scheduler)
 			: base (scheduler)
 		{
 		}

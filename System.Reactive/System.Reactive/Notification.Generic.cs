@@ -82,7 +82,7 @@ namespace System.Reactive
 			
 			public override bool Equals (Notification<T> other)
 			{
-				return object.ReferenceEquals (this, other);
+				return other is OnCompleted;
 			}
 		}
 
