@@ -1,3 +1,5 @@
+using System.Reactive;
+
 namespace System
 {
 	public static class ObservableExtensions
@@ -9,22 +11,22 @@ namespace System
 		
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
 		{
-			throw new NotImplementedException ();
+			return source.Subscribe (Observer.Create (onNext));
 		}
 		
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source, Action<TSource> onNext, Action<Exception> onError)
 		{
-			throw new NotImplementedException ();
+			return source.Subscribe (Observer.Create (onNext, onError));
 		}
 		
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source, Action<TSource> onNext, Action onCompleted)
 		{
-			throw new NotImplementedException ();
+			return source.Subscribe (Observer.Create (onNext, onCompleted));
 		}
 		
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source, Action<TSource> onNext, Action<Exception> onError, Action onCompleted)
 		{
-			throw new NotImplementedException ();
+			return source.Subscribe (Observer.Create (onNext, onError, onCompleted));
 		}
 	}
 }

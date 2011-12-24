@@ -1,4 +1,6 @@
 using System;
+using System.Reactive.Disposables;
+using System.Threading;
 
 namespace System.Reactive.Concurrency
 {
@@ -19,12 +21,13 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (state, dueTime - Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Scheduler.Now + Scheduler.Normalize (dueTime), action);
+			Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
+			return action (this, state);
 		}
 	}
 }

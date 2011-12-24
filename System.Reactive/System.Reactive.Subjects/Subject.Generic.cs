@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reactive.Concurrency;
@@ -36,11 +37,11 @@ namespace System.Reactive.Subjects
 				s.OnNext (value);
 		}
 		
-		List<IObserver<T>> subscribed = new List<IObserver<T>> ();
+		ConcurrentQueue<IObserver<T>> subscribed = new ConcurrentQueue<IObserver<T>> ();
 		
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			subscribed.Add (observer);
+			subscribed.Enqueue (observer);
 			throw new NotImplementedException ();
 		}
 	}

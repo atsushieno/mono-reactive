@@ -83,7 +83,7 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (scheduler, dueTime, (a) => action ());
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action<Action> action)

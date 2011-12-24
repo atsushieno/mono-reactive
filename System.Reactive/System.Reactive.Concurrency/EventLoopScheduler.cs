@@ -8,15 +8,25 @@ namespace System.Reactive.Concurrency
 	public sealed class EventLoopScheduler : IScheduler, IDisposable
 	{
 		public EventLoopScheduler ()
+			: this ((ts) => new Thread (ts))
 		{
 		}
+		
+		Thread th;
 		
 		public EventLoopScheduler (Func<ThreadStart, Thread> threadFactory)
 		{
+			if (threadFactory == null)
+				throw new ArgumentNullException ("threadFactory");
+			thread_factory = threadFactory;
 		}
+		
+		Func<ThreadStart, Thread> thread_factory;
+		Thread thread;
 		
 		public void Dispose ()
 		{
+			throw new NotImplementedException ();
 		}
 		
 		public DateTimeOffset Now {

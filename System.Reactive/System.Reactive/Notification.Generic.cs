@@ -47,7 +47,8 @@ namespace System.Reactive
 			throw new NotImplementedException ();
 		}
 
-		internal class Completed : Notification<T>
+		// It is public in Microsoft.Phone.Reactive
+		public class OnCompleted : Notification<T>
 		{
 			public override Exception Exception {
 				get { return null; }
@@ -85,11 +86,12 @@ namespace System.Reactive
 			}
 		}
 
-		internal class Error : Notification<T>
+		// It is public in Microsoft.Phone.Reactive
+		public class OnError : Notification<T>
 		{
 			Exception error;
 			
-			public Error (Exception error)
+			public OnError (Exception error)
 			{
 				this.error = error;
 			}
@@ -126,16 +128,17 @@ namespace System.Reactive
 			
 			public override bool Equals (Notification<T> other)
 			{
-				var e = other as Error;
+				var e = other as OnError;
 				return (object) e != null && error.Equals (e.error);
 			}
 		}
 
-		internal class Next : Notification<T>
+		// It is public in Microsoft.Phone.Reactive
+		public class OnNext : Notification<T>
 		{
 			T value;
 			
-			public Next (T value)
+			public OnNext (T value)
 			{
 				this.value = value;
 			}
@@ -172,7 +175,7 @@ namespace System.Reactive
 			
 			public override bool Equals (Notification<T> other)
 			{
-				var n = other as Next;
+				var n = other as OnNext;
 				return (object) n != null && value.Equals (n.value);
 			}
 		}

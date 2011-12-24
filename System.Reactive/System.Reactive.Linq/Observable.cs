@@ -194,7 +194,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
 		{
-			return new SimpleActionObservable<TSource> (subscribe);
+			return new SimpleDisposableObservable<TSource> (observer => Disposable.Create (subscribe (observer)));
 		}
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, IDisposable> subscribe)
