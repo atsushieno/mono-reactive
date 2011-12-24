@@ -12,6 +12,7 @@ namespace System.Reactive.Subjects
 	public sealed class Subject<T>
 		: ISubject<T>, ISubject<T, T>, IObserver<T>, IObservable<T>, IDisposable
 	{
+		bool done;
 		bool disposed;
 
 		public void Dispose ()
@@ -30,10 +31,12 @@ namespace System.Reactive.Subjects
 		public void OnCompleted ()
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0)
-				foreach (var s in subscribed)
-					s.OnCompleted ();
-			else {
+			if (subscribed.Count > 0) {
+				if (!done)
+					foreach (var s in subscribed)
+						s.OnCompleted ();
+				done = true;
+			} else {
 				var n = Notification.CreateOnCompleted<T> ();
 				if (!notifications.Contains (n))
 					notifications.Enqueue (n);
@@ -43,10 +46,12 @@ namespace System.Reactive.Subjects
 		public void OnError (Exception error)
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0)
-				foreach (var s in subscribed)
-					s.OnError (error);
-			else {
+			if (subscribed.Count > 0) {
+				if (!done)
+					foreach (var s in subscribed)
+						s.OnError (error);
+				done = true;
+			} else {
 				var n = Notification.CreateOnError<T> (error);
 				if (!notifications.Contains (n))
 					notifications.Enqueue (n);
@@ -56,10 +61,12 @@ namespace System.Reactive.Subjects
 		public void OnNext (T value)
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0)
-				foreach (var s in subscribed)
-					s.OnNext (value);
-			else {
+			if (subscribed.Count > 0) {
+				if (!done)
+					foreach (var s in subscribed)
+						s.OnNext (value);
+				done = true;
+			} else {
 				var n = Notification.CreateOnNext<T> (value);
 				if (!notifications.Contains (n))
 					notifications.Enqueue (n);

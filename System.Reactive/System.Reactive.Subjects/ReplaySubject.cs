@@ -40,9 +40,17 @@ namespace System.Reactive.Subjects
 		{
 		}
 
+		bool disposed;
+
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			disposed = true;
+		}
+		
+		void CheckDisposed ()
+		{
+			if (disposed)
+				throw new ObjectDisposedException ("subject");
 		}
 		
 		public void OnCompleted ()
