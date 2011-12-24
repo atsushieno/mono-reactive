@@ -50,12 +50,54 @@ namespace System.Reactive
 		
 		public static Action<Notification<T>> ToNotifier<T> (this IObserver<T> observer)
 		{
-			throw new NotImplementedException ();
+			if (observer == null)
+				throw new ArgumentNullException ("observer");
+
+			return delegate (Notification<T> n) {
+				switch (n.Kind) {
+				case NotificationKind.OnCompleted:
+					observer.OnCompleted ();
+					break;
+				case NotificationKind.OnError:
+					observer.OnError (n.Exception);
+					break;
+				case NotificationKind.OnNext:
+					observer.OnNext (n.Value);
+					break;
+				}
+			};
 		}
 		
 		public static IObserver<T> ToObserver<T> (this Action<Notification<T>> handler)
 		{
-			throw new NotImplementedException ();
+			if (handler == null)
+				throw new ArgumentNullException ("handler");
+			return new NotifiedObserver<T> (handler);
+		}
+
+		internal class NotifiedObserver<T> : IObserver<T>
+		{
+			Action<Notification<T>> handler;
+			
+			public NotifiedObserver (Action<Notification<T>> handler)
+			{
+				this.handler = handler;
+			}
+			
+			public void OnCompleted ()
+			{
+				handler (Notification.CreateOnCompleted<T> ());
+			}
+			
+			public void OnError (Exception ex)
+			{
+				handler (Notification.CreateOnError<T> (ex));
+			}
+			
+			public void OnNext (T value)
+			{
+				handler (Notification.CreateOnNext <T> (value));
+			}
 		}
 	}
 }

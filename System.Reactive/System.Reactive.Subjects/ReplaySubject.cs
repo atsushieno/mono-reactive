@@ -1,46 +1,67 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Subjects
 {
+	// see http://leecampbell.blogspot.com/2010/05/intro-to-rx.html
 	public sealed class ReplaySubject<T>
 		: ISubject<T>, ISubject<T, T>, IObserver<T>, IObservable<T>, IDisposable
 	{
+		const int default_buffer_size = 10;
+		
 		public ReplaySubject ()
+			: this (default_buffer_size)
 		{
 		}
 
 		public ReplaySubject (int bufferSize)
+			: this (bufferSize, TimeSpan.Zero)
 		{
 		}
 
 		public ReplaySubject (TimeSpan window)
+			: this (default_buffer_size, window)
 		{
 		}
 
 		public ReplaySubject (IScheduler scheduler)
+			: this (TimeSpan.Zero, scheduler)
 		{
 		}
 
 		public ReplaySubject (int bufferSize, IScheduler scheduler)
+			: this (bufferSize, TimeSpan.Zero, scheduler)
 		{
 		}
 
 		public ReplaySubject (int bufferSize, TimeSpan window)
 		{
+			notifications = new List<Notification<T>> (bufferSize);
+			this.window = window;
 		}
 
 		public ReplaySubject (TimeSpan window, IScheduler scheduler)
+			: this (default_buffer_size, window, scheduler)
 		{
 		}
 
 		public ReplaySubject (int bufferSize, TimeSpan window, IScheduler scheduler)
+			: this (bufferSize, window)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			this.scheduler = scheduler;
 		}
 
 		bool disposed;
+		bool done;
+		TimeSpan window;
+		IScheduler scheduler = Scheduler.CurrentThread; // default
 
 		public void Dispose ()
 		{
@@ -53,24 +74,55 @@ namespace System.Reactive.Subjects
 				throw new ObjectDisposedException ("subject");
 		}
 		
+		List<Notification<T>> notifications;
+		
 		public void OnCompleted ()
 		{
-			throw new NotImplementedException ();
+			CheckDisposed ();
+			if (!done) {
+				done = true;
+				var n = Notification.CreateOnCompleted<T> ();
+				notifications.Add (n);
+				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
+			}
 		}
 		
 		public void OnError (Exception error)
 		{
-			throw new NotImplementedException ();
+			CheckDisposed ();
+			if (!done) {
+				done = true;
+				var n = Notification.CreateOnError<T> (error);
+				notifications.Add (n);
+				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
+			}
 		}
 		
 		public void OnNext (T value)
 		{
-			throw new NotImplementedException ();
+			CheckDisposed ();
+			if (!done) {
+				var n = Notification.CreateOnNext<T> (value);
+				notifications.Add (n);
+				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
+			}
 		}
+		
+		List<IObserver<T>> observers = new List<IObserver<T>> ();
 		
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			throw new NotImplementedException ();
+			CheckDisposed ();
+			observers.Add (observer);
+			Schedule (() => notifications.ForEach ((n) => n.Accept (observer)));
+			return Disposable.Create (() => observers.Remove (observer));
+		}
+
+		void Schedule (Action action)
+		{
+			// FIXME: this should use to IScheduler.Now at notification registration.
+			// FIXME: use window. Maybe with Observable.Window().
+			scheduler.Schedule (action);
 		}
 	}
 }
