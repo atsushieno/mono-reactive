@@ -65,7 +65,6 @@ namespace System.Reactive.Subjects
 				if (!done)
 					foreach (var s in subscribed)
 						s.OnNext (value);
-				done = true;
 			} else {
 				var n = Notification.CreateOnNext<T> (value);
 				if (!notifications.Contains (n))

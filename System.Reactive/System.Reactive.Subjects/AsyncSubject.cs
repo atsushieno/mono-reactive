@@ -7,6 +7,7 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Subjects
 {
+	// see http://leecampbell.blogspot.com/2010/05/intro-to-rx.html
 	public sealed class AsyncSubject<T>
 		: ISubject<T>, ISubject<T, T>, IObserver<T>, IObservable<T>, IDisposable
 	{
@@ -65,7 +66,7 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			observers.Add (observer);
 
-			if (n != null)
+			if (n != null && done)
 				n.Accept (observer);
 
 			return Disposable.Create (() => observers.Remove (observer));
