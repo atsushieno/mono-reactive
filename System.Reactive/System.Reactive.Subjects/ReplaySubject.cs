@@ -122,7 +122,9 @@ namespace System.Reactive.Subjects
 		{
 			// FIXME: this should use to IScheduler.Now at notification registration.
 			// FIXME: use window. Maybe with Observable.Window().
-			scheduler.Schedule (action);
+			// FIXME: enable this once Scheduler extension method is implemented.
+			//scheduler.Schedule (action);
+			action ();
 		}
 	}
 }
