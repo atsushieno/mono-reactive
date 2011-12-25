@@ -19,7 +19,7 @@ namespace System.Reactive
 		
 		public static IObserver<T> Create<T> (Action<T> onNext, Action onCompleted)
 		{
-			return Create (onNext, (ex) => {}, onCompleted);
+			return Create (onNext, (ex) => { throw ex; }, onCompleted);
 		}
 		
 		public static IObserver<T> Create<T> (Action<T> onNext, Action <Exception> onError)

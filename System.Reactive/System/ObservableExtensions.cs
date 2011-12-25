@@ -6,7 +6,7 @@ namespace System
 	{
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source)
 		{
-			throw new NotImplementedException ();
+			return Subscribe (source, (tsrc) => {});
 		}
 		
 		public static IDisposable Subscribe<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
