@@ -194,7 +194,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
 		{
-			return new SimpleDisposableObservable<TSource> (observer => Disposable.Create (subscribe (observer)));
+			return Create<TSource> (observer => Disposable.Create (subscribe (observer)));
 		}
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, IDisposable> subscribe)
@@ -305,11 +305,20 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> ElementAtOrDefault<TSource> (this IObservable<TSource> source, int index)
 		{ throw new NotImplementedException (); }
 		
+		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Empty<TResult> ()
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			sub.OnCompleted ();
+			return sub;
+		}
 		
 		public static IObservable<TResult> Empty<TResult> (IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> (scheduler);
+			sub.OnCompleted ();
+			return sub;
+		}
 		
 		public static IObservable<TSource> Finally<TSource> (this IObservable<TSource> source, Action finallyAction)
 		{ throw new NotImplementedException (); }
@@ -763,8 +772,15 @@ namespace System.Reactive.Linq
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
 		{ throw new NotImplementedException (); }
 		
+		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<int> Range (int start, int count)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<int> ();
+			foreach (var i in Enumerable.Range (start, count))
+				sub.OnNext (i);
+			sub.OnCompleted ();
+			return sub;
+		}
 		
 		public static IObservable<int> Range (int start, int count, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
@@ -894,11 +910,22 @@ namespace System.Reactive.Linq
 			int retryCount)
 		{ throw new NotImplementedException (); }
 		
+		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Return<TResult> (TResult value)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			sub.OnNext (value);
+			sub.OnCompleted ();
+			return sub;
+		}
 		
 		public static IObservable<TResult> Return<TResult> (TResult value, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> (scheduler);
+			sub.OnNext (value);
+			sub.OnCompleted ();
+			return sub;
+		}
 		
 		public static IObservable<TSource> Sample<TSource> (
 			this IObservable<TSource> source,
@@ -1149,13 +1176,22 @@ namespace System.Reactive.Linq
 			IScheduler scheduler)
 		{ throw new NotImplementedException (); }
 		
+		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Throw<TResult> (Exception exception)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			sub.OnError (exception);
+			return sub;
+		}
 		
 		public static IObservable<TResult> Throw<TResult> (
 			Exception exception,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> (scheduler);
+			sub.OnError (exception);
+			return sub;
+		}
 		
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (this IObservable<TSource> source)
 		{
