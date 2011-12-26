@@ -61,8 +61,8 @@ namespace System.Reactive.Subjects
 		bool disposed;
 		bool done;
 		TimeSpan window;
-		// FIXME: use CurrentThread for default
-		IScheduler scheduler = Scheduler.Immediate;
+		// FIXME: use CurrentThread for default (see http://social.msdn.microsoft.com/Forums/en-AU/rx/thread/e032b40a-019b-496e-bb11-64c8fcc94410 )
+		IScheduler scheduler = Scheduler.ThreadPool;
 
 		public void Dispose ()
 		{

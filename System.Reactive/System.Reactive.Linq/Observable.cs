@@ -12,6 +12,8 @@ using System.Threading;
 
 namespace System.Reactive.Linq
 {
+	// For the default scheduler in each method, see http://social.msdn.microsoft.com/Forums/en-AU/rx/thread/e032b40a-019b-496e-bb11-64c8fcc94410
+
 	public static partial class Observable
 	{
 		public static IObservable<TSource> Aggregate<TSource> (
@@ -94,7 +96,9 @@ namespace System.Reactive.Linq
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
 			TimeSpan timeSpan)
-		{ throw new NotImplementedException (); }
+		{
+			return Buffer<TSource> (source, timeSpan, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -112,7 +116,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan timeSpan,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			return Buffer<TSource> (source, timeSpan, count, Scheduler.ThreadPool);
+		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -124,7 +130,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan timeSpan,
 			TimeSpan timeShift)
-		{ throw new NotImplementedException (); }
+		{
+			return Buffer<TSource> (source, timeSpan, timeShift, Scheduler.ThreadPool);
+		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -212,7 +220,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Delay<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Delay<TSource> (source, dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Delay<TSource> (this IObservable<TSource> source, TimeSpan dueTime)
 		{ throw new NotImplementedException (); }
@@ -416,7 +426,9 @@ namespace System.Reactive.Linq
 			Func<TState, bool> condition,
 			Func<TState, TState> iterate,
 			Func<TState, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return Generate<TState, TResult> (initialState, condition, iterate, resultSelector, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,
@@ -424,7 +436,9 @@ namespace System.Reactive.Linq
 			Func<TState, TState> iterate,
 			Func<TState, TResult> resultSelector,
 			Func<TState, DateTimeOffset> timeSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return Generate<TState, TResult> (initialState, condition, iterate, resultSelector, timeSelector, Scheduler.ThreadPool);
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,
@@ -432,7 +446,9 @@ namespace System.Reactive.Linq
 			Func<TState, TState> iterate,
 			Func<TState, TResult> resultSelector,
 			Func<TState, TimeSpan> timeSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return Generate<TState, TResult> (initialState, condition, iterate, resultSelector, timeSelector, Scheduler.ThreadPool);
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,
@@ -527,7 +543,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<long> Interval (TimeSpan period)
-		{ throw new NotImplementedException (); }
+		{
+			return Interval (period, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<long> Interval (
 			TimeSpan period,
@@ -609,18 +627,26 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Merge<TSource> (this IEnumerable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (sources, Scheduler.Immediate);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (this IObservable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (sources, int.MaxValue);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (params IObservable<TSource>[] sources)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (Scheduler.Immediate, sources);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IEnumerable<IObservable<TSource>> sources,
 			int maxConcurrent)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (sources, maxConcurrent, Scheduler.Immediate);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IEnumerable<IObservable<TSource>> sources,
@@ -635,7 +661,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Merge<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (first, second, Scheduler.Immediate);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			IScheduler scheduler,
@@ -792,10 +820,14 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value)
-		{ throw new NotImplementedException (); }
+		{
+			return Repeat<TResult> (value, Scheduler.CurrentThread);
+		}
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value, int repeatCount)
-		{ throw new NotImplementedException (); }
+		{
+			return Repeat<TResult> (value, repeatCount, Scheduler.CurrentThread);
+		}
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
@@ -808,12 +840,16 @@ namespace System.Reactive.Linq
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			int bufferSize)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, bufferSize, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -823,7 +859,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			TimeSpan window)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, window, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -835,7 +873,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int bufferSize,
 			TimeSpan window)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, bufferSize, window, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -853,13 +893,17 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, selector, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			int bufferSize)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, selector, bufferSize, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -871,21 +915,27 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			TimeSpan window)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, selector, window, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			int bufferSize,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, selector, bufferSize, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			int bufferSize,
 			TimeSpan window)
-		{ throw new NotImplementedException (); }
+		{
+			return Replay<TSource, TResult> (source, selector, bufferSize, window, Scheduler.CurrentThread);
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -913,10 +963,7 @@ namespace System.Reactive.Linq
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Return<TResult> (TResult value)
 		{
-			var sub = new ReplaySubject<TResult> ();
-			sub.OnNext (value);
-			sub.OnCompleted ();
-			return sub;
+			return Return (value, Scheduler.Immediate);
 		}
 		
 		public static IObservable<TResult> Return<TResult> (TResult value, IScheduler scheduler)
@@ -930,7 +977,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Sample<TSource> (
 			this IObservable<TSource> source,
 			TimeSpan interval)
-		{ throw new NotImplementedException (); }
+		{
+			return Sample (source, interval, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Sample<TSource> (
 			this IObservable<TSource> source,
@@ -1051,13 +1100,17 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<Unit> Start (Action action)
-		{ throw new NotImplementedException (); }
+		{
+			return Start (action, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<Unit> Start (Action action, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function)
-		{ throw new NotImplementedException (); }
+		{
+			return Start (function, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
@@ -1065,7 +1118,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> StartWith<TSource>( 
 			this IObservable<TSource> source,
 			params TSource [] values)
-		{ throw new NotImplementedException (); }
+		{
+			return StartWith<TSource> (source, Scheduler.Immediate, values);
+		}
 		
 		public static IObservable<TSource> StartWith<TSource> (
 			this IObservable<TSource> source,
@@ -1076,7 +1131,9 @@ namespace System.Reactive.Linq
 		public static IDisposable Subscribe<TSource> (
 			this IEnumerable<TSource> source,
 			IObserver<TSource> observer)
-		{ throw new NotImplementedException (); }
+		{
+			return Subscribe<TSource> (source, observer, Scheduler.CurrentThread);
+		}
 		
 		public static IDisposable Subscribe<TSource> (
 			this IEnumerable<TSource> source,
@@ -1168,7 +1225,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Throttle<TSource> (
 			this IObservable<TSource> source,
 			TimeSpan dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Throttle (source, dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Throttle<TSource> (
 			this IObservable<TSource> source,
@@ -1179,9 +1238,7 @@ namespace System.Reactive.Linq
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Throw<TResult> (Exception exception)
 		{
-			var sub = new ReplaySubject<TResult> ();
-			sub.OnError (exception);
-			return sub;
+			return Throw<TResult> (exception, Scheduler.Immediate);
 		}
 		
 		public static IObservable<TResult> Throw<TResult> (
@@ -1195,7 +1252,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (this IObservable<TSource> source)
 		{
-			return TimeInterval (source, Scheduler.GetDefault (source));
+			return TimeInterval (source, Scheduler.ThreadPool);
 		}
 		
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (
@@ -1208,12 +1265,16 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
 			DateTimeOffset dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Timeout<TSource> (source, dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
 			TimeSpan dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Timeout<TSource> (source, dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
@@ -1225,7 +1286,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan dueTime,
 			IObservable<TSource> other)
-		{ throw new NotImplementedException (); }
+		{
+			return Timeout<TSource> (source, dueTime, other, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
@@ -1255,11 +1318,15 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Timer (dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<long> Timer (
 			TimeSpan dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Timer (dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime,
@@ -1274,12 +1341,16 @@ namespace System.Reactive.Linq
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime,
 			TimeSpan period)
-		{ throw new NotImplementedException (); }
+		{
+			return Timer (dueTime, period, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<long> Timer (
 			TimeSpan dueTime,
 			TimeSpan period)
-		{ throw new NotImplementedException (); }
+		{
+			return Timer (dueTime, period, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime,
@@ -1294,7 +1365,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return Timestamp (source, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
@@ -1303,7 +1376,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action)
-		{ throw new NotImplementedException (); }
+		{
+			return ToAsync (action, Scheduler.ThreadPool);
+		}
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action, IScheduler scheduler)
 		{ throw new NotImplementedException (); }
@@ -1398,7 +1473,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 
 		public static IObservable<TSource> ToObservable<TSource> (this IEnumerable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return ToObservable<TSource> (source, Scheduler.CurrentThread);
+		}
 		
 		public static IObservable<TSource> ToObservable<TSource> (
 			this IEnumerable<TSource> source,
