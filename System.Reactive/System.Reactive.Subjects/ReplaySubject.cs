@@ -61,7 +61,8 @@ namespace System.Reactive.Subjects
 		bool disposed;
 		bool done;
 		TimeSpan window;
-		IScheduler scheduler = Scheduler.CurrentThread; // default
+		// FIXME: use CurrentThread for default
+		IScheduler scheduler = Scheduler.Immediate;
 
 		public void Dispose ()
 		{
@@ -120,11 +121,8 @@ namespace System.Reactive.Subjects
 
 		void Schedule (Action action)
 		{
-			// FIXME: this should use to IScheduler.Now at notification registration.
 			// FIXME: use window. Maybe with Observable.Window().
-			// FIXME: enable this once Scheduler extension method is implemented.
-			//scheduler.Schedule (action);
-			action ();
+			scheduler.Schedule (action);
 		}
 	}
 }

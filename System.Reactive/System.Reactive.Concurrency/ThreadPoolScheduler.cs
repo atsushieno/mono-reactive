@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
@@ -22,12 +22,17 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (state, dueTime - Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Scheduler.Now + Scheduler.Normalize (dueTime), action);
+			ThreadPool.QueueUserWorkItem ((s) => {
+				Thread.Sleep (Scheduler.Normalize (dueTime));
+				var dis = action (this, (TState) s);
+				dis.Dispose ();
+			});
+			return Disposable.Empty;
 		}
 	}
 }

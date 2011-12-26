@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
@@ -94,17 +95,21 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action<Action> action)
 		{
-			throw new NotImplementedException ();
+			// FIXME: pass some useful state.
+			return Schedule<object> (scheduler, null, dueTime, (stat, stdtact) => action (() => stdtact (stat, dueTime)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, Action<TState, Action<TState>> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (scheduler, state, Now, (stat, stdtact) => action (stat, (st) => stdtact (st, Now)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, DateTimeOffset dueTime, Action<TState, Action<TState, DateTimeOffset>> action)
 		{
-			throw new NotImplementedException ();
+			return scheduler.Schedule<TState> (state, dueTime, delegate (IScheduler sch, TState stat) {
+				action (state, (st, dt) => Thread.Sleep (dt - Now));
+				return Disposable.Empty;
+			});
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action action)
@@ -119,7 +124,10 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, TimeSpan dueTime, Action<TState, Action<TState, TimeSpan>> action)
 		{
-			throw new NotImplementedException ();
+			return scheduler.Schedule<TState> (state, dueTime, delegate (IScheduler sch, TState stat) {
+				action (state, (st, dt) => Thread.Sleep (dt));
+				return Disposable.Empty;
+			});
 		}
 	}
 }
