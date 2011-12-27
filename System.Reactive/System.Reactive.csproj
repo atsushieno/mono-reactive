@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0D7D238E-9FB4-4923-99EA-53CC34640235}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Reactive</RootNamespace>
+    <AssemblyName>System.Reactive</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="System\ObservableExtensions.cs" />
+    <Compile Include="System.Reactive\EventPattern.cs" />
+    <Compile Include="System.Reactive\IEventPatternSource.cs" />
+    <Compile Include="System.Reactive\IEventSource.cs" />
+    <Compile Include="System.Reactive\Internal_DefaultObserver.cs" />
+    <Compile Include="System.Reactive\Internal_WrappedObserver.cs" />
+    <Compile Include="System.Reactive\Notification.Generic.cs" />
+    <Compile Include="System.Reactive\Notification.Static.cs" />
+    <Compile Include="System.Reactive\NotificationKind.cs" />
+    <Compile Include="System.Reactive\Observer.cs" />
+    <Compile Include="System.Reactive\TimeInterval.cs" />
+    <Compile Include="System.Reactive\Timestamped.cs" />
+    <Compile Include="System.Reactive\Unit.cs" />
+    <Compile Include="System.Reactive.Concurrency\CurrentThreadScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\EventLoopScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\HistoricalScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\HistoricalSchedulerBase.cs" />
+    <Compile Include="System.Reactive.Concurrency\ImmediateScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\IScheduledItem.cs" />
+    <Compile Include="System.Reactive.Concurrency\IScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\NewThreadScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\Scheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\SynchronizationContextScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\TaskPoolScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\ThreadPoolScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\VirtualTimeScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\VirtualTimeSchedulerBase.cs" />
+    <Compile Include="System.Reactive.Disposables\BooleanDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\CancellationDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\CompositeDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\ContextDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\Disposable.cs" />
+    <Compile Include="System.Reactive.Disposables\MultipleAssignmentDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\RefCountDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\ScheduledDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\SerialDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\SingleAssignmentDisposable.cs" />
+    <Compile Include="System.Reactive.Joins\Pattern.cs" />
+    <Compile Include="System.Reactive.Joins\Plan.cs" />
+    <Compile Include="System.Reactive.Joins\System.Reactive.Joins.generated.cs" />
+    <Compile Include="System.Reactive.Linq\IGroupedObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_AbstractObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_NeverObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_SimpleDisposableObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.cs" />
+    <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />
+    <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
+    <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
+    <Compile Include="System.Reactive.Subjects\IConnectableObservable.cs" />
+    <Compile Include="System.Reactive.Subjects\ISubject.cs" />
+    <Compile Include="System.Reactive.Subjects\ISubject.Variant.cs" />
+    <Compile Include="System.Reactive.Subjects\ReplaySubject.cs" />
+    <Compile Include="System.Reactive.Subjects\Subject.Generic.cs" />
+    <Compile Include="System.Reactive.Subjects\Subject.Static.cs" />
+    <Compile Include="System.Reactive.Threading.Tasks\TaskObservableExtensions.cs" />
+  </ItemGroup>
+</Project>
