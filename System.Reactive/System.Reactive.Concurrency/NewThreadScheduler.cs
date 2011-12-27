@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
@@ -37,7 +38,12 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Scheduler.Now + Scheduler.Normalize (dueTime), action);
+			IDisposable dis = null;
+			thread_factory (() => {
+				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
+				dis = action (this, (TState) state);
+				}).Start ();
+			return Disposable.Create (() => { if (dis != null) dis.Dispose (); });
 		}
 	}
 }
