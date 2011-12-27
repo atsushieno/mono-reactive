@@ -744,7 +744,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> Never<TResult> ()
-		{ throw new NotImplementedException (); }
+		{
+			return new NeverObservable<TResult> ();
+		}
 		
 		public static IEnumerable<TSource> Next<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
@@ -830,13 +832,21 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Repeat (value, 1, scheduler);
+		}
 		
 		public static IObservable<TResult> Repeat<TResult> (
 			TResult value,
 			int repeatCount,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> (scheduler);
+			for (int i = 0; i < repeatCount; i++)
+				sub.OnNext (value);
+			sub.OnCompleted ();
+			return sub;
+		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source)

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
@@ -21,17 +22,25 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Scheduler.Now, action);
+			return Schedule<TState> (state, Scheduler.Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			return Schedule (state, dueTime - Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Scheduler.Now + Scheduler.Normalize (dueTime), action);
+			IDisposable dis = null;
+			// FIXME: this should not depend on SynchronizationContext.Current
+			if (SynchronizationContext.Current == null)
+				SynchronizationContext.SetSynchronizationContext (new SynchronizationContext ());
+			SynchronizationContext.Current.Post ((stat) => {
+				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
+				dis = action (this, (TState) stat);
+				}, default (TState));
+			return Disposable.Create (() => { if (dis != null) dis.Dispose (); });
 		}
 	}
 }
