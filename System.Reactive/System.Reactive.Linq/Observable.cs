@@ -30,7 +30,34 @@ namespace System.Reactive.Linq
 		public static IObservable<bool> All<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
+			var sub = new Subject<bool> ();
+			IDisposable dis = null;
+			bool ret = true;
+			bool hasValue = false;
+			dis = source.Subscribe ((s) => {
+				hasValue = true;
+				try {
+					ret &= predicate (s);
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					sub.OnNext (hasValue && ret);
+					sub.OnCompleted ();
+					dis.Dispose ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return sub;
+		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{ throw new NotImplementedException (); }
@@ -88,34 +115,54 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<decimal> Average (this IObservable<decimal> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<double> Average (this IObservable<double> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<int> Average (this IObservable<int> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<long> Average (this IObservable<long> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<float> Average (this IObservable<float> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<decimal?> Average (this IObservable<decimal?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<double?> Average (this IObservable<double?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<int?> Average (this IObservable<int?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<long?> Average (this IObservable<long?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<float?> Average (this IObservable<float?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+		}
 		
 		public static IObservable<IList<TSource>> Buffer<TSource, TBufferClosing> (
 			this IObservable<TSource> source,
@@ -871,6 +918,32 @@ namespace System.Reactive.Linq
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
 			dis = source.Subscribe (s => sum = sum != null ? s : add (sum, s), () => VerifyCompleted (true, sub, sum, dis));
+			return sub;
+		}
+		
+		static IObservable<T> NonNullableAverage<T> (this IObservable<T> source, Func<T,T,T> add, Func<T,int,T> avg)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
+			T sum = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			int count = 0;
+			dis = source.Subscribe (s => { count++; sum = add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count), dis));
+			return sub;
+		}
+		
+		static IObservable<T> NullableAverage<T> (this IObservable<T> source, Func<T,T,T> add, Func<T,int,T> avg)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
+			T sum = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			int count = 0;
+			dis = source.Subscribe (s => { count++; sum = sum != null ? s : add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count), dis));
 			return sub;
 		}
 
