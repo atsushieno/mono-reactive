@@ -801,6 +801,24 @@ namespace System.Reactive.Linq
 			dis = source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, () => VerifyCompleted (true, sub, max, dis));
 			return sub;
 		}
+		
+		static IObservable<T> NonNullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
+		{
+			T sum = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			dis = source.Subscribe (s => sum = add (sum, s), () => VerifyCompleted (true, sub, sum, dis));
+			return sub;
+		}
+		
+		static IObservable<T> NullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
+		{
+			T sum = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			dis = source.Subscribe (s => sum = sum != null ? s : add (sum, s), () => VerifyCompleted (true, sub, sum, dis));
+			return sub;
+		}
 
 		public static IObservable<decimal> Max (this IObservable<decimal> source)
 		{
@@ -1578,34 +1596,54 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<decimal> Sum (this IObservable<decimal> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<double> Sum (this IObservable<double> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<int> Sum (this IObservable<int> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<long> Sum (this IObservable<long> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<float> Sum (this IObservable<float> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<decimal?> Sum (this IObservable<decimal?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<double?> Sum (this IObservable<double?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<int?> Sum (this IObservable<int?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<long?> Sum (this IObservable<long?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableSum ((x, y) => x + y);
+		}
 		
 		public static IObservable<float?> Sum (this IObservable<float?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableSum ((x, y) => x + y);
+		}
 
 		public static IObservable<TSource> Switch<TSource> (this IObservable<IObservable<TSource>> sources)
 		{ throw new NotImplementedException (); }
