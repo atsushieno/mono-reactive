@@ -699,7 +699,7 @@ namespace System.Reactive.Linq
 			return InternalLastOrDefault<TSource> (source, predicate, false);
 		}
 		
-		// The callers (First/FirstOrDefault) are blocking methods.
+		// The callers (Last/LastOrDefault) are blocking methods.
 		static TSource InternalLastOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
 		{
 			// FIXME: should we use SpinWait or create some hybrid one?
@@ -1216,21 +1216,57 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static TSource Single<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return Single<TSource> (source, s => true);
+		}
 		
 		public static TSource Single<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return InternalSingleOrDefault<TSource> (source, predicate, true);
+		}
 		
 		public static TSource SingleOrDefault<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return SingleOrDefault<TSource> (source, s => true);
+		}
 		
 		public static TSource SingleOrDefault<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return InternalSingleOrDefault<TSource> (source, predicate, false);
+		}
 		
+		// The callers (Single/SingleOrDefault) are blocking methods.
+		static TSource InternalSingleOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
+		{
+			// FIXME: should we use SpinWait or create some hybrid one?
+			var wait = new ManualResetEvent (false);
+			TSource ret = default (TSource);
+			bool got = false, error = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
+				(s) => { if (predicate (s)) {
+					if (got)
+						error = true;
+					got = true;
+					ret = s;
+					}
+				},
+				() => { wait.Set (); }
+				);
+			wait.WaitOne ();
+			dis.Dispose ();
+			if (error)
+				throw new InvalidOperationException ("Observed that there was more than one item in the target object");
+			if (!got && throwError)
+				throw new InvalidOperationException ();
+			return ret;
+		}
+
 		public static IObservable<TSource> Skip<TSource> (
 			this IObservable<TSource> source,
 			int count)
