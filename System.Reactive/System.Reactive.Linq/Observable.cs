@@ -584,26 +584,62 @@ namespace System.Reactive.Linq
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupBy<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.GroupBy (keySelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupBy<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return GroupBy<TSource, TKey, TSource> (source, keySelector, s => s, comparer);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TElement>> GroupBy<TSource, TKey, TElement> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.GroupBy (keySelector, elementSelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TElement>> GroupBy<TSource, TKey, TElement> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			IDisposable dis = null;
+			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
+			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
+			dis = source.Subscribe ((s) => {
+				try {
+					var k = keySelector (s);
+					GroupedSubject<TKey, TElement> g;
+					if (!dic.TryGetValue (k, out g)) {
+						g = new GroupedSubject<TKey, TElement> (k);
+						dic.Add (k, g);
+						sub.OnNext (g);
+					}
+					g.OnNext (elementSelector (s));
+				} catch (Exception ex) {
+					sub.OnError (ex);
+					// FIXME: should we handle OnError() in groups too?
+				}
+			}, () => {
+				try {
+					foreach (var g in dic.Values)
+						g.OnCompleted ();
+					sub.OnCompleted ();
+					dis.Dispose ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+					// FIXME: should we handle OnError() in groups too?
+				}
+			});
+			return sub;
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupByUntil<TSource, TKey, TDuration> (
 			this IObservable<TSource> source,
@@ -748,6 +784,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NonNullableMin<T> (this IObservable<T> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T min = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -767,6 +806,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NullableMin<T> (this IObservable<T> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T min = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -776,6 +818,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NonNullableMax<T> (this IObservable<T> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T max = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -795,6 +840,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NullableMax<T> (this IObservable<T> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T max = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -804,6 +852,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NonNullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T sum = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -813,6 +864,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<T> NullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			T sum = default (T);
 			var sub = new Subject<T> ();
 			IDisposable dis = null;
@@ -1402,12 +1456,38 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> Select<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, TResult> selector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Select ((s, i) => selector (s));
+		}
 		
 		public static IObservable<TResult> Select<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, int, TResult> selector)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+
+			var sub = new Subject<TResult> ();
+			IDisposable dis = null;
+			int idx = 0;
+			dis = source.Subscribe ((s) => {
+				try {
+					sub.OnNext (selector (s, idx++));
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					dis.Dispose ();
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return sub;
+		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -1969,12 +2049,39 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Where<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Where ((s, i) => predicate (s));
+		}
 		
 		public static IObservable<TSource> Where<TSource>(
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			int idx = 0;
+			dis = source.Subscribe ((s) => {
+				try {
+					if (predicate (s, idx++))
+						sub.OnNext (s);
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					dis.Dispose ();
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return sub;
+		}
 		
 		public static IObservable<IObservable<TSource>> Window<TSource> (
 			this IObservable<TSource> source,
