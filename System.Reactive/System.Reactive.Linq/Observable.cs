@@ -51,6 +51,11 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<bool> Any<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
 			var sub = new Subject<bool> ();
 			IDisposable dis = null;
 			bool hit = false;
@@ -218,13 +223,21 @@ namespace System.Reactive.Linq
 		public static IObservable<bool> Contains<TSource> (
 			this IObservable<TSource> source,
 			TSource value)
-		{ throw new NotImplementedException (); }
+		{
+			return Contains<TSource> (source, value, EqualityComparer<TSource>.Default);
+		}
 		
 		public static IObservable<bool> Contains<TSource> (
 			this IObservable<TSource> source,
 			TSource value,
 			IEqualityComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			return Any<TSource> (source, v => comparer.Equals (v, value));
+		}
 		
 		public static IObservable<int> Count<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
