@@ -456,7 +456,9 @@ namespace System.Reactive.Linq
 			Func<TState, TState> iterate,
 			Func<TState, TResult> resultSelector,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Generate<TState, TResult> (initialState, condition, iterate, resultSelector, (st) => TimeSpan.Zero, scheduler);
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,
@@ -465,7 +467,9 @@ namespace System.Reactive.Linq
 			Func<TState, TResult> resultSelector,
 			Func<TState, DateTimeOffset> timeSelector,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Generate<TState, TResult> (initialState, condition, iterate, resultSelector, (st) => timeSelector (st) - scheduler.Now, scheduler);
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,
@@ -474,7 +478,30 @@ namespace System.Reactive.Linq
 			Func<TState, TResult> resultSelector,
 			Func<TState, TimeSpan> timeSelector,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (condition == null)
+				throw new ArgumentNullException ("condition");
+			if (iterate == null)
+				throw new ArgumentNullException ("iterate");
+			if (resultSelector == null)
+				throw new ArgumentNullException ("resultSelector");
+			if (timeSelector == null)
+				throw new ArgumentNullException ("timeSelector");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
+			return new ColdObservable<TResult> ((sub) => {
+				try {
+					for (var i = initialState; condition (i); i = iterate (i)) {
+						Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
+						sub.OnNext (resultSelector (i));
+					}
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
+		}
 		
 		public static IEnumerator<TSource> GetEnumerator<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
