@@ -45,10 +45,39 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<bool> Any<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return Any<TSource> (source, (s) => true);
+		}
 		
 		public static IObservable<bool> Any<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<bool> ();
+			IDisposable dis = null;
+			bool hit = false;
+			dis = source.Subscribe ((s) => {
+				try {
+					if (predicate (s)) {
+						hit = true;
+						sub.OnNext (true);
+						sub.OnCompleted ();
+						dis.Dispose ();
+					}
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					if (!hit) {
+						sub.OnNext (false);
+						sub.OnCompleted ();
+						dis.Dispose ();
+					}
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return sub;
+		}
 		
 		public static IObservable<TSource> AsObservable<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
