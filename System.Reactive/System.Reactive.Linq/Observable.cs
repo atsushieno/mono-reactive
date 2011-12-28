@@ -240,7 +240,13 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<int> Count<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<int> ();
+			IDisposable dis = null;
+			int count = 0;
+			dis = source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); dis.Dispose (); });
+			return sub;
+		}
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
 		{
