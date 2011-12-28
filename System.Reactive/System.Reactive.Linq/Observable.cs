@@ -1550,7 +1550,17 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> ToObservable<TSource> (
 			this IEnumerable<TSource> source,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return new ColdObservable<TSource> ((sub) => {
+				try {
+					foreach (var s in source)
+						sub.OnNext (s);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
+		}
 		
 		public static IObservable<TSource> Using<TSource, TResource> (
 			Func<TResource> resourceFactory,
