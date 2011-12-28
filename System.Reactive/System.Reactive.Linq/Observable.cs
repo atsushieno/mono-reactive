@@ -734,41 +734,146 @@ namespace System.Reactive.Linq
 		public static IObservable<Notification<TSource>> Materialize<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
 		
+		
+		static void VerifyCompleted<T> (bool hasValue, ISubject<T> sub, T value, IDisposable dis)
+		{
+			if (!hasValue)
+				sub.OnError (new InvalidOperationException ());
+			else {
+				sub.OnNext (value);
+				sub.OnCompleted ();
+			}
+			dis.Dispose (); 
+		}
+		
+		static IObservable<T> NonNullableMin<T> (this IObservable<T> source)
+		{
+			T min = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			bool got = false;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						min = s;
+					} else if (Comparer<T>.Default.Compare (min, s) > 0)
+						min = s;
+				},
+				() => VerifyCompleted (got, sub, min, dis)
+				);
+			return sub;
+		}
+		
+		static IObservable<T> NullableMin<T> (this IObservable<T> source)
+		{
+			T min = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			dis = source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (min, s) > 0) min = s; }, () => VerifyCompleted (true, sub, min, dis));
+			return sub;
+		}
+		
+		static IObservable<T> NonNullableMax<T> (this IObservable<T> source)
+		{
+			T max = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			bool got = false;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						max = s;
+					} else if (Comparer<T>.Default.Compare (max, s) < 0)
+						max = s;
+				},
+				() => VerifyCompleted (got, sub, max, dis)
+				);
+			return sub;
+		}
+		
+		static IObservable<T> NullableMax<T> (this IObservable<T> source)
+		{
+			T max = default (T);
+			var sub = new Subject<T> ();
+			IDisposable dis = null;
+			dis = source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, () => VerifyCompleted (true, sub, max, dis));
+			return sub;
+		}
+
 		public static IObservable<decimal> Max (this IObservable<decimal> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMax ();
+		}
 		
 		public static IObservable<double> Max (this IObservable<double> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMax ();
+		}
 		
 		public static IObservable<int> Max (this IObservable<int> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMax ();
+		}
 		
 		public static IObservable<long> Max (this IObservable<long> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMax ();
+		}
 		
 		public static IObservable<float> Max (this IObservable<float> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMax ();
+		}
 		
 		public static IObservable<decimal?> Max (this IObservable<decimal?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMax ();
+		}
 		
 		public static IObservable<double?> Max (this IObservable<double?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMax ();
+		}
 		
 		public static IObservable<int?> Max (this IObservable<int?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMax ();
+		}
 		
 		public static IObservable<long?> Max (this IObservable<long?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMax ();
+		}
 		
 		public static IObservable<float?> Max (this IObservable<float?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMax ();
+		}
 		
 		public static IObservable<TSource> Max<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Max (Comparer<TSource>.Default);
+		}
 		
 		public static IObservable<TSource> Max<TSource> (this IObservable<TSource> source, IComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			TSource max = default (TSource);
+			var sub = new Subject<TSource> ();
+			bool got = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						max = s;
+					} else if (comparer.Compare (max, s) < 0)
+						max = s;
+				},
+				() => VerifyCompleted (got, sub, max, dis));
+			return sub;
+		}
 		
 		public static IObservable<IList<TSource>> MaxBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
 		{ throw new NotImplementedException (); }
@@ -836,40 +941,77 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<decimal> Min (this IObservable<decimal> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMin ();
+		}
 		
 		public static IObservable<double> Min (this IObservable<double> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMin ();
+		}
 		
 		public static IObservable<int> Min (this IObservable<int> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMin ();
+		}
 		
 		public static IObservable<long> Min (this IObservable<long> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMin ();
+		}
 		
 		public static IObservable<float> Min (this IObservable<float> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NonNullableMin ();
+		}
 		
 		public static IObservable<decimal?> Min (this IObservable<decimal?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMin ();
+		}
 		
 		public static IObservable<double?> Min (this IObservable<double?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMin ();
+		}
 		
 		public static IObservable<int?> Min (this IObservable<int?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMin ();
+		}
 		
 		public static IObservable<long?> Min (this IObservable<long?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMin ();
+		}
 		
 		public static IObservable<float?> Min (this IObservable<float?> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.NullableMin ();
+		}
 		
 		public static IObservable<TSource> Min<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Min (Comparer<TSource>.Default);
+		}
 		
 		public static IObservable<TSource> Min<TSource> (this IObservable<TSource> source, IComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			TSource min = default (TSource);
+			var sub = new Subject<TSource> ();
+			bool got = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						min = s;
+					} else if (comparer.Compare (min, s) > 0)
+						min = s;
+				},
+				() => VerifyCompleted (got, sub, min, dis));
+			return sub;
+		}
 		
 		public static IObservable<IList<TSource>> MinBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
 		{ throw new NotImplementedException (); }
