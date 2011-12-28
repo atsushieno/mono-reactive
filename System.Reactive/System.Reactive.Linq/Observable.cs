@@ -876,13 +876,50 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<IList<TSource>> MaxBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.MaxBy (keySelector, Comparer<TKey>.Default);
+		}
 		
 		public static IObservable<IList<TSource>> MaxBy<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		
+		{
+			TKey maxk = default (TKey);
+			List<TSource> max = new List<TSource> ();
+			var sub = new Subject<IList<TSource>> ();
+			bool got = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						max.Add (s);
+						maxk = keySelector (s);
+					} else {
+						var k = keySelector (s);
+						var cmp = comparer.Compare (maxk, k);
+						if (cmp == 0)
+							max.Add (s);
+						if (cmp < 0) {
+							max.Clear ();
+							max.Add (s);
+							maxk = k;
+						}
+					}
+				},
+				() => {
+					if (!got)
+						sub.OnError (new InvalidOperationException ());
+					else {
+						sub.OnNext (max);
+						sub.OnCompleted ();
+					}
+					dis.Dispose (); 
+				});
+			return sub;
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
@@ -1014,13 +1051,49 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<IList<TSource>> MinBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.MinBy (keySelector, Comparer<TKey>.Default);
+		}
 		
 		public static IObservable<IList<TSource>> MinBy<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			TKey mink = default (TKey);
+			List<TSource> min = new List<TSource> ();
+			var sub = new Subject<IList<TSource>> ();
+			bool got = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				(s) => {
+					if (!got) {
+						got = true;
+						min.Add (s);
+						mink = keySelector (s);
+					} else {
+						var k = keySelector (s);
+						var cmp = comparer.Compare (mink, k);
+						if (cmp == 0)
+							min.Add (s);
+						if (cmp > 0) {
+							min.Clear ();
+							min.Add (s);
+							mink = k;
+						}
+					}
+				},
+				() => {
+					if (!got)
+						sub.OnError (new InvalidOperationException ());
+					else {
+						sub.OnNext (min);
+						sub.OnCompleted ();
+					}
+					dis.Dispose (); 
+				});
+			return sub;
+		}
 
 		public static IEnumerable<TSource> MostRecent<TSource> (
 			this IObservable<TSource> source,
