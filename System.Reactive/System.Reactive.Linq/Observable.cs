@@ -1115,7 +1115,9 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<Unit> Start (Action action, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Start<Unit> (() => { action (); return Unit.Default; }, scheduler);
+		}
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function)
 		{
@@ -1123,7 +1125,9 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return new HotObservable<TSource> (function, scheduler);
+		}
 		
 		public static IObservable<TSource> StartWith<TSource>( 
 			this IObservable<TSource> source,
