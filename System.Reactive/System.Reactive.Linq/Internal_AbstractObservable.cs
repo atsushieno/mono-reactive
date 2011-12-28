@@ -86,58 +86,29 @@ namespace System.Reactive.Linq
 	}
 	*/
 	
-	/* Observable implementation for Interval() :
-		- cold observable
-		- Notifies "current count" to *each* observer i.e. this
-		  observable holds different count numbers to the observers.
-
-		example of different counts:
-		
-		var interval = Observable.Interval(TimeSpan.FromMilliseconds(250));
-		Thread.Sleep(3000);
-		interval.Subscribe(Console.WriteLine);
-		Thread.Sleep(3000);
-		interval.Subscribe((s) => Console.WriteLine ("x " + s)); 
-
-	*/
-	internal class IntervalObservable : IObservable<long>
+	internal class ColdObservable<T> : IObservable<T>
 	{
-		List<KeyValuePair<IObserver<long>, ISubject<long>>> subjects = new List<KeyValuePair<IObserver<long>, ISubject<long>>> ();
-		
-		TimeSpan interval;
 		IScheduler scheduler;
+		Action<ISubject<T>> work;
 		
-		public IntervalObservable (TimeSpan interval, IScheduler scheduler)
+		public ColdObservable (Action<ISubject<T>> work, IScheduler scheduler)
 		{
-			this.interval = interval;
+			this.work = work;
 			this.scheduler = scheduler;
 		}
 
-		public IDisposable Subscribe (IObserver<long> observer)
+		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			var sub = new Subject<long> ();
+			var sub = new Subject<T> ();
 			sub.Subscribe (observer);
-			subjects.Add (new KeyValuePair<IObserver<long>, ISubject<long>> (observer, sub));
-			scheduler.Schedule (() => {
-				try {
-					int count = 0;
-					while (true) {
-						Thread.Sleep (interval);
-						sub.OnNext (count++);
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
+			scheduler.Schedule (() => work (sub));
 			return Disposable.Create (() => {
-				subjects.Remove (subjects.First (p => p.Value == sub));
 				sub.Dispose ();
 			});
 		}
 		
 		public void Dispose ()
 		{
-			subjects.Clear ();
 		}
 	}
 }

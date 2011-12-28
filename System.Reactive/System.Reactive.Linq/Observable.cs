@@ -546,12 +546,33 @@ namespace System.Reactive.Linq
 		{
 			return Interval (period, Scheduler.ThreadPool);
 		}
+
+		/* It Notifies "current count" to *each* observer i.e. this
+		   observable holds different count numbers to the observers.
 		
+		Example of different counts:
+		
+		var interval = Observable.Interval(TimeSpan.FromMilliseconds(250));
+		interval.Subscribe(Console.WriteLine);
+		Thread.Sleep(3000);
+		interval.Subscribe((s) => Console.WriteLine ("x " + s)); 
+
+		*/
 		public static IObservable<long> Interval (
 			TimeSpan period,
 			IScheduler scheduler)
 		{
-			return new IntervalObservable (period, scheduler);
+			return new ColdObservable<long> ((sub) => {
+				try {
+					long count = 0;
+					while (true) {
+						Thread.Sleep (period);
+						sub.OnNext (count++);
+					}
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
 		}
 		
 		public static IObservable<TResult> Join<TLeft, TRight, TLeftDuration, TRightDuration, TResult>(
