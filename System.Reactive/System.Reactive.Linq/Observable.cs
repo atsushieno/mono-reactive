@@ -376,16 +376,43 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static TSource First<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return First<TSource> (source, (s) => true);
+		}
 		
 		public static TSource First<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return InternalFirstOrDefault<TSource> (source, predicate, true);
+		}
 		
 		public static TSource FirstOrDefault<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return FirstOrDefault (source, (s) => true);
+		}
 		
 		public static TSource FirstOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return InternalFirstOrDefault<TSource> (source, predicate, false);
+		}
+		
+		// The callers (First/FirstOrDefault) are blocking methods.
+		static TSource InternalFirstOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
+		{
+			// FIXME: should we use SpinWait or create some hybrid one?
+			var wait = new ManualResetEvent (false);
+			TSource ret = default (TSource);
+			bool got = false;
+			IDisposable dis = null;
+			dis = source.Subscribe (
+				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
+				(s) => { if (!got && predicate (s)) { got = true; ret = s; dis.Dispose (); wait.Set (); } },
+				() => { if (!got) wait.Set (); }
+				);
+			wait.WaitOne ();
+			if (!got && throwError)
+				throw new InvalidOperationException ();
+			return ret;
+		}
 		
 		public static void ForEach<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
 		{ throw new NotImplementedException (); }
