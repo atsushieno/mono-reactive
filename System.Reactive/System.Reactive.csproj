@@ -115,6 +115,7 @@
     <Compile Include="System.Reactive.Linq\Internal_NeverObservable.cs" />
     <Compile Include="System.Reactive.Linq\Internal_SimpleDisposableObservable.cs" />
     <Compile Include="System.Reactive.Linq\Observable.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
     <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />
     <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
     <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
