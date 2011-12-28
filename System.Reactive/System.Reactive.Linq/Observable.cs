@@ -1126,7 +1126,15 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function, IScheduler scheduler)
 		{
-			return new HotObservable<TSource> (function, scheduler);
+			return new HotObservable<TSource> ((sub) => {
+				try {
+					var ret = function ();
+					sub.OnNext (ret);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
 		}
 		
 		public static IObservable<TSource> StartWith<TSource>( 

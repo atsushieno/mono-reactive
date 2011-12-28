@@ -39,37 +39,31 @@ namespace System.Reactive.Linq
 	
 	internal class HotObservable<T> : IObservable<T>
 	{
-		Func<T> func;
 		IDisposable scheduler_disposable;
 		ReplaySubject<T> subject;
 
-		public HotObservable (Func<T> func, IScheduler scheduler)
+		public ReplaySubject<T> Subject {
+			get { return subject; }
+		}
+		
+		public HotObservable (Action<ReplaySubject<T>> work, IScheduler scheduler)
 		{
 			subject = new ReplaySubject<T> (scheduler);
-			
-			scheduler_disposable = scheduler.Schedule (() => {
-				try {
-					var ret = func ();
-					subject.OnNext (ret);
-					subject.OnCompleted ();
-				} catch (Exception ex) {
-					subject.OnError (ex);
-				}
-			});
+			scheduler_disposable = scheduler.Schedule (() => work (subject));
 		}
 		
 		public void Dispose ()
 		{
-			if (scheduler_disposable != null) {
+			if (scheduler_disposable != null)
 				scheduler_disposable.Dispose ();
-				scheduler_disposable = null;
-			}
-			subject.Dispose ();
+			var dis = Subject as IDisposable;
+			if (dis != null)
+				dis.Dispose ();
 		}
 
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			return subject.Subscribe (observer);
+			return Subject.Subscribe (observer);
 		}
 	}
 	
