@@ -550,7 +550,9 @@ namespace System.Reactive.Linq
 		public static IObservable<long> Interval (
 			TimeSpan period,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return new IntervalObservable (period, scheduler);
+		}
 		
 		public static IObservable<TResult> Join<TLeft, TRight, TLeftDuration, TRightDuration, TResult>(
 			this IObservable<TLeft> left,
@@ -1280,9 +1282,7 @@ namespace System.Reactive.Linq
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (
 			this IObservable<TSource> source,
 			IScheduler scheduler)
-		{
-			return new TimeIntervalObservable<TSource> (source, scheduler);
-		}
+		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
