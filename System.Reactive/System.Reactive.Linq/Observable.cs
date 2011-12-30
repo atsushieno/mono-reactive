@@ -433,12 +433,16 @@ namespace System.Reactive.Linq
 		public static IObservable<TEventArgs> FromEvent<TEventArgs> (
 			Action<Action<TEventArgs>> addHandler,
 			Action<Action<TEventArgs>> removeHandler)
-		{ throw new NotImplementedException (); }
+		{
+			return new EventObservable<Action<TEventArgs>, TEventArgs> (action => action, addHandler, removeHandler);
+		}
 		
 		public static IObservable<Unit> FromEvent (
 			Action<Action> addHandler,
 			Action<Action> removeHandler)
-		{ throw new NotImplementedException (); }
+		{
+			return FromEvent<Action, Unit> (au => () => au (Unit.Default), addHandler, removeHandler);
+		}
 		
 		public static IObservable<TEventArgs> FromEvent<TDelegate, TEventArgs> (
 			Action<TDelegate> addHandler,
@@ -449,7 +453,9 @@ namespace System.Reactive.Linq
 			Func<Action<TEventArgs>, TDelegate> conversion,
 			Action<TDelegate> addHandler,
 			Action<TDelegate> removeHandler)
-		{ throw new NotImplementedException (); }
+		{
+			return new EventObservable<TDelegate, TEventArgs> (conversion, addHandler, removeHandler);
+		}
 		
 		public static IObservable<EventPattern<TEventArgs>> FromEventPattern<TEventArgs> (
 			Action<EventHandler<TEventArgs>> addHandler,
