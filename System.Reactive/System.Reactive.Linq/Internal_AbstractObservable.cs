@@ -111,4 +111,41 @@ namespace System.Reactive.Linq
 		{
 		}
 	}
+	
+	internal class WrappedSubject<T> : ISubject<T>
+	{
+		ISubject<T> inner;
+		IDisposable disposable;
+		
+		public WrappedSubject (ISubject<T> inner, IDisposable disposable)
+		{
+			this.inner = inner;
+			this.disposable = disposable;
+		}
+		
+		public void Dispose ()
+		{
+			disposable.Dispose ();
+		}
+		
+		public void OnNext (T value)
+		{
+			inner.OnNext (value);
+		}
+		
+		public void OnError (Exception ex)
+		{
+			inner.OnError (ex);
+		}
+		
+		public void OnCompleted ()
+		{
+			inner.OnCompleted ();
+		}
+		
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			return inner.Subscribe (observer);
+		}
+	}
 }

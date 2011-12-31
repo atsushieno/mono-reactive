@@ -52,12 +52,11 @@ namespace System.Reactive.Linq
 				try {
 					sub.OnNext (hasValue && ret);
 					sub.OnCompleted ();
-					dis.Dispose ();
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
 				});
-			return sub;
+			return new WrappedSubject<bool> (sub, dis);
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IEnumerable<IObservable<TSource>> sources)
@@ -109,7 +108,7 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return sub;
+			return new WrappedSubject<bool> (sub, dis);
 		}
 		
 		public static IObservable<TSource> AsObservable<TSource> (this IObservable<TSource> source)
@@ -308,23 +307,63 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.DistinctUntilChanged (EqualityComparer<TSource>.Default);
+		}
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource> (
 			this IObservable<TSource> source,
 			IEqualityComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return source.DistinctUntilChanged (k => k, comparer);
+		}
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.DistinctUntilChanged (keySelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			bool hit = false;
+			TKey prev = default (TKey);
+			dis = source.Subscribe (Observer.Create<TSource> ((s) => {
+				try {
+					var k = keySelector (s);
+					if (!hit) {
+						hit = true;
+						prev = k;
+						sub.OnNext (s);
+					} else if (!comparer.Equals (k, prev)) {
+						prev = k;
+						sub.OnNext (s);
+					}
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}));
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
@@ -434,7 +473,9 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				}, sub); return sub; };
+				}, sub);
+				return sub;
+			};
 		}
 		
 		public static Func<IObservable<TResult>> FromAsyncPattern<TResult> (
@@ -450,7 +491,9 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				}, sub); return sub; };
+				}, sub);
+				return sub;
+			};
 		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
@@ -589,13 +632,12 @@ namespace System.Reactive.Linq
 					foreach (var g in dic.Values)
 						g.OnCompleted ();
 					sub.OnCompleted ();
-					dis.Dispose ();
 				} catch (Exception ex) {
 					sub.OnError (ex);
 					// FIXME: should we handle OnError() in groups too?
 				}
 			});
-			return sub;
+			return new WrappedSubject<IGroupedObservable<TKey, TElement>> (sub, dis);
 		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupByUntil<TSource, TKey, TDuration> (
@@ -768,9 +810,8 @@ namespace System.Reactive.Linq
 						sub.OnNext (max);
 						sub.OnCompleted ();
 					}
-					dis.Dispose (); 
 				});
-			return sub;
+			return new WrappedSubject<IList<TSource>> (sub, dis);
 		}
 		
 		public static IObservable<TSource> Merge<TSource> (this IEnumerable<IObservable<TSource>> sources)
@@ -869,9 +910,8 @@ namespace System.Reactive.Linq
 						sub.OnNext (min);
 						sub.OnCompleted ();
 					}
-					dis.Dispose (); 
 				});
-			return sub;
+			return new WrappedSubject<IList<TSource>> (sub, dis);
 		}
 
 		public static IEnumerable<TSource> MostRecent<TSource> (
@@ -1187,13 +1227,12 @@ namespace System.Reactive.Linq
 				}
 				}, () => {
 				try {
-					dis.Dispose ();
 					sub.OnCompleted ();
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
 				});
-			return sub;
+			return new WrappedSubject<TResult> (sub, dis);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
@@ -1731,7 +1770,7 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return sub;
+			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
 		public static IObservable<IObservable<TSource>> Window<TSource> (
