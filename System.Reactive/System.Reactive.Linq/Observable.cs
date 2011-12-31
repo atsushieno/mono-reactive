@@ -60,13 +60,31 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IEnumerable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+			return sources.ToArray ().Amb ();
+		}
 		
 		public static IObservable<TSource> Amb<TSource> (params IObservable<TSource>[] sources)
-		{ throw new NotImplementedException (); }
+		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+			var sub = new Subject<TSource> ();
+			int completed = 0;
+			IEnumerable<IDisposable> dis = from source in sources
+				select source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == sources.Length) sub.OnCompleted (); });
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
+		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IObservable<TSource> first, IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			int completed = 0;
+			var dis1 = first.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == 2) sub.OnCompleted (); });
+			var dis2 = second.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == 2) sub.OnCompleted (); });
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { dis1.Dispose (); dis2.Dispose (); sub.Dispose (); }));
+		}
 		
 		public static Pattern<TLeft, TRight> And<TLeft, TRight> (this IObservable<TLeft> left, IObservable<TRight> right)
 		{ throw new NotImplementedException (); }
