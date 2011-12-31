@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive.Linq;
 
 namespace System.Reactive.Joins
 {
@@ -19,5 +20,10 @@ namespace System.Reactive.Joins
 		}
 		
 		IObservable<T> t;
+
+		public IObservable<TResult> AsObservable<TResult> (Func<T, TResult> selector)
+		{
+			return t.Select (selector);
+		}
 	}
 }

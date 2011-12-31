@@ -1834,10 +1834,14 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> When<TResult> (this IEnumerable<Plan<TResult>> plans)
-		{ throw new NotImplementedException (); }
+		{
+			return When (plans.ToArray ());
+		}
 		
 		public static IObservable<TResult> When<TResult> (params Plan<TResult>[] plans)
-		{ throw new NotImplementedException (); }
+		{
+			return Amb (plans.Select (p => p.AsObservable ()));
+		}
 		
 		public static IObservable<TSource> Where<TSource> (
 			this IObservable<TSource> source,

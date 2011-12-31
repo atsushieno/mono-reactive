@@ -43,6 +43,11 @@ namespace System.Reactive.Joins
 		{{
 			return new Plan<{0}, TResult> (this, selector);
 		}}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<{0}, TResult> selector)
+		{{
+			throw new NotImplementedException ();
+		}}
 	}}
 	
 	internal class Plan<{0}, TResult> : Plan<TResult>
@@ -54,6 +59,11 @@ namespace System.Reactive.Joins
 		{{
 			this.pattern = pattern;
 			this.selector = selector;
+		}}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{{
+			throw new NotImplementedException ();
 		}}
 	}}
 	", s, i + 1, s2, s3, s4, s5, i == 16 ? "/*" : null, i == 16 ? "*/" : null);

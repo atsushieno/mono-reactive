@@ -31,6 +31,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, TResult> : Plan<TResult>
@@ -42,6 +47,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -70,6 +80,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, TResult> : Plan<TResult>
@@ -81,6 +96,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -111,6 +131,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, TResult> : Plan<TResult>
@@ -122,6 +147,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -154,6 +184,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, TResult> : Plan<TResult>
@@ -165,6 +200,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -199,6 +239,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, TResult> : Plan<TResult>
@@ -210,6 +255,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -246,6 +296,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, TResult> : Plan<TResult>
@@ -257,6 +312,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -295,6 +355,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, TResult> : Plan<TResult>
@@ -306,6 +371,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -346,6 +416,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : Plan<TResult>
@@ -357,6 +432,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -399,6 +479,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : Plan<TResult>
@@ -410,6 +495,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -454,6 +544,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : Plan<TResult>
@@ -465,6 +560,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -511,6 +611,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : Plan<TResult>
@@ -522,6 +627,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -570,6 +680,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> : Plan<TResult>
@@ -581,6 +696,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -631,6 +751,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> : Plan<TResult>
@@ -642,6 +767,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -694,6 +824,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> : Plan<TResult>
@@ -705,6 +840,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	
@@ -759,6 +899,11 @@ namespace System.Reactive.Joins
 		{
 			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> (this, selector);
 		}
+		
+		internal IObservable<TResult> AsObservable<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 	
 	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> : Plan<TResult>
@@ -770,6 +915,11 @@ namespace System.Reactive.Joins
 		{
 			this.pattern = pattern;
 			this.selector = selector;
+		}
+		
+		internal override IObservable<TResult> AsObservable ()
+		{
+			throw new NotImplementedException ();
 		}
 	}
 	

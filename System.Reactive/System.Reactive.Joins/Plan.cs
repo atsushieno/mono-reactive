@@ -1,6 +1,10 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace System.Reactive.Joins
 {
@@ -9,6 +13,8 @@ namespace System.Reactive.Joins
 		internal Plan ()
 		{
 		}
+		
+		internal abstract IObservable<TResult> AsObservable ();
 	}
 	
 	internal class Plan<T, TResult> : Plan<TResult>
@@ -20,6 +26,11 @@ namespace System.Reactive.Joins
 		{
 			this.source = source;
 			this.selector = selector;
+		}
+
+		internal override IObservable<TResult> AsObservable ()
+		{
+			return source.AsObservable<TResult> (selector);
 		}
 	}
 }
