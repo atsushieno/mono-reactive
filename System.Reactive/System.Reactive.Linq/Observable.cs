@@ -1388,33 +1388,8 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
 		{
-			if (source == null)
-				throw new ArgumentNullException ("source");
-			if (predicate == null)
-				throw new ArgumentNullException ("predicate");
-
-			var sub = new Subject<TSource> ();
-			IDisposable dis = null;
-			int idx = 0;
 			bool skipDone = false;
-			dis = source.Subscribe ((s) => {
-				try {
-					if (skipDone || !predicate (s, idx++)) {
-						if (!skipDone)
-							skipDone = true;
-						sub.OnNext (s);
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				}, () => {
-				try {
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
-			return new WrappedSubject<TSource> (sub, dis);
+			return source.Where ((s, i) => skipDone || (skipDone = !predicate (s, i)));
 		}
 		
 		public static IObservable<Unit> Start (Action action)
@@ -1510,12 +1485,43 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Take<TSource> (
 			this IObservable<TSource> source,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Where ((s, i) => i < count);
+		}
 		
 		public static IObservable<TSource> TakeLast<TSource> (
 			this IObservable<TSource> source,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (count < 0)
+				throw new ArgumentOutOfRangeException ("count");
+
+			var q = new Queue<TSource> ();
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			dis = source.Subscribe ((s) => {
+				try {
+					q.Enqueue (s);
+					if (count > 0)
+						count--;
+					else
+						q.Dequeue ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					while (q.Count > 0)
+						sub.OnNext (q.Dequeue ());
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> TakeUntil<TSource, TOther> (
 			this IObservable<TSource> source,
@@ -1525,12 +1531,17 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> TakeWhile<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return source.TakeWhile ((s, i) => predicate (s));
+		}
 		
 		public static IObservable<TSource> TakeWhile<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			bool stopped = false;
+			return source.Where ((s, i) => !stopped && (stopped = !predicate (s, i)));
+		}
 		
 		public static Plan<TResult> Then<TSource, TResult> (
 			this IObservable<TSource> source,
