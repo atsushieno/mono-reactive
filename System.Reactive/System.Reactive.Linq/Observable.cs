@@ -424,12 +424,34 @@ namespace System.Reactive.Linq
 		public static Func<IObservable<Unit>> FromAsyncPattern(
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Action<IAsyncResult> end)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<Unit> ();
+			return () => { begin ((res) => {
+				try {
+					end (res);
+					sub.OnNext (Unit.Default);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, sub); return sub; };
+		}
 		
 		public static Func<IObservable<TResult>> FromAsyncPattern<TResult> (
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Func<IAsyncResult, TResult> end)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TResult> ();
+			return () => { begin ((res) => {
+				try {
+					var result = end (res);
+					sub.OnNext (result);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, sub); return sub; };
+		}
 
 		public static IObservable<TResult> Generate<TState, TResult> (
 			TState initialState,

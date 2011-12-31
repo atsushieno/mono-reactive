@@ -11,6 +11,7 @@ using System;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Subjects;
 
 namespace System.Reactive.Linq
 {
@@ -20,12 +21,23 @@ namespace System.Reactive.Linq
 
 		for (int i = 1; i <= 14; i++) {
 			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
+			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			Console.WriteLine (@"
-		public static Func<{0}, IObservable<Unit>> FromAsyncPattern<{0}> (Func<{0}, AsyncCallback, Object, IAsyncResult> begin, Action<IAsyncResult> end)
+		public static Func<{0}, IObservable<TResult>> FromAsyncPattern<{0}, TResult> (Func<{0}, AsyncCallback, Object, IAsyncResult> begin, Func<IAsyncResult, TResult> end)
 		{{
-			throw new NotImplementedException ();
+			var sub = new Subject<TResult> ();
+			return ({1}) => {{ begin ({1}, (res) => {{
+				try {{
+					var result = end (res);
+					sub.OnNext (result);
+					sub.OnCompleted ();
+				}} catch (Exception ex) {{
+					sub.OnError (ex);
+				}}
+				}}, sub); return sub; }};
+
 		}}
-		", s);
+		", s, s2);
 		}
 
 		for (int i = 2; i <= 16; i++) {
