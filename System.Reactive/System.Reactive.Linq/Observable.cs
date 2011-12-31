@@ -1480,12 +1480,16 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> SubscribeOn<TSource> (
 			this IObservable<TSource> source,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return new SchedulerBoundObservable<TSource> (source, scheduler);
+		}
 		
 		public static IObservable<TSource> SubscribeOn<TSource> (
 			this IObservable<TSource> source,
 			SynchronizationContext context)
-		{ throw new NotImplementedException (); }
+		{
+			return source.SubscribeOn (new SynchronizationContextScheduler (context));
+		}
 		
 		public static IObservable<decimal> Sum (this IObservable<decimal> source)
 		{

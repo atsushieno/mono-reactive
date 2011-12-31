@@ -148,4 +148,24 @@ namespace System.Reactive.Linq
 			return inner.Subscribe (observer);
 		}
 	}
+
+	// subscription and unsubscription is handled on the specified scheduler.
+	internal class SchedulerBoundObservable<T> : IObservable<T>
+	{
+		IObservable<T> source;
+		IScheduler scheduler;
+		
+		public SchedulerBoundObservable (IObservable<T> source, IScheduler scheduler)
+		{
+			this.source = source;
+			this.scheduler = scheduler;
+		}
+
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			IDisposable dis = null;
+			scheduler.Schedule (() => dis = source.Subscribe (observer));
+			return Disposable.Create (() => { if (dis != null) scheduler.Schedule (() => dis.Dispose ()); });
+		}
+	}
 }
