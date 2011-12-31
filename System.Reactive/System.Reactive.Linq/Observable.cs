@@ -1750,16 +1750,43 @@ namespace System.Reactive.Linq
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
 		
+		class EventSource<T> : IEventSource<T>
+		{
+			public event Action<T> OnNext;
+			
+			public EventSource (IObservable<T> source)
+			{
+				source.Subscribe (t => { if (OnNext != null) OnNext (t); });
+			}
+		}
+		
 		public static IEventSource<Unit> ToEvent (this IObservable<Unit> source)
-		{ throw new NotImplementedException (); }
+		{
+			return ToEvent<Unit> (source);
+		}
 		
 		public static IEventSource<TSource> ToEvent<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return new EventSource<TSource> (source);
+		}
 		
+		class EventPatternSource<TEventArgs> : IEventPatternSource<TEventArgs>
+			where TEventArgs : EventArgs
+		{
+			public event EventHandler<TEventArgs> OnNext;
+			
+			public EventPatternSource (IObservable<EventPattern<TEventArgs>> source)
+			{
+				source.Subscribe ((ep) => { if (OnNext != null) OnNext (ep.Sender, ep.EventArgs); });
+			}
+		}
+
 		public static IEventPatternSource<TEventArgs> ToEventPattern<TEventArgs> (
 			this IObservable<EventPattern<TEventArgs>> source)
 			where TEventArgs : EventArgs
-		{ throw new NotImplementedException (); }
+		{
+			return new EventPatternSource<TEventArgs> (source);
+		}
 		
 		public static IObservable<IList<TSource>> ToList<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
