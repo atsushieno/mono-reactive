@@ -8,10 +8,13 @@ public class CodeGen
 	{
 		Console.WriteLine (@"
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-
-#pragma warning disable 0414
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace System.Reactive.Joins
 {");
@@ -22,6 +25,26 @@ namespace System.Reactive.Joins
 			string s3 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			string s4 = String.Join ("\t\t", (from t in Enumerable.Range (1, i) select "IObservable<T" + t + "> t" + t + ";\n").ToArray ());
 			string s5 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "this.t" + t + " = t" + t + ";").ToArray ());
+			string s6 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "var q" + t + " = new Queue<T" + t + "> ();").ToArray ());
+
+			string s7 = null;
+			foreach (var t in Enumerable.Range (1, i)) {
+				string s8 = String.Join (" && ", (from t2 in Enumerable.Range (1, i) select "q" + t2 + ".Count > 0").ToArray ());
+				string s9 = String.Join (", ", (from t2 in Enumerable.Range (1, i) select "q" + t2 + ".Dequeue ()").ToArray ());
+
+				s7 += String.Format (@"
+			t{0}.Subscribe (Observer.Create<T{0}> (t => {{
+				q{0}.Enqueue (t);
+				if ({1})
+					sub.OnNext (selector ({2}));
+			}}, (ex) => sub.OnError (ex), () => {{
+				done [{3}] = true;
+				if (done.All (b => b))
+					sub.OnCompleted ();
+			}}));
+			", t, s8, s9, t - 1);
+			}
+
 			Console.Write (@"
 	public class Pattern<{0}> : Pattern
 	{{
@@ -46,7 +69,13 @@ namespace System.Reactive.Joins
 		
 		internal IObservable<TResult> AsObservable<TResult> (Func<{0}, TResult> selector)
 		{{
-			throw new NotImplementedException ();
+			var sub = new Subject<TResult> ();
+			bool [] done = new bool [{8}];
+			{9}
+
+			{10}
+
+			return sub;
 		}}
 	}}
 	
@@ -63,10 +92,10 @@ namespace System.Reactive.Joins
 		
 		internal override IObservable<TResult> AsObservable ()
 		{{
-			throw new NotImplementedException ();
+			return pattern.AsObservable<TResult> (selector);
 		}}
 	}}
-	", s, i + 1, s2, s3, s4, s5, i == 16 ? "/*" : null, i == 16 ? "*/" : null);
+	", s, i + 1, s2, s3, s4, s5, i == 16 ? "/*" : null, i == 16 ? "*/" : null, i, s6, s7);
 		}
 
 		Console.WriteLine (@"
