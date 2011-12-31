@@ -10,4 +10,14 @@ namespace System.Reactive.Joins
 		{
 		}
 	}
+	
+	internal class Pattern<T> : Pattern
+	{
+		internal Pattern (IObservable<T> t)
+		{
+			this.t = t;
+		}
+		
+		IObservable<T> t;
+	}
 }

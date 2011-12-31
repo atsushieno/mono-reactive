@@ -10,4 +10,16 @@ namespace System.Reactive.Joins
 		{
 		}
 	}
+	
+	internal class Plan<T, TResult> : Plan<TResult>
+	{
+		Pattern<T> source;
+		Func<T, TResult> selector;
+		
+		public Plan (Pattern<T> source, Func<T, TResult> selector)
+		{
+			this.source = source;
+			this.selector = selector;
+		}
+	}
 }

@@ -1566,7 +1566,9 @@ namespace System.Reactive.Linq
 		public static Plan<TResult> Then<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, TResult> selector)
-		{ throw new NotImplementedException (); }
+		{
+			return new Plan<TSource, TResult> (new Pattern<TSource> (source), selector);
+		}
 		
 		public static IObservable<TSource> Throttle<TSource> (
 			this IObservable<TSource> source,

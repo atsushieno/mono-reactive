@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
-#pragma warning disable 0169, 0649, 0414
+#pragma warning disable 0414
 
 namespace System.Reactive.Joins
 {
@@ -12,6 +12,8 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
 		}
 		
 		IObservable<T1> t1;
@@ -47,6 +49,9 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
 		}
 		
 		IObservable<T1> t1;
@@ -83,6 +88,10 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
 		}
 		
 		IObservable<T1> t1;
@@ -120,6 +129,11 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
 		}
 		
 		IObservable<T1> t1;
@@ -158,6 +172,12 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
 		}
 		
 		IObservable<T1> t1;
@@ -197,6 +217,13 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
 		}
 		
 		IObservable<T1> t1;
@@ -237,6 +264,14 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
 		}
 		
 		IObservable<T1> t1;
@@ -278,6 +313,15 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
 		}
 		
 		IObservable<T1> t1;
@@ -320,6 +364,16 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
 		}
 		
 		IObservable<T1> t1;
@@ -363,6 +417,17 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
 		}
 		
 		IObservable<T1> t1;
@@ -407,6 +472,18 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
+			this.t12 = t12;
 		}
 		
 		IObservable<T1> t1;
@@ -452,6 +529,19 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
+			this.t12 = t12;
+			this.t13 = t13;
 		}
 		
 		IObservable<T1> t1;
@@ -498,6 +588,20 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
+			this.t12 = t12;
+			this.t13 = t13;
+			this.t14 = t14;
 		}
 		
 		IObservable<T1> t1;
@@ -545,6 +649,21 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14, IObservable<T15> t15)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
+			this.t12 = t12;
+			this.t13 = t13;
+			this.t14 = t14;
+			this.t15 = t15;
 		}
 		
 		IObservable<T1> t1;
@@ -593,6 +712,22 @@ namespace System.Reactive.Joins
 	{
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14, IObservable<T15> t15, IObservable<T16> t16)
 		{
+			this.t1 = t1;
+			this.t2 = t2;
+			this.t3 = t3;
+			this.t4 = t4;
+			this.t5 = t5;
+			this.t6 = t6;
+			this.t7 = t7;
+			this.t8 = t8;
+			this.t9 = t9;
+			this.t10 = t10;
+			this.t11 = t11;
+			this.t12 = t12;
+			this.t13 = t13;
+			this.t14 = t14;
+			this.t15 = t15;
+			this.t16 = t16;
 		}
 		
 		IObservable<T1> t1;
