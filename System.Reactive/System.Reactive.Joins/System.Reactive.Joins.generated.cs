@@ -3,12 +3,13 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
+#pragma warning disable 0169, 0649, 0414
+
 namespace System.Reactive.Joins
 {
 
 	public class Pattern<T1, T2> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2)
 		{
 		}
@@ -26,12 +27,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2> pattern;
+		Func<T1, T2, TResult> selector;
+		
+		public Plan (Pattern<T1, T2> pattern, Func<T1, T2, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3)
 		{
 		}
@@ -50,12 +63,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3> pattern;
+		Func<T1, T2, T3, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3> pattern, Func<T1, T2, T3, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4)
 		{
 		}
@@ -75,12 +100,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4> pattern;
+		Func<T1, T2, T3, T4, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4> pattern, Func<T1, T2, T3, T4, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5)
 		{
 		}
@@ -101,12 +138,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5> pattern;
+		Func<T1, T2, T3, T4, T5, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5> pattern, Func<T1, T2, T3, T4, T5, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6)
 		{
 		}
@@ -128,12 +177,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6> pattern;
+		Func<T1, T2, T3, T4, T5, T6, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6> pattern, Func<T1, T2, T3, T4, T5, T6, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7)
 		{
 		}
@@ -156,12 +217,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7> pattern, Func<T1, T2, T3, T4, T5, T6, T7, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8)
 		{
 		}
@@ -185,12 +258,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9)
 		{
 		}
@@ -215,12 +300,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10)
 		{
 		}
@@ -246,12 +343,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11)
 		{
 		}
@@ -278,12 +387,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12)
 		{
 		}
@@ -311,12 +432,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13)
 		{
 		}
@@ -345,12 +478,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14)
 		{
 		}
@@ -380,12 +525,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14, IObservable<T15> t15)
 		{
 		}
@@ -416,12 +573,24 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 	public class Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : Pattern
 	{
-#pragma warning disable 0169, 0649
 		internal Pattern (IObservable<T1> t1, IObservable<T2> t2, IObservable<T3> t3, IObservable<T4> t4, IObservable<T5> t5, IObservable<T6> t6, IObservable<T7> t7, IObservable<T8> t8, IObservable<T9> t9, IObservable<T10> t10, IObservable<T11> t11, IObservable<T12> t12, IObservable<T13> t13, IObservable<T14> t14, IObservable<T15> t15, IObservable<T16> t16)
 		{
 		}
@@ -453,7 +622,20 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> selector)
 		{
-			throw new NotImplementedException ();
+			return new Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> (this, selector);
 		}
 	}
+	
+	internal class Plan<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> : Plan<TResult>
+	{
+		Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> pattern;
+		Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> selector;
+		
+		public Plan (Pattern<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> pattern, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> selector)
+		{
+			this.pattern = pattern;
+			this.selector = selector;
+		}
+	}
+	
 }

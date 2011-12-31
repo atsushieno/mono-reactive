@@ -11,6 +11,8 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
+#pragma warning disable 0169, 0649, 0414
+
 namespace System.Reactive.Joins
 {");
 
@@ -22,7 +24,6 @@ namespace System.Reactive.Joins
 			Console.Write (@"
 	public class Pattern<{0}> : Pattern
 	{{
-#pragma warning disable 0169, 0649
 		internal Pattern ({1})
 		{{
 		}}
@@ -38,9 +39,22 @@ namespace System.Reactive.Joins
 
 		public Plan<TResult> Then<TResult> (Func<{0}, TResult> selector)
 		{{
-			throw new NotImplementedException ();
+			return new Plan<{0}, TResult> (this, selector);
 		}}
-	}}", s, s2, s3, s4, i + 1, i == 16 ? "/*" : null, i == 16 ? "*/" : null);
+	}}
+	
+	internal class Plan<{0}, TResult> : Plan<TResult>
+	{{
+		Pattern<{0}> pattern;
+		Func<{0}, TResult> selector;
+		
+		public Plan (Pattern<{0}> pattern, Func<{0}, TResult> selector)
+		{{
+			this.pattern = pattern;
+			this.selector = selector;
+		}}
+	}}
+	", s, s2, s3, s4, i + 1, i == 16 ? "/*" : null, i == 16 ? "*/" : null);
 		}
 
 		Console.WriteLine (@"

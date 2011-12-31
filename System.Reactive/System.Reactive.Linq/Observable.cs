@@ -89,15 +89,6 @@ namespace System.Reactive.Linq
 		public static Pattern<TLeft, TRight> And<TLeft, TRight> (this IObservable<TLeft> left, IObservable<TRight> right)
 		{
 			return new Pattern<TLeft, TRight> (left, right);
-			/*
-			var sub = new Subject<TSource> ();
-			var ql = new Queue<TLeft> ();
-			var qr = new Queue<TRight> ();
-			int completed = 0;
-			var dis1 = first.Subscribe (s => { if (qr.Count > 0) sub.Next (new Pattern<TLeft, TRight> (s, qr.Dequeue ())); else ql.Enqueue (s); }, ex => sub.OnError (ex), () => { ql.Clear (); sub.OnCompleted (); });
-			var dis2 = second.Subscribe (s => { if (ql.Count > 0) sub.Next (new Pattern<TLeft, TRight> (ql.Dequeue (), s)); else qr.Enqueue (s); }, ex => sub.OnError (ex), () => { qr.Clear (); sub.OnCompleted (); });
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { dis1.Dispose (); dis2.Dispose (); sub.Dispose (); }));
-			*/
 		}
 		
 		public static IObservable<bool> Any<TSource> (this IObservable<TSource> source)
