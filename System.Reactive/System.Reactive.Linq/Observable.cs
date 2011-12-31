@@ -1335,12 +1335,42 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Skip<TSource> (
 			this IObservable<TSource> source,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			return source.SkipWhile ((s, i) => i < count);
+		}
 		
 		public static IObservable<TSource> SkipLast<TSource> (
 			this IObservable<TSource> source,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (count < 0)
+				throw new ArgumentOutOfRangeException ("count");
+
+			var q = new Queue<TSource> ();
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			dis = source.Subscribe ((s) => {
+				try {
+					q.Enqueue (s);
+					if (count > 0)
+						count--;
+					else
+						sub.OnNext (q.Dequeue ());
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					q.Clear ();
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> SkipUntil<TSource, TOther> (
 			this IObservable<TSource> source,
@@ -1350,12 +1380,42 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> SkipWhile<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			return source.SkipWhile ((s, i) => predicate (s));
+		}
 		
 		public static IObservable<TSource> SkipWhile<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			int idx = 0;
+			bool skipDone = false;
+			dis = source.Subscribe ((s) => {
+				try {
+					if (skipDone || !predicate (s, idx++)) {
+						if (!skipDone)
+							skipDone = true;
+						sub.OnNext (s);
+					}
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, () => {
+				try {
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<Unit> Start (Action action)
 		{
