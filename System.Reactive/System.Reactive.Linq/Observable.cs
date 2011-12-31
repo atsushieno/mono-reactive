@@ -1469,7 +1469,13 @@ namespace System.Reactive.Linq
 			this IEnumerable<TSource> source,
 			IObserver<TSource> observer,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var o = source.ToObservable ();
+			var sub = new ReplaySubject<TSource> (scheduler);
+			sub.Subscribe (observer);
+			var dis = o.Subscribe (Observer.Create<TSource> (s => sub.OnNext (s), ex => sub.OnError (ex), () => sub.OnCompleted ()));
+			return Disposable.Create (() => { dis.Dispose (); sub.Dispose (); });
+		}
 
 		public static IObservable<TSource> SubscribeOn<TSource> (
 			this IObservable<TSource> source,
