@@ -111,7 +111,8 @@
     <Compile Include="System.Reactive.Joins\System.Reactive.Joins.generated.cs" />
     <Compile Include="System.Reactive.Linq\IGroupedObservable.cs" />
     <Compile Include="System.Reactive.Linq\Internal_AbstractObservable.cs" />
-    <Compile Include="System.Reactive.Linq\Internal_EventSubject.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_EventObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_EventPatternObservable.cs" />
     <Compile Include="System.Reactive.Linq\Internal_GroupedSubject.cs" />
     <Compile Include="System.Reactive.Linq\Internal_NeverObservable.cs" />
     <Compile Include="System.Reactive.Linq\Internal_SimpleDisposableObservable.cs" />
