@@ -63,27 +63,40 @@ namespace System.Reactive.Linq
 		{
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
-			return sources.ToArray ().Amb ();
+			var sub = new Subject<TSource> ();
+			IObservable<TSource> first = null;
+
+			// avoided using "from source in sources select ..." for eager evaluation.
+			var dis = new List<IDisposable> ();
+			foreach (var source in sources) {
+				dis.Add (source.Subscribe (Observer.Create<TSource> (s => {
+					if (first == null)
+						first = source;
+					if (first == source)
+						sub.OnNext (s);
+				}, ex => {
+					if (first == null)
+						first = source;
+					if (first == source)
+						sub.OnError (ex);
+				}, () => {
+					if (first == null)
+						first = source;
+					if (first == source)
+						sub.OnCompleted ();
+				})));
+			}
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (params IObservable<TSource>[] sources)
 		{
-			if (sources == null)
-				throw new ArgumentNullException ("sources");
-			var sub = new Subject<TSource> ();
-			int completed = 0;
-			IEnumerable<IDisposable> dis = from source in sources
-				select source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == sources.Length) sub.OnCompleted (); });
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
+			return Amb ((IEnumerable<IObservable<TSource>>) sources);
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IObservable<TSource> first, IObservable<TSource> second)
 		{
-			var sub = new Subject<TSource> ();
-			int completed = 0;
-			var dis1 = first.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == 2) sub.OnCompleted (); });
-			var dis2 = second.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (++completed == 2) sub.OnCompleted (); });
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { dis1.Dispose (); dis2.Dispose (); sub.Dispose (); }));
+			return Amb (new IObservable<TSource> [] {first, second});
 		}
 		
 		public static Pattern<TLeft, TRight> And<TLeft, TRight> (this IObservable<TLeft> left, IObservable<TRight> right)
@@ -1012,15 +1025,17 @@ namespace System.Reactive.Linq
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<int> Range (int start, int count)
 		{
-			var sub = new ReplaySubject<int> ();
+			return Range (start, count, Scheduler.CurrentThread);
+		}
+		
+		public static IObservable<int> Range (int start, int count, IScheduler scheduler)
+		{
+			var sub = new ReplaySubject<int> (scheduler);
 			foreach (var i in Enumerable.Range (start, count))
 				sub.OnNext (i);
 			sub.OnCompleted ();
 			return sub;
 		}
-		
-		public static IObservable<int> Range (int start, int count, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
 		{ throw new NotImplementedException (); }
@@ -1451,7 +1466,17 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IScheduler scheduler,
 			params TSource [] values)
-		{ throw new NotImplementedException (); }
+		{
+			return new HotObservable<TSource> ((sub) => {
+				try {
+					foreach (var v in values)
+						sub.OnNext (v);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
+		}
 		
 		public static IDisposable Subscribe<TSource> (
 			this IEnumerable<TSource> source,
@@ -1727,25 +1752,39 @@ namespace System.Reactive.Linq
 		}
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return () => Start (action, scheduler);
+		}
 		
 		public static Func<TSource, IObservable<Unit>> ToAsync<TSource> (this Action<TSource> action)
-		{ throw new NotImplementedException (); }
+		{
+			return action.ToAsync (Scheduler.ThreadPool);
+		}
 		
 		public static Func<IObservable<TResult>> ToAsync<TResult> (this Func<TResult> function)
-		{ throw new NotImplementedException (); }
+		{
+			return function.ToAsync (Scheduler.ThreadPool);
+		}
 		
 		public static Func<TSource, IObservable<Unit>> ToAsync<TSource> (this Action<TSource> action, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return (s) => Start (() => action (s), scheduler);
+		}
 		
 		public static Func<IObservable<TResult>> ToAsync<TResult> (this Func<TResult> function, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return () => Start (function, scheduler);
+		}
 		
 		public static Func<T, IObservable<TResult>> ToAsync<T, TResult> (this Func<T, TResult> function)
-		{ throw new NotImplementedException (); }
+		{
+			return function.ToAsync (Scheduler.ThreadPool);
+		}
 		
 		public static Func<T, IObservable<TResult>> ToAsync<T, TResult> (this Func<T, TResult> function, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return (t) => Start (() => function (t), scheduler);
+		}
 		
 		public static IObservable<IDictionary<TKey, TSource>> ToDictionary<TSource, TKey> (
 			this IObservable<TSource> source,

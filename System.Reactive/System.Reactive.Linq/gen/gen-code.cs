@@ -42,17 +42,18 @@ namespace System.Reactive.Linq
 
 		for (int i = 2; i <= 16; i++) {
 			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
+			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			Console.WriteLine (@"
 		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (Func<{0}, TResult> function)
 		{{
-			throw new NotImplementedException ();
+			return ({1}) => Start (() => function ({1}));
 		}}
 		
 		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (Func<{0}, TResult> function, IScheduler scheduler)
 		{{
-			throw new NotImplementedException ();
+			return ({1}) => Start (() => function ({1}), scheduler);
 		}}
-		", s);
+		", s, s2);
 		}
 
 		Console.WriteLine (@"
