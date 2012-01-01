@@ -239,16 +239,35 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Concat<TSource> (this IEnumerable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dis = new List<IDisposable> ();
+			StartConcat (sources.GetEnumerator (), sub, dis);
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+		}
+		
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, Subject<TSource> sub, List<IDisposable> dis)
+		{
+			if (!sources.MoveNext ())
+				return true;
+			dis.Add (sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); }));
+			return false;
+		}
 		
 		public static IObservable<TSource> Concat<TSource> (this IObservable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			return sources.ToEnumerable ().Concat ();
+		}
 		
 		public static IObservable<TSource> Concat<TSource> (params IObservable<TSource> [] sources)
-		{ throw new NotImplementedException (); }
+		{
+			return sources.AsEnumerable ().Concat ();
+		}
 		
 		public static IObservable<TSource> Concat<TSource> (this IObservable<TSource> first, IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			return new IObservable<TSource> [] {first, second}.Concat ();
+		}
 		
 		public static IObservable<bool> Contains<TSource> (
 			this IObservable<TSource> source,
