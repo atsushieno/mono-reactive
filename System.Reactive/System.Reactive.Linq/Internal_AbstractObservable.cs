@@ -112,6 +112,30 @@ namespace System.Reactive.Linq
 		}
 	}
 	
+	internal class ColdObservable2<T> : IObservable<T>
+	{
+		IObservable<T> inner;
+		Action start;
+		IScheduler scheduler;
+		bool started;
+
+		public ColdObservable2 (IObservable<T> inner, Action start, IScheduler scheduler)
+		{
+			this.inner = inner;
+			this.start = start;
+			this.scheduler = scheduler;
+		}
+		
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			if (!started) {
+				started = true;
+				scheduler.Schedule (start);
+			}
+			return inner.Subscribe (observer);
+		}
+	}
+	
 	internal class WrappedSubject<T> : ISubject<T>
 	{
 		ISubject<T> inner;

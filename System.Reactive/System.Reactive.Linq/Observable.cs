@@ -617,7 +617,8 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			return new ColdObservable<TResult> ((sub) => {
+			var sub = new Subject<TResult> ();
+			Action action = () => {
 				try {
 					for (var i = initialState; condition (i); i = iterate (i)) {
 						Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
@@ -627,7 +628,8 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				}, scheduler);
+				};
+			return new ColdObservable2<TResult> (sub, action, scheduler);
 		}
 		
 		public static IEnumerator<TSource> GetEnumerator<TSource> (this IObservable<TSource> source)
