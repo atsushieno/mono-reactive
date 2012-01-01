@@ -236,7 +236,21 @@ namespace System.Reactive.Linq
 			this IObservable<TFirst> first,
 			IObservable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TResult> ();
+			TFirst fv = default (TFirst);
+			TSecond sv = default (TSecond);
+			bool first_started = false, second_started = false, first_completed = false, second_completed = false;
+			var dis1 = first.Subscribe (
+				f => { fv = f; first_started = true; if (second_started) sub.OnNext (resultSelector (fv, sv)); },
+				ex => sub.OnError (ex),
+				() => { first_completed = true; if (second_completed) sub.OnCompleted (); });
+			var dis2 = second.Subscribe (
+				s => { sv = s; second_started = true; if (first_started) sub.OnNext (resultSelector (fv, sv)); },
+				ex => sub.OnError (ex),
+				() => { second_completed = true; if (first_completed) sub.OnCompleted (); });
+			return new WrappedSubject<TResult> (sub, new CompositeDisposable (dis1, dis2));
+		}
 		
 		public static IObservable<TSource> Concat<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
