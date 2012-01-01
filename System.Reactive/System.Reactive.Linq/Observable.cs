@@ -872,12 +872,16 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Merge<TSource> (
 			this IEnumerable<IObservable<TSource>> sources,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return sources.Merge (int.MaxValue, scheduler);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IObservable<IObservable<TSource>> sources,
 			int maxConcurrent)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge<TSource> (sources.ToEnumerable (), maxConcurrent, Scheduler.Immediate);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IObservable<TSource> first,
@@ -889,19 +893,47 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Merge<TSource> (
 			IScheduler scheduler,
 			params IObservable<TSource>[] sources)
-		{ throw new NotImplementedException (); }
+		{
+			return sources.Merge (scheduler);
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IEnumerable<IObservable<TSource>> sources,
 			int maxConcurrent,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+			var sub = new Subject<TSource> ();
+			// avoided using "from source in sources select ..." for eager evaluation.
+			var dis = new List<IDisposable> ();
+			var l = new List<IObservable<TSource>> (sources);
+			int index = 0;
+			foreach (var source in l) {
+				if (index >= maxConcurrent)
+					continue;
+				Func<IObservable<TSource>, IDisposable> subfunc = null;
+				subfunc = ss => ss.Subscribe (Observer.Create<TSource> (s => {
+					sub.OnNext (s);
+				}, ex => {
+					sub.OnError (ex);
+				}, () => {
+					sub.OnCompleted ();
+					if (index < l.Count)
+						dis.Add (subfunc (l [index++]));
+				}));
+				dis.Add (subfunc (source));
+			}
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
+		}
 		
 		public static IObservable<TSource> Merge<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Merge (scheduler, new IObservable<TSource> [] {first, second});
+		}
 		
 		public static IObservable<IList<TSource>> MinBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
 		{
@@ -1879,7 +1911,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TResult> When<TResult> (params Plan<TResult>[] plans)
 		{
-			return Amb (plans.Select (p => p.AsObservable ()));
+			return Merge (plans.Select (p => p.AsObservable ()));
 		}
 		
 		public static IObservable<TSource> Where<TSource> (
