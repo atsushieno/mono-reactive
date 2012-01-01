@@ -2105,12 +2105,16 @@ namespace System.Reactive.Linq
 			this IObservable<TFirst> first,
 			IEnumerable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return Zip (first, second.ToObservable (), resultSelector);
+		}
 		
 		public static IObservable<TResult> Zip<TFirst, TSecond, TResult>(
 			this IObservable<TFirst> first,
 			IObservable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return When (first.And (second).Then (resultSelector));
+		}
 	}
 }
