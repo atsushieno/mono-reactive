@@ -33,7 +33,8 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			if (subscribed.Count > 0) {
 				if (!done)
-					foreach (var s in subscribed)
+					// ToArray is to avoid InvalidOperationException when OnCompleted() unsubscribes item itself from the list.
+					foreach (var s in subscribed.ToArray ())
 						s.OnCompleted ();
 				done = true;
 			} else {
@@ -48,7 +49,8 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			if (subscribed.Count > 0) {
 				if (!done)
-					foreach (var s in subscribed)
+					// ToArray is to avoid InvalidOperationException when OnError() unsubscribes item itself from the list.
+					foreach (var s in subscribed.ToArray ())
 						s.OnError (error);
 				done = true;
 			} else {
@@ -63,7 +65,8 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			if (subscribed.Count > 0) {
 				if (!done)
-					foreach (var s in subscribed)
+					// ToArray is to avoid InvalidOperationException when OnNext() unsubscribes item itself from the list.
+					foreach (var s in subscribed.ToArray ())
 						s.OnNext (value);
 			} else {
 				var n = Notification.CreateOnNext<T> (value);
