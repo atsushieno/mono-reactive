@@ -1332,36 +1332,100 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, IEnumerable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			source.Subscribe ((v) => {
+				foreach (var r in selector (v))
+					sub.OnNext (r);
+				}, (ex) => sub.OnError (ex), () => sub.OnCompleted ());
+			return sub;
+		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			var dis = source.Subscribe (
+				(v) => { var o = selector (v); o.Subscribe (vv => sub.OnNext (vv)); },
+				(ex) => sub.OnError (ex),
+				() => sub.OnCompleted ());
+			return new WrappedSubject<TResult> (sub, dis);
+		}
 		
 		public static IObservable<TOther> SelectMany<TSource, TOther> (
 			this IObservable<TSource> source,
 			IObservable<TOther> other)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TOther> ();
+			int waits = 0;
+			var dis = source.Subscribe (
+				v => {
+					waits++;
+					IDisposable d = null;
+					d = other.Subscribe (
+						vv => sub.OnNext (vv),
+						ex => sub.OnError (ex),
+						() => { waits--; if (d != null) d.Dispose (); });
+				},
+				ex => sub.OnError (ex),
+				() => { if (waits == 0) sub.OnCompleted (); }
+				);
+			return new WrappedSubject<TOther> (sub, dis);
+		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, IObservable<TResult>> onNext,
 			Func<Exception, IObservable<TResult>> onError,
 			Func<IObservable<TResult>> onCompleted)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new ReplaySubject<TResult> ();
+			var dis = source.Subscribe (
+				(v) => { var o = onNext (v); o.Subscribe (vv => sub.OnNext (vv)); },
+				(ex) => { var o = onError (ex); o.Subscribe (vv => sub.OnNext (vv)); },
+				() => { var o = onCompleted (); o.Subscribe (vv => sub.OnNext (vv)); });
+			return new WrappedSubject<TResult> (sub, dis);
+		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TCollection, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, IEnumerable<TCollection>> collectionSelector,
 			Func<TSource, TCollection, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TResult> ();
+			var dis = source.Subscribe (Observer.Create<TSource> (
+				v => {
+					var c = collectionSelector (v);
+					foreach (var v2 in c)
+						sub.OnNext (resultSelector (v, v2));
+				},
+				ex => sub.OnError (ex),
+				() => sub.OnCompleted ()));
+			return new WrappedSubject<TResult> (sub, dis);
+		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TCollection, TResult> (
 			this IObservable<TSource> source,
 			Func<TSource, IObservable<TCollection>> collectionSelector,
 			Func<TSource, TCollection, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TResult> ();
+			int waits = 0;
+			var dis = source.Subscribe (Observer.Create<TSource> (
+				v => {
+					waits++;
+					var cc = collectionSelector (v);
+					IDisposable d = null;
+					d = cc.Subscribe (
+						c => sub.OnNext (resultSelector (v, c)),
+						ex => sub.OnError (ex),
+						() => { waits--; if (d != null) d.Dispose (); });
+				},
+				ex => sub.OnError (ex),
+				() => { if (waits == 0) sub.OnCompleted (); }));
+			return new WrappedSubject<TResult> (sub, dis);
+		}
 		
 		public static IObservable<bool> SequenceEqual<TSource> (
 			this IObservable<TSource> first,
