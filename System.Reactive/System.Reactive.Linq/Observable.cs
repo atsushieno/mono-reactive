@@ -818,7 +818,13 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<long> LongCount<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<long> ();
+			IDisposable dis = null;
+			long count = 0;
+			dis = source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); dis.Dispose (); });
+			return sub;
+		}
 		
 		public static IObservable<Notification<TSource>> Materialize<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
