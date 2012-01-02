@@ -147,95 +147,6 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> AsObservable<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
 		
-		public static IObservable<IList<TSource>> Buffer<TSource, TBufferClosing> (
-			this IObservable<TSource> source,
-			Func<IObservable<TBufferClosing>> bufferClosingSelector)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			int count)
-		{
-			return source.Buffer (TimeSpan.MaxValue, count);
-		}
-		
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan)
-		{
-			return Buffer<TSource> (source, timeSpan, Scheduler.ThreadPool);
-		}
-		
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			int count,
-			int skip)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IList<TSource>> Buffer<TSource, TBufferOpening, TBufferClosing> (
-			this IObservable<TSource> source,
-			IObservable<TBufferOpening> bufferOpenings,
-			Func<TBufferOpening, IObservable<TBufferClosing>> bufferClosingSelector)
-		{
-			var sub = new Subject<IList<TSource>> ();
-			var l = new List<TSource> ();
-			var dis = source.Subscribe (
-				s => l.Add (s), ex => sub.OnError (ex), () => {
-					if (l.Count > 0)
-						sub.OnNext (l);
-					sub.OnCompleted ();
-				}
-				);
-			var disc = new List<IDisposable> ();
-			var dis2 = bufferOpenings.Subscribe (Observer.Create<TBufferOpening> (
-				s => {
-					var closing = bufferClosingSelector (s);
-					disc.Add (closing.Subscribe (c => {
-						sub.OnNext (l);
-						l = new List<TSource> ();
-						}));
-				}, () => new CompositeDisposable (disc).Dispose ()));
-			return new WrappedSubject<IList<TSource>> (sub, new CompositeDisposable (dis, dis2));
-		}
-
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			int count)
-		{
-			return Buffer<TSource> (source, timeSpan, count, Scheduler.ThreadPool);
-		}
-
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			IScheduler scheduler)
-		{
-			return source.Buffer (timeSpan, int.MaxValue, scheduler);
-		}
-
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			TimeSpan timeShift)
-		{
-			return Buffer<TSource> (source, timeSpan, timeShift, Scheduler.ThreadPool);
-		}
-
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			int count,
-			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
-
-		public static IObservable<IList<TSource>> Buffer<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			TimeSpan timeShift,
-			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
-		
 		public static IObservable<TResult> Cast<TResult> (this IObservable<Object> source)
 		{ throw new NotImplementedException (); }
 
@@ -508,45 +419,6 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Finally<TSource> (this IObservable<TSource> source, Action finallyAction)
 		{ throw new NotImplementedException (); }
 		
-		public static TSource First<TSource> (this IObservable<TSource> source)
-		{
-			return First<TSource> (source, (s) => true);
-		}
-		
-		public static TSource First<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{
-			return InternalFirstOrDefault<TSource> (source, predicate, true);
-		}
-		
-		public static TSource FirstOrDefault<TSource> (this IObservable<TSource> source)
-		{
-			return FirstOrDefault (source, (s) => true);
-		}
-		
-		public static TSource FirstOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{
-			return InternalFirstOrDefault<TSource> (source, predicate, false);
-		}
-		
-		// The callers (First/FirstOrDefault) are blocking methods.
-		static TSource InternalFirstOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
-		{
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
-			TSource ret = default (TSource);
-			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
-				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
-				(s) => { if (!got && predicate (s)) { got = true; ret = s; dis.Dispose (); wait.Set (); } },
-				() => { if (!got) wait.Set (); }
-				);
-			wait.WaitOne ();
-			if (!got && throwError)
-				throw new InvalidOperationException ();
-			return ret;
-		}
-		
 		public static void ForEach<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
 		{ throw new NotImplementedException (); }
 		
@@ -811,46 +683,6 @@ namespace System.Reactive.Linq
 			Func<TRight, IObservable<TRightDuration>> rightDurationSelector,
 			Func<TLeft, TRight, TResult> resultSelector)
 		{ throw new NotImplementedException (); }
-		
-		public static TSource Last<TSource> (this IObservable<TSource> source)
-		{
-			return Last<TSource> (source, s => true);
-		}
-		
-		public static TSource Last<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{
-			return InternalLastOrDefault<TSource> (source, predicate, true);
-		}
-		
-		public static TSource LastOrDefault<TSource> (this IObservable<TSource> source)
-		{
-			return LastOrDefault<TSource> (source, s => true);
-		}
-		
-		public static TSource LastOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate)
-		{
-			return InternalLastOrDefault<TSource> (source, predicate, false);
-		}
-		
-		// The callers (Last/LastOrDefault) are blocking methods.
-		static TSource InternalLastOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
-		{
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
-			TSource ret = default (TSource);
-			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
-				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
-				(s) => { if (predicate (s)) { got = true; ret = s; } },
-				() => { wait.Set (); }
-				);
-			wait.WaitOne ();
-			dis.Dispose ();
-			if (!got && throwError)
-				throw new InvalidOperationException ();
-			return ret;
-		}
 		
 		public static IEnumerable<TSource> Latest<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
@@ -1481,53 +1313,6 @@ namespace System.Reactive.Linq
 			return Single<TSource> (source, s => true);
 		}
 		
-		public static TSource Single<TSource> (
-			this IObservable<TSource> source,
-			Func<TSource, bool> predicate)
-		{
-			return InternalSingleOrDefault<TSource> (source, predicate, true);
-		}
-		
-		public static TSource SingleOrDefault<TSource> (this IObservable<TSource> source)
-		{
-			return SingleOrDefault<TSource> (source, s => true);
-		}
-		
-		public static TSource SingleOrDefault<TSource> (
-			this IObservable<TSource> source,
-			Func<TSource, bool> predicate)
-		{
-			return InternalSingleOrDefault<TSource> (source, predicate, false);
-		}
-		
-		// The callers (Single/SingleOrDefault) are blocking methods.
-		static TSource InternalSingleOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
-		{
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
-			TSource ret = default (TSource);
-			bool got = false, error = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
-				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
-				(s) => { if (predicate (s)) {
-					if (got)
-						error = true;
-					got = true;
-					ret = s;
-					}
-				},
-				() => { wait.Set (); }
-				);
-			wait.WaitOne ();
-			dis.Dispose ();
-			if (error)
-				throw new InvalidOperationException ("Observed that there was more than one item in the target object");
-			if (!got && throwError)
-				throw new InvalidOperationException ();
-			return ret;
-		}
-
 		public static IObservable<TSource> Skip<TSource> (
 			this IObservable<TSource> source,
 			int count)
