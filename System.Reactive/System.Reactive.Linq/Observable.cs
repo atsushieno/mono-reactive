@@ -990,7 +990,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> OfType<TResult> (this IObservable<Object> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Where (v => v != null && typeof (TResult).IsAssignableFrom (v.GetType ())).Select (v => (TResult) v);
+		}
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{ throw new NotImplementedException (); }
