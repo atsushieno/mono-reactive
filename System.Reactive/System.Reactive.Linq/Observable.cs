@@ -1792,7 +1792,15 @@ namespace System.Reactive.Linq
 		public static IObservable<TimeInterval<TSource>> TimeInterval<TSource> (
 			this IObservable<TSource> source,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TimeInterval<TSource>> ();
+			DateTimeOffset last = scheduler.Now;
+			var dis = source.Subscribe (Observer.Create<TSource> (
+				v => { sub.OnNext (new TimeInterval<TSource> (v, Scheduler.Normalize (scheduler.Now - last))); last = scheduler.Now; },
+				ex => sub.OnError (ex),
+				() => sub.OnCompleted ()));
+			return new WrappedSubject<TimeInterval<TSource>> (sub, dis);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
