@@ -302,23 +302,53 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Distinct<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Distinct (EqualityComparer<TSource>.Default);
+		}
 		
 		public static IObservable<TSource> Distinct<TSource> (
 			this IObservable<TSource> source,
 			IEqualityComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return Distinct<TSource, TSource> (source, s => s, comparer);
+		}
 		
 		public static IObservable<TSource> Distinct<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Distinct (keySelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<TSource> Distinct<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
+			var sub = new Subject<TSource> ();
+			IDisposable dis = null;
+			var keys = new HashSet<TKey> (comparer);
+			dis = source.Subscribe (Observer.Create<TSource> (
+				(s) => {
+					var k = keySelector (s);
+					if (!keys.Contains (k)) {
+						keys.Add (k);
+						sub.OnNext (s);
+					}
+				},
+				(ex) => sub.OnError (ex),
+				() => {
+					sub.OnCompleted ();
+				}));
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource> (this IObservable<TSource> source)
 		{
