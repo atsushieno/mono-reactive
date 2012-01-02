@@ -1573,7 +1573,15 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Switch<TSource> (this IObservable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dl = new List<IDisposable> ();
+			var wait = new ManualResetEvent (true);
+			var dis = sources.Subscribe (s => {
+				dl.Add (s.Subscribe (v => { wait.WaitOne (); sub.OnNext (v); }, ex => sub.OnError (ex), () => { wait.Set (); }));
+				}, ex => sub.OnError (ex), () => { wait.Set (); sub.OnCompleted (); });
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dl) d.Dispose (); dis.Dispose (); }));
+		}
 		
 		public static IObservable<TSource> Synchronize<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
