@@ -155,7 +155,9 @@ namespace System.Reactive.Linq
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
 			int count)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Buffer (TimeSpan.MaxValue, count);
+		}
 		
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -174,7 +176,27 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IObservable<TBufferOpening> bufferOpenings,
 			Func<TBufferOpening, IObservable<TBufferClosing>> bufferClosingSelector)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<IList<TSource>> ();
+			var l = new List<TSource> ();
+			var dis = source.Subscribe (
+				s => l.Add (s), ex => sub.OnError (ex), () => {
+					if (l.Count > 0)
+						sub.OnNext (l);
+					sub.OnCompleted ();
+				}
+				);
+			var disc = new List<IDisposable> ();
+			var dis2 = bufferOpenings.Subscribe (Observer.Create<TBufferOpening> (
+				s => {
+					var closing = bufferClosingSelector (s);
+					disc.Add (closing.Subscribe (c => {
+						sub.OnNext (l);
+						l = new List<TSource> ();
+						}));
+				}, () => new CompositeDisposable (disc).Dispose ()));
+			return new WrappedSubject<IList<TSource>> (sub, new CompositeDisposable (dis, dis2));
+		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -188,7 +210,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan timeSpan,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Buffer (timeSpan, int.MaxValue, scheduler);
+		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (
 			this IObservable<TSource> source,
@@ -1788,7 +1812,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			DateTimeOffset dueTime,
 			IObservable<TSource> other)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Timeout (dueTime, other, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
@@ -1802,27 +1828,68 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			DateTimeOffset dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Timeout<TSource> (source, dueTime - scheduler.Now, scheduler);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
 			TimeSpan dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return TimeoutInternal<TSource> (source, dueTime, null, scheduler);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
 			DateTimeOffset dueTime,
 			IObservable<TSource> other,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Timeout<TSource> (source, dueTime - scheduler.Now, other, scheduler);
+		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
 			this IObservable<TSource> source,
 			TimeSpan dueTime,
 			IObservable<TSource> other,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (other == null)
+				throw new ArgumentNullException ("other");
+			return TimeoutInternal<TSource> (source, dueTime, other, scheduler);
+		}
+		
+		static IObservable<TSource> TimeoutInternal<TSource>(
+			this IObservable<TSource> source,
+			TimeSpan dueTime,
+			IObservable<TSource> other,
+			IScheduler scheduler)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("other");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			var sub = new Subject<TSource> ();
+			var wait = new ManualResetEvent (false);
+			var dis = source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => wait.Set ());
+			var sdis = scheduler.Schedule (() => {
+				if (wait.WaitOne (Scheduler.Normalize (dueTime)))
+					sub.OnCompleted ();
+				else {
+					if (other != null)
+						other.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => sub.OnCompleted ());
+					else
+						sub.OnError (new TimeoutException ());
+				}
+				wait.Dispose ();
+			});
+			return new WrappedSubject<TSource> (sub, new CompositeDisposable (dis, sdis));
+		}
 		
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime)
@@ -1839,12 +1906,28 @@ namespace System.Reactive.Linq
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Timer (dueTime - scheduler.Now, scheduler);
+		}
 		
 		public static IObservable<long> Timer (
 			TimeSpan dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return new ColdObservable<long> ((sub) => {
+				try {
+					Thread.Sleep (Scheduler.Normalize (dueTime));
+					sub.OnNext (0);
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+				}
+				}, scheduler);
+		}
 		
 		public static IObservable<long> Timer (
 			DateTimeOffset dueTime,
@@ -1864,13 +1947,27 @@ namespace System.Reactive.Linq
 			DateTimeOffset dueTime,
 			TimeSpan period,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Timer (dueTime - Scheduler.Now, period, scheduler);
+		}
 		
 		public static IObservable<long> Timer (
 			TimeSpan dueTime,
 			TimeSpan period,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<long> ();
+			var t = Timer (dueTime, scheduler);
+			IDisposable di = null;
+			var dt = t.Subscribe (Observer.Create<long> ((v) => {}, () => {
+				sub.OnNext (0);
+				var i = Interval (period, scheduler);
+				di = i.Subscribe ((v) => sub.OnNext (v + 1));
+			}));
+			return new WrappedSubject<long> (sub, Disposable.Create (() => { dt.Dispose (); if (di != null) di.Dispose (); }));
+		}
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source)
 		{
@@ -1878,7 +1975,13 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source, IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			var sub = new Subject<Timestamped<TSource>> ();
+			var dis = source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<Timestamped<TSource>> (sub, dis);
+		}
 		
 		public static IObservable<TSource[]> ToArray<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
