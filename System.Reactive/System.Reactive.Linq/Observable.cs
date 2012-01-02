@@ -1915,7 +1915,15 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<IList<TSource>> ToList<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<IList<TSource>> ();
+			var l = new List<TSource> ();
+			var dis = source.Subscribe (Observer.Create<TSource> (
+				v => l.Add (v),
+				ex => sub.OnError (ex),
+				() => { sub.OnNext (l); sub.OnCompleted (); }));
+			return new WrappedSubject<IList<TSource>> (sub, dis);
+		}
 		
 		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
 			this IObservable<TSource> source,
