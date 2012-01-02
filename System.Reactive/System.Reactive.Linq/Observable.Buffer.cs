@@ -19,7 +19,7 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<IObservable<TBufferClosing>> bufferClosingSelector)
 		{
-			return Buffer<TSource, long, TBufferClosing> (source, Timer (TimeSpan.Zero), l => bufferClosingSelector ());
+			return Buffer<TSource, int, TBufferClosing> (source, Range (0, int.MaxValue), l => bufferClosingSelector ());
 		}
 		
 		public static IObservable<IList<TSource>> Buffer<TSource> (
@@ -107,7 +107,7 @@ namespace System.Reactive.Linq
 				v => { l.Add (v); counter.OnNext (Unit.Default); },
 				ex => sub.OnError (ex),
 				() => { if (l.Count > 0) sub.OnNext (l); sub.OnCompleted (); }));
-			var buffer = new BufferObservable (timeSpan, counter, count, scheduler);
+			var buffer = new TimeOrCountObservable (timeSpan, counter, count, scheduler);
 			var bdis = buffer.Subscribe (Observer.Create<Unit> (
 				u => {
 					var n = l;
@@ -125,62 +125,5 @@ namespace System.Reactive.Linq
 			TimeSpan timeShift,
 			IScheduler scheduler)
 		{ throw new NotImplementedException (); }
-
-		class BufferObservable : IObservable<Unit>
-		{
-			ISubject<Unit> subject = new Subject<Unit> ();
-			TimeSpan interval;
-			IScheduler scheduler;
-			bool started, stop;
-			AutoResetEvent wait;
-			IDisposable schedule_disposable;
-			IObservable<Unit> counter;
-			int threshold_count;
-			int current_count;
-			
-			public BufferObservable (TimeSpan interval, IObservable<Unit> counter, int count, IScheduler scheduler)
-			{
-				this.interval = interval;
-				this.counter = counter;
-				this.threshold_count = count;
-				this.scheduler = scheduler;
-			}
-			
-			public IDisposable Subscribe (IObserver<Unit> observer)
-			{
-				var dis = subject.Subscribe (observer);
-
-				if (started)
-					return dis;
-				started = true;
-				schedule_disposable = scheduler.Schedule (() => {
-					wait = new AutoResetEvent (false);
-					counter.Subscribe (Observer.Create<Unit> (u => { if (++current_count == threshold_count) wait.Set (); }, ex => subject.OnError (ex)));
-					Tick ();
-				});
-				return Disposable.Create (() => {
-					stop = true;
-					if (wait != null)
-						wait.Set ();
-					dis.Dispose ();
-					schedule_disposable.Dispose ();
-				});
-			}
-			
-			void SubmitNext ()
-			{
-				subject.OnNext (Unit.Default);
-				current_count = 0;
-			}
-			
-			void Tick ()
-			{
-				wait.WaitOne (interval);
-				if (stop)
-					return;
-				SubmitNext ();
-				Tick (); // repeat
-			}
-		}
 	}
 }

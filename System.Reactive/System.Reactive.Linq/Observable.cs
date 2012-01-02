@@ -2059,65 +2059,6 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			int count)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			int count,
-			int skip)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			int count)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			TimeSpan timeShift)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			int count,
-			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource> (
-			this IObservable<TSource> source,
-			TimeSpan timeSpan,
-			TimeSpan timeShift,
-			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
-
-		public static IObservable<IObservable<TSource>> Window<TSource, TWindowClosing> (
-			this IObservable<TSource> source,
-			Func<IObservable<TWindowClosing>> windowClosingSelector)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<IObservable<TSource>> Window<TSource, TWindowOpening, TWindowClosing> (
-			this IObservable<TSource> source,
-			IObservable<TWindowOpening> windowOpenings,
-			Func<TWindowOpening, IObservable<TWindowClosing>> windowClosingSelector)
-		{ throw new NotImplementedException (); }
-		
 		public static IObservable<TResult> Zip<TFirst, TSecond, TResult> (
 			this IObservable<TFirst> first,
 			IEnumerable<TSecond> second,

@@ -116,11 +116,13 @@
     <Compile Include="System.Reactive.Linq\Internal_GroupedSubject.cs" />
     <Compile Include="System.Reactive.Linq\Internal_NeverObservable.cs" />
     <Compile Include="System.Reactive.Linq\Internal_SimpleDisposableObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_TimeOrCountObservable.cs" />
     <Compile Include="System.Reactive.Linq\Observable.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Blocking.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Buffer.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Events.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Window.cs" />
     <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />
     <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
     <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
