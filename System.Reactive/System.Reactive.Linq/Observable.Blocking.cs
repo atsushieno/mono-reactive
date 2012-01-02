@@ -54,6 +54,17 @@ namespace System.Reactive.Linq
 			return ret;
 		}
 		
+		public static void ForEach<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
+		{
+			var wait = new ManualResetEvent (false);
+			Exception error = null;
+			var dis = source.Subscribe (v => onNext (v), ex => { error = ex; wait.Set (); }, () => wait.Set ());
+			wait.WaitOne ();
+			dis.Dispose ();
+			if (error != null)
+				throw error;
+		}
+		
 		public static TSource Last<TSource> (this IObservable<TSource> source)
 		{
 			return Last<TSource> (source, s => true);

@@ -494,17 +494,6 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Finally<TSource> (this IObservable<TSource> source, Action finallyAction)
 		{ throw new NotImplementedException (); }
 		
-		public static void ForEach<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
-		{
-			var wait = new ManualResetEvent (false);
-			Exception error = null;
-			var dis = source.Subscribe (v => onNext (v), ex => { error = ex; wait.Set (); }, () => wait.Set ());
-			wait.WaitOne ();
-			dis.Dispose ();
-			if (error != null)
-				throw error;
-		}
-		
 		public static Func<IObservable<Unit>> FromAsyncPattern(
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Action<IAsyncResult> end)
