@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -586,7 +587,9 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IEnumerator<TSource> GetEnumerator<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.ToEnumerable ().GetEnumerator ();
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupBy<TSource, TKey> (
 			this IObservable<TSource> source,
@@ -1887,7 +1890,15 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var l = new BlockingCollection<TSource> ();
+			source.Subscribe (Observer.Create<TSource> (
+				v => { l.Add (v); },
+				() => { l.CompleteAdding (); }
+				));
+			foreach (var s in l)
+				yield return s;
+		}
 		
 		public static IObservable<IList<TSource>> ToList<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
