@@ -150,7 +150,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> Cast<TResult> (this IObservable<Object> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Select (v => (TResult) v);
+		}
 
 		public static IObservable<TSource> Catch<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{ throw new NotImplementedException (); }
@@ -1378,16 +1380,43 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<TResult> (sub, dis);
 		}
 		
+		class CountingObservable<TSource> : IObservable<TSource>
+		{
+			IObservable<TSource> source;
+			
+			public CountingObservable (IObservable<TSource> source)
+			{
+				this.source = source;
+				source.Subscribe (v => Count++);
+			}
+			
+			public int Count { get; private set; }
+			
+			public IDisposable Subscribe (IObserver<TSource> observer)
+			{
+				return source.Subscribe (observer);
+			}
+		}
+		
 		public static IObservable<bool> SequenceEqual<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			return first.SequenceEqual (second, EqualityComparer<TSource>.Default);
+		}
 		
 		public static IObservable<bool> SequenceEqual<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second,
 			IEqualityComparer<TSource> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			var fo = new CountingObservable<TSource> (first);
+			var so = new CountingObservable<TSource> (second);
+			var cmp = When (fo.And (so).Then ((f, s) => comparer.Equals (f, s))).All (v => true);
+			var sub = new Subject<bool> ();
+			var dis = cmp.Subscribe (v => sub.OnNext (v && fo.Count == so.Count), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<bool> (sub, dis);
+		}
 		
 		public static TSource Single<TSource> (this IObservable<TSource> source)
 		{
