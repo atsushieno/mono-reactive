@@ -271,19 +271,32 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Delay<TSource> (this IObservable<TSource> source, TimeSpan dueTime)
-		{ throw new NotImplementedException (); }
+		{
+			return Delay<TSource> (source, dueTime, Scheduler.ThreadPool);
+		}
 		
 		public static IObservable<TSource> Delay<TSource> (
 			this IObservable<TSource> source,
 			DateTimeOffset dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Delay<TSource> (source, dueTime - scheduler.Now, scheduler);
+		}
 		
 		public static IObservable<TSource> Delay<TSource> (
 			this IObservable<TSource> source,
 			TimeSpan dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return new ColdObservable<TSource> ((sub) => {
+				Thread.Sleep (Scheduler.Normalize (dueTime)); 
+				source.Subscribe (sub);
+				}, scheduler);
+		}
 		
 		public static IObservable<TSource> Dematerialize<TSource> (this IObservable<Notification<TSource>> source)
 		{ throw new NotImplementedException (); }
