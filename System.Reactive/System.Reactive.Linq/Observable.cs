@@ -70,7 +70,8 @@ namespace System.Reactive.Linq
 			// avoided using "from source in sources select ..." for eager evaluation.
 			var dis = new List<IDisposable> ();
 			foreach (var source in sources) {
-				dis.Add (source.Subscribe (Observer.Create<TSource> (s => {
+				dis.Add (source.Subscribe (
+				s => {
 					if (first == null)
 						first = source;
 					if (first == source)
@@ -85,7 +86,7 @@ namespace System.Reactive.Linq
 						first = source;
 					if (first == source)
 						sub.OnCompleted ();
-				})));
+				}));
 			}
 			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
 		}
@@ -343,7 +344,7 @@ namespace System.Reactive.Linq
 			var sub = new Subject<TSource> ();
 			IDisposable dis = null;
 			var keys = new HashSet<TKey> (comparer);
-			dis = source.Subscribe (Observer.Create<TSource> (
+			dis = source.Subscribe (
 				(s) => {
 					var k = keySelector (s);
 					if (!keys.Contains (k)) {
@@ -354,7 +355,7 @@ namespace System.Reactive.Linq
 				(ex) => sub.OnError (ex),
 				() => {
 					sub.OnCompleted ();
-				}));
+				});
 			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
@@ -393,7 +394,7 @@ namespace System.Reactive.Linq
 			IDisposable dis = null;
 			bool hit = false;
 			TKey prev = default (TKey);
-			dis = source.Subscribe (Observer.Create<TSource> ((s) => {
+			dis = source.Subscribe (s => {
 				try {
 					var k = keySelector (s);
 					if (!hit) {
@@ -413,7 +414,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				}));
+				});
 			return new WrappedSubject<TSource> (sub, dis);
 		}
 
@@ -715,7 +716,11 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> IgnoreElements<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (v => {}, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<long> Interval (TimeSpan period)
 		{
@@ -884,7 +889,7 @@ namespace System.Reactive.Linq
 				if (index >= maxConcurrent)
 					continue;
 				Func<IObservable<TSource>, IDisposable> subfunc = null;
-				subfunc = ss => ss.Subscribe (Observer.Create<TSource> (s => {
+				subfunc = ss => ss.Subscribe (s => {
 					sub.OnNext (s);
 				}, ex => {
 					sub.OnError (ex);
@@ -892,7 +897,7 @@ namespace System.Reactive.Linq
 					sub.OnCompleted ();
 					if (index < l.Count)
 						dis.Add (subfunc (l [index++]));
-				}));
+				});
 				dis.Add (subfunc (source));
 			}
 			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
@@ -1338,14 +1343,14 @@ namespace System.Reactive.Linq
 			Func<TSource, TCollection, TResult> resultSelector)
 		{
 			var sub = new Subject<TResult> ();
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = source.Subscribe (
 				v => {
 					var c = collectionSelector (v);
 					foreach (var v2 in c)
 						sub.OnNext (resultSelector (v, v2));
 				},
 				ex => sub.OnError (ex),
-				() => sub.OnCompleted ()));
+				() => sub.OnCompleted ());
 			return new WrappedSubject<TResult> (sub, dis);
 		}
 		
@@ -1356,7 +1361,7 @@ namespace System.Reactive.Linq
 		{
 			var sub = new Subject<TResult> ();
 			int waits = 0;
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = source.Subscribe (
 				v => {
 					waits++;
 					var cc = collectionSelector (v);
@@ -1367,7 +1372,7 @@ namespace System.Reactive.Linq
 						() => { waits--; if (d != null) d.Dispose (); });
 				},
 				ex => sub.OnError (ex),
-				() => { if (waits == 0) sub.OnCompleted (); }));
+				() => { if (waits == 0) sub.OnCompleted (); });
 			return new WrappedSubject<TResult> (sub, dis);
 		}
 		
@@ -1513,7 +1518,7 @@ namespace System.Reactive.Linq
 			var o = source.ToObservable ();
 			var sub = new ReplaySubject<TSource> (scheduler);
 			sub.Subscribe (observer);
-			var dis = o.Subscribe (Observer.Create<TSource> (s => sub.OnNext (s), ex => sub.OnError (ex), () => sub.OnCompleted ()));
+			var dis = o.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			return Disposable.Create (() => { dis.Dispose (); sub.Dispose (); });
 		}
 
@@ -1654,10 +1659,10 @@ namespace System.Reactive.Linq
 		{
 			var sub = new Subject<TimeInterval<TSource>> ();
 			DateTimeOffset last = scheduler.Now;
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = source.Subscribe (
 				v => { sub.OnNext (new TimeInterval<TSource> (v, Scheduler.Normalize (scheduler.Now - last))); last = scheduler.Now; },
 				ex => sub.OnError (ex),
-				() => sub.OnCompleted ()));
+				() => sub.OnCompleted ());
 			return new WrappedSubject<TimeInterval<TSource>> (sub, dis);
 		}
 		
@@ -1828,11 +1833,11 @@ namespace System.Reactive.Linq
 			var sub = new Subject<long> ();
 			var t = Timer (dueTime, scheduler);
 			IDisposable di = null;
-			var dt = t.Subscribe (Observer.Create<long> ((v) => {}, () => {
+			var dt = t.Subscribe (v => {}, ex => sub.OnError (ex), () => {
 				sub.OnNext (0);
 				var i = Interval (period, scheduler);
 				di = i.Subscribe ((v) => sub.OnNext (v + 1));
-			}));
+			});
 			return new WrappedSubject<long> (sub, Disposable.Create (() => { dt.Dispose (); if (di != null) di.Dispose (); }));
 		}
 		
@@ -1924,20 +1929,20 @@ namespace System.Reactive.Linq
 		{
 			var sub = new Subject<IDictionary<TKey, TElement>> ();
 			var dic = new Dictionary<TKey, TElement> (comparer);
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = source.Subscribe (
 				v => dic.Add (keySelector (v), elementSelector (v)),
 				ex => sub.OnError (ex),
-				() => { sub.OnNext (dic); sub.OnCompleted (); }));
+				() => { sub.OnNext (dic); sub.OnCompleted (); });
 			return new WrappedSubject<IDictionary<TKey, TElement>> (sub, dis);
 		}
 		
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
 		{
 			var l = new BlockingCollection<TSource> ();
-			source.Subscribe (Observer.Create<TSource> (
+			source.Subscribe (
 				v => { l.Add (v); },
 				() => { l.CompleteAdding (); }
-				));
+				);
 			foreach (var s in l)
 				yield return s;
 		}
@@ -1946,10 +1951,10 @@ namespace System.Reactive.Linq
 		{
 			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = source.Subscribe (
 				v => l.Add (v),
 				ex => sub.OnError (ex),
-				() => { sub.OnNext (l); sub.OnCompleted (); }));
+				() => { sub.OnNext (l); sub.OnCompleted (); });
 			return new WrappedSubject<IList<TSource>> (sub, dis);
 		}
 		
