@@ -440,10 +440,34 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> ElementAt<TSource> (this IObservable<TSource> source, int index)
-		{ throw new NotImplementedException (); }
+		{
+			return ElementAtOrDefault<TSource> (source, index, true);
+		}
 		
 		public static IObservable<TSource> ElementAtOrDefault<TSource> (this IObservable<TSource> source, int index)
-		{ throw new NotImplementedException (); }
+		{
+			return ElementAtOrDefault<TSource> (source, index, false);
+		}
+		
+		static IObservable<TSource> ElementAtOrDefault<TSource> (this IObservable<TSource> source, int index, bool throwError)
+		{
+			var sub = new Subject<TSource> ();
+			long i = 0;
+			var dis = source.Subscribe (
+				v => { if (i++ == index) sub.OnNext (v); sub.OnCompleted (); },
+				ex => sub.OnError (ex),
+				() => {
+					if (i < index) {
+						if (throwError)
+							sub.OnError (new IndexOutOfRangeException ());
+						else {
+							sub.OnNext (default (TSource));
+							sub.OnCompleted ();
+						}
+					}
+				});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Empty<TResult> ()
