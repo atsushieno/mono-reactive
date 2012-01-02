@@ -258,10 +258,17 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> DefaultIfEmpty<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.DefaultIfEmpty (default (TSource));
+		}
 		
 		public static IObservable<TSource> DefaultIfEmpty<TSource> (this IObservable<TSource> source, TSource defaultValue)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			bool hadValue = false;
+			var dis = source.Subscribe (v => { hadValue = true; sub.OnNext (v); }, ex => sub.OnError (ex), () => { if (!hadValue) sub.OnNext (defaultValue); sub.OnCompleted (); });
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TValue> Defer<TValue> (Func<IObservable<TValue>> observableFactory)
 		{ throw new NotImplementedException (); }
