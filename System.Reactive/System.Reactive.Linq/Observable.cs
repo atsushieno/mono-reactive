@@ -1868,26 +1868,40 @@ namespace System.Reactive.Linq
 		public static IObservable<IDictionary<TKey, TSource>> ToDictionary<TSource, TKey> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.ToDictionary (keySelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IDictionary<TKey, TSource>> ToDictionary<TSource, TKey>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return ToDictionary<TSource, TKey, TSource> (source, keySelector, s => s, comparer);
+		}
 		
 		public static IObservable<IDictionary<TKey, TElement>> ToDictionary<TSource, TKey, TElement>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.ToDictionary (keySelector, elementSelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IDictionary<TKey, TElement>> ToDictionary<TSource, TKey, TElement>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<IDictionary<TKey, TElement>> ();
+			var dic = new Dictionary<TKey, TElement> (comparer);
+			var dis = source.Subscribe (Observer.Create<TSource> (
+				v => dic.Add (keySelector (v), elementSelector (v)),
+				ex => sub.OnError (ex),
+				() => { sub.OnNext (dic); sub.OnCompleted (); }));
+			return new WrappedSubject<IDictionary<TKey, TElement>> (sub, dis);
+		}
 		
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
 		{
