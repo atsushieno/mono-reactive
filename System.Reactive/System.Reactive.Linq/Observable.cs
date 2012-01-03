@@ -304,7 +304,7 @@ namespace System.Reactive.Linq
 		{
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
-			return new ColdObservable<TSource> ((sub) => {
+			return new ColdObservableEach<TSource> ((sub) => {
 				Thread.Sleep (Scheduler.Normalize (dueTime)); 
 				source.Subscribe (sub);
 				}, scheduler);
@@ -603,8 +603,15 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			var sub = new Subject<TResult> ();
-			Action action = () => {
+			/* FIXME: this example snippet fails to process the 2nd. subscription.
+
+				var observable = Observable.Generate (1, x => x < 6, x => x + 1, x => x,  x=>TimeSpan.FromSeconds(1)).Timestamp();
+				observable.Subscribe(x => Console.WriteLine("{0}, {1}", x.Value, x.Timestamp));
+				Thread.Sleep (3000);
+				observable.Subscribe(x => Console.WriteLine("{0}, {1}", x.Value, x.Timestamp));
+
+			*/
+			return new ColdObservableEach<TResult> (sub => {
 				try {
 					for (var i = initialState; condition (i); i = iterate (i)) {
 						Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
@@ -614,8 +621,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				};
-			return new ColdObservable2<TResult> (sub, action, scheduler);
+				}, scheduler);
 		}
 		
 		public static IEnumerator<TSource> GetEnumerator<TSource> (this IObservable<TSource> source)
@@ -745,7 +751,7 @@ namespace System.Reactive.Linq
 			TimeSpan period,
 			IScheduler scheduler)
 		{
-			return new ColdObservable<long> ((sub) => {
+			return new ColdObservableEach<long> ((sub) => {
 				try {
 					long count = 0;
 					while (true) {
@@ -999,7 +1005,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
-			return new ColdObservable<TSource> (
+			return new ColdObservableEach<TSource> (
 				sub => {
 					var l = new List<IDisposable> ();
 					var e = sources.GetEnumerator ();
@@ -1880,7 +1886,7 @@ namespace System.Reactive.Linq
 		{
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
-			return new ColdObservable<long> ((sub) => {
+			return new ColdObservableEach<long> ((sub) => {
 				try {
 					Thread.Sleep (Scheduler.Normalize (dueTime));
 					sub.OnNext (0);
@@ -2087,7 +2093,7 @@ namespace System.Reactive.Linq
 			this IEnumerable<TSource> source,
 			IScheduler scheduler)
 		{
-			return new ColdObservable<TSource> ((sub) => {
+			return new ColdObservableEach<TSource> ((sub) => {
 				try {
 					foreach (var s in source)
 						sub.OnNext (s);

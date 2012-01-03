@@ -86,12 +86,12 @@ namespace System.Reactive.Linq
 	}
 	*/
 	
-	internal class ColdObservable<T> : IObservable<T>
+	internal class ColdObservableEach<T> : IObservable<T>
 	{
 		IScheduler scheduler;
 		Action<ISubject<T>> work;
 		
-		public ColdObservable (Action<ISubject<T>> work, IScheduler scheduler)
+		public ColdObservableEach (Action<ISubject<T>> work, IScheduler scheduler)
 		{
 			this.work = work;
 			this.scheduler = scheduler;
@@ -112,14 +112,15 @@ namespace System.Reactive.Linq
 		}
 	}
 	
-	internal class ColdObservable2<T> : IObservable<T>
+	/*
+	internal class ColdObservableOnce<T> : IObservable<T>
 	{
 		IObservable<T> inner;
 		Action start;
 		IScheduler scheduler;
 		bool started;
 
-		public ColdObservable2 (IObservable<T> inner, Action start, IScheduler scheduler)
+		public ColdObservableOnce (IObservable<T> inner, Action start, IScheduler scheduler)
 		{
 			this.inner = inner;
 			this.start = start;
@@ -135,6 +136,7 @@ namespace System.Reactive.Linq
 			return inner.Subscribe (observer);
 		}
 	}
+	*/
 	
 	internal class WrappedSubject<T> : ISubject<T>
 	{
