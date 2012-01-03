@@ -158,18 +158,26 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Catch<TSource> (params IObservable<TSource> [] sources)
-		{ throw new NotImplementedException (); }
+		{
+			return Catch<TSource> ((IEnumerable<IObservable<TSource>>) sources);
+		}
 		
 		public static IObservable<TSource> Catch<TSource, TException> (
 			this IObservable<TSource> source,
 			Func<TException, IObservable<TSource>> handler)
 			where TException : Exception
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (v => sub.OnNext (v), ex => { var eex = ex as TException; if (eex != null) foreach (var vv in handler (eex).ToEnumerable ()) sub.OnNext (vv); else sub.OnError (ex); }, () => sub.OnCompleted ());
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> Catch<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			return Catch (new IObservable<TSource> [] {first, second});
+		}
 		
 		public static IObservable<TResult> CombineLatest<TFirst, TSecond, TResult> (
 			this IObservable<TFirst> first,
