@@ -99,7 +99,7 @@ namespace System.Reactive.Linq
 
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			var sub = new Subject<T> ();
+			var sub = new ReplaySubject<T> ();
 			sub.Subscribe (observer);
 			scheduler.Schedule (() => work (sub));
 			return Disposable.Create (() => {

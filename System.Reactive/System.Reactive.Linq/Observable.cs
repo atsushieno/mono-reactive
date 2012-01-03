@@ -2153,7 +2153,17 @@ namespace System.Reactive.Linq
 			Func<TResource> resourceFactory,
 			Func<TResource, IObservable<TSource>> observableFactory)
 			where TResource : IDisposable
-		{ throw new NotImplementedException (); }
+		{
+			TResource rdis = default (TResource);
+			var subdis = new List<IDisposable> ();
+			var src = new ColdObservableEach<TSource> (sub => {
+				rdis = resourceFactory ();
+				var source = observableFactory (rdis);
+				subdis.Add (source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ()));
+				}, Scheduler.Immediate); // maybe not harmful scheduler
+			Action release = () => { if (rdis != null) rdis.Dispose (); foreach (var d in subdis) d.Dispose (); };
+			return src.Do (v => {}, ex => release (), () => release ());
+		}
 		
 		public static IObservable<TResult> When<TResult> (this IEnumerable<Plan<TResult>> plans)
 		{
