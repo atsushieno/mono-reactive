@@ -998,15 +998,37 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (this IEnumerable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			return new ColdObservable<TSource> (
+				sub => {
+					var l = new List<IDisposable> ();
+					var e = sources.GetEnumerator ();
+					OnErrorResumeNext<TSource> (null, sub, e, l);
+				},
+				Scheduler.Immediate);
+		}
+		
+		static void OnErrorResumeNext<TSource> (Exception error, ISubject<TSource> sub, IEnumerator<IObservable<TSource>> e, List<IDisposable> dis)
+		{
+			if (e.MoveNext ())
+				e.Current.Subscribe (v => sub.OnNext (v), ex => OnErrorResumeNext (ex, sub, e, dis), () => sub.OnCompleted ());
+			else if (error != null)
+				sub.OnError (error);
+			else // there was no Observable sequence
+				sub.OnCompleted ();
+		}
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (params IObservable<TSource>[] sources)
-		{ throw new NotImplementedException (); }
+		{
+			return OnErrorResumeNext ((IEnumerable<IObservable<TSource>>) sources);
+		}
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (
 			this IObservable<TSource> first,
 			IObservable<TSource> second)
-		{ throw new NotImplementedException (); }
+		{
+			return OnErrorResumeNext (new IObservable<TSource> [] {first, second});
+		}
 		
 		public static IConnectableObservable<TSource> Publish<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }
@@ -1206,6 +1228,17 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int retryCount)
 		{
+			/* To my understanding, this should be Replay. The example below won't print numbers at all if it is just a Subject<T>.
+			
+				var source = new ReplaySubject<int>();
+				source.OnNext(5);
+				source.OnNext(2);
+				source.OnError(new NotSupportedException());
+				int retryCount = 2;
+				
+				sub.Subscribe(Console.WriteLine, ex => Console.WriteLine("retry exceeded"), () => Console.WriteLine ("done"));
+			
+			*/
 			var sub = new ReplaySubject<TSource> ();
 			Action<Exception> onError;
 			var dis = new List<IDisposable> ();
