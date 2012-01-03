@@ -534,7 +534,9 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Finally<TSource> (this IObservable<TSource> source, Action finallyAction)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Do (v => {}, ex => finallyAction (), () => finallyAction ());
+		}
 		
 		public static Func<IObservable<Unit>> FromAsyncPattern(
 			Func<AsyncCallback, Object, IAsyncResult> begin,
