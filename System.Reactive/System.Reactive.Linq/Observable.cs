@@ -1030,8 +1030,28 @@ namespace System.Reactive.Linq
 			return new NeverObservable<TResult> ();
 		}
 		
+		// blocking and without buffering.
 		public static IEnumerable<TSource> Next<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var wait = new AutoResetEvent (false);
+			bool ongoing = true;
+			TSource current = default (TSource);
+			Exception error = null;
+			source.Subscribe (
+				v => { current = v; wait.Set (); },
+				ex => { error = ex; ongoing = false; wait.Set (); },
+				() => { ongoing = false; wait.Set (); }
+				);
+			while (true) {
+				wait.WaitOne ();
+				if (error != null)
+					throw error;
+				if (ongoing)
+					yield return current;
+				else
+					break;
+			}
+		}
 		
 		public static IObservable<TSource> ObserveOn<TSource> (
 			this IObservable<TSource> source,
