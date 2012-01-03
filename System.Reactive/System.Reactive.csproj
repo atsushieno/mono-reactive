@@ -121,6 +121,7 @@
     <Compile Include="System.Reactive.Linq\Observable.Blocking.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Buffer.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Events.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Latest.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Window.cs" />
     <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />

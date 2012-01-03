@@ -812,9 +812,6 @@ namespace System.Reactive.Linq
 			Func<TLeft, TRight, TResult> resultSelector)
 		{ throw new NotImplementedException (); }
 		
-		public static IEnumerable<TSource> Latest<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
-		
 		public static IObservable<long> LongCount<TSource> (this IObservable<TSource> source)
 		{
 			var sub = new Subject<long> ();
