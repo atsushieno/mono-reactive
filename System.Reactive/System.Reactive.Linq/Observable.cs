@@ -1206,12 +1206,12 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int retryCount)
 		{
-			var sub = new Subject<TSource> ();
+			var sub = new ReplaySubject<TSource> ();
 			Action<Exception> onError;
 			var dis = new List<IDisposable> ();
 			onError = (error) => {
 				if (retryCount-- <= 0)
-					throw error;
+					sub.OnError (error);
 				else
 					dis.Add (source.Subscribe (v => sub.OnNext (v), ex => onError (ex), () => {}));
 				};
