@@ -319,7 +319,24 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Dematerialize<TSource> (this IObservable<Notification<TSource>> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (
+				n => {
+					switch (n.Kind) {
+					case NotificationKind.OnNext:
+						sub.OnNext (n.Value);
+						break;
+					case NotificationKind.OnError:
+						sub.OnError (n.Exception);
+						break;
+					case NotificationKind.OnCompleted:
+						sub.OnCompleted ();
+						break;
+					}
+				});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> Distinct<TSource> (this IObservable<TSource> source)
 		{
@@ -432,31 +449,44 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
 			Action<TSource> onNext)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Do (Observer.Create<TSource> (onNext));
+		}
 
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
 			IObserver<TSource> observer)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			sub.Subscribe (observer);
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
 			Action<TSource> onNext,
 			Action<Exception> onError)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Do (Observer.Create<TSource> (onNext, onError));
+		}
 
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
 			Action<TSource> onNext,
 			Action onCompleted)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Do (Observer.Create<TSource> (onNext, onCompleted));
+		}
 
 		public static IObservable<TSource> Do<TSource> (
 			this IObservable<TSource> source,
 			Action<TSource> onNext,
 			Action<Exception> onError,
 			Action onCompleted)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Do (Observer.Create<TSource> (onNext, onError, onCompleted));
+		}
 		
 		public static IObservable<TSource> ElementAt<TSource> (this IObservable<TSource> source, int index)
 		{
@@ -793,7 +823,14 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<Notification<TSource>> Materialize<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<Notification<TSource>> ();
+			var dis = source.Subscribe (
+				v => sub.OnNext (Notification.CreateOnNext<TSource> (v)),
+				ex => sub.OnNext (Notification.CreateOnError<TSource> (ex)),
+				() => { sub.OnNext (Notification.CreateOnCompleted<TSource> ()); sub.OnCompleted (); });
+			return new WrappedSubject<Notification<TSource>> (sub, dis);
+		}
 		
 		public static IObservable<IList<TSource>> MaxBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
 		{
