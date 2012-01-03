@@ -209,6 +209,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Concat<TSource> (this IObservable<IObservable<TSource>> sources)
 		{
+			// FIXME: don't use ToEnumerable.
 			return sources.ToEnumerable ().Concat ();
 		}
 		
@@ -1067,7 +1068,7 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value, IScheduler scheduler)
 		{
-			return Repeat (value, 1, scheduler);
+			return Repeat (value, int.MaxValue, scheduler);
 		}
 		
 		public static IObservable<TResult> Repeat<TResult> (
@@ -1197,12 +1198,29 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 
 		public static IObservable<TSource> Retry<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Retry (int.MaxValue);
+		}
 		
 		public static IObservable<TSource> Retry<TSource> (
 			this IObservable<TSource> source,
 			int retryCount)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			Action<Exception> onError;
+			var dis = new List<IDisposable> ();
+			onError = (error) => {
+				if (retryCount-- <= 0)
+					throw error;
+				else
+					dis.Add (source.Subscribe (v => sub.OnNext (v), ex => onError (ex), () => {}));
+				};
+			dis.Add (source.Subscribe (
+				v => sub.OnNext (v),
+				ex => onError (ex),
+				() => sub.OnCompleted ()));
+			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Return<TResult> (TResult value)
