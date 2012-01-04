@@ -106,10 +106,6 @@ namespace System.Reactive.Linq
 				dis.Dispose ();
 			});
 		}
-		
-		public void Dispose ()
-		{
-		}
 	}
 	
 	/*

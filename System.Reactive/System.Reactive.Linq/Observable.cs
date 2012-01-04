@@ -1467,10 +1467,22 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
+		static IObservable<TSource> SwitchUntil<TSource, TOther> (this IObservable<TSource> source, IObservable<TOther> other, bool initValue)
+		{
+			return new ColdObservableEach<TSource> (sub => {
+				bool enabled = initValue;
+				IDisposable dis = null, odis = null;
+				odis = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
+				dis = source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
+				}, Scheduler.Immediate); // maybe not harmful to run the starter...
+		}
+		
 		public static IObservable<TSource> SkipUntil<TSource, TOther> (
 			this IObservable<TSource> source,
 			IObservable<TOther> other)
-		{ throw new NotImplementedException (); }
+		{
+			return source.SwitchUntil (other, false);
+		}
 
 		public static IObservable<TSource> SkipWhile<TSource> (
 			this IObservable<TSource> source,
@@ -1661,7 +1673,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> TakeUntil<TSource, TOther> (
 			this IObservable<TSource> source,
 			IObservable<TOther> other)
-		{ throw new NotImplementedException (); }
+		{
+			return source.SwitchUntil (other, true);
+		}
 		
 		public static IObservable<TSource> TakeWhile<TSource> (
 			this IObservable<TSource> source,
