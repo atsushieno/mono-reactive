@@ -169,8 +169,25 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<bool> (sub, dis);
 		}
 		
+		class WrappedObservable<T> : IObservable<T>
+		{
+			IObservable<T> source;
+			
+			public WrappedObservable (IObservable<T> source)
+			{
+				this.source = source;
+			}
+			
+			public IDisposable Subscribe (IObserver<T> observer)
+			{
+				return source.Subscribe (observer);
+			}
+		}
+		
 		public static IObservable<TSource> AsObservable<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return new WrappedObservable<TSource> (source);
+		}
 		
 		public static IObservable<TResult> Cast<TResult> (this IObservable<Object> source)
 		{
