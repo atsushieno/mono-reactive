@@ -11,23 +11,24 @@ namespace System.Reactive.Linq
 {
 	public static partial class Observable
 	{
-		class ConnectableObservable<TSource> : IConnectableObservable<TSource>
+		class ConnectableObservable<TSource, TResult> : IConnectableObservable<TResult>
 		{
 			IObservable<TSource> source;
-			ISubject<TSource> sub;
-			Func<ISubject<TSource>> subject_creator;
+			ISubject<TSource, TResult> sub;
+			Func<ISubject<TSource, TResult>> subject_creator;
 			
-			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource>> subjectCreator)
+			// FIXME: is it safe to leave created subject not disposed? (though also note that Multicast() does not *create* returned subject; it's just passing the argument)
+			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource, TResult>> subjectCreator)
 			{
 				this.source = source;
 				this.subject_creator = subjectCreator;
 			}
 
 			bool connected;
-			List<IObserver<TSource>> observers = new List<IObserver<TSource>> ();
+			List<IObserver<TResult>> observers = new List<IObserver<TResult>> ();
 			new List<IDisposable> disposables;
 
-			public IDisposable Subscribe (IObserver<TSource> observer)
+			public IDisposable Subscribe (IObserver<TResult> observer)
 			{
 				observers.Add (observer);
 				IDisposable dis = null;
@@ -65,7 +66,7 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TSource initialValue)
 		{
-			return new ConnectableObservable<TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
+			return new ConnectableObservable<TSource, TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
 		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
@@ -83,7 +84,7 @@ namespace System.Reactive.Linq
 		
 		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
 		{
-			return new ConnectableObservable <TSource> (source, () => new AsyncSubject<TSource> ());
+			return new ConnectableObservable <TSource, TSource> (source, () => new AsyncSubject<TSource> ());
 		}
 		
 		public static IObservable<TResult> PublishLast<TSource, TResult> (
@@ -94,7 +95,9 @@ namespace System.Reactive.Linq
 		public static IConnectableObservable<TResult> Multicast<TSource, TResult> (
 			this IObservable<TSource> source,
 			ISubject<TSource, TResult> subject)
-		{ throw new NotImplementedException (); }
+		{
+			return new ConnectableObservable<TSource, TResult> (source, () => subject);
+		}
 		
 		public static IObservable<TResult> Multicast<TSource, TIntermediate, TResult> (
 			this IObservable<TSource> source,
@@ -131,7 +134,7 @@ namespace System.Reactive.Linq
 		static IConnectableObservable<TSource> Replay<TSource> (
 			this IObservable<TSource> source, Func<ReplaySubject<TSource>> createSubject)
 		{
-			return new ConnectableObservable<TSource> (source, createSubject);
+			return new ConnectableObservable<TSource, TSource> (source, createSubject);
 		}
 
 		public static IConnectableObservable<TSource> Replay<TSource> (
