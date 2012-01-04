@@ -755,21 +755,27 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<IGroupedObservable<TKey, TSource>, IObservable<TDuration>> durationSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.GroupByUntil (keySelector, durationSelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupByUntil<TSource, TKey, TDuration> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<IGroupedObservable<TKey, TSource>, IObservable<TDuration>> durationSelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return GroupByUntil<TSource, TKey, TSource, TDuration> (source, keySelector, s => s, durationSelector, comparer);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TElement>> GroupByUntil<TSource, TKey, TElement, TDuration> (
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector,
 			Func<IGroupedObservable<TKey, TElement>, IObservable<TDuration>> durationSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.GroupByUntil (keySelector, elementSelector, durationSelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<IGroupedObservable<TKey, TElement>> GroupByUntil<TSource, TKey, TElement, TDuration> (
 			this IObservable<TSource> source,
@@ -777,7 +783,43 @@ namespace System.Reactive.Linq
 			Func<TSource, TElement> elementSelector,
 			Func<IGroupedObservable<TKey, TElement>, IObservable<TDuration>> durationSelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			IDisposable dis = null;
+			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
+			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
+			dis = source.Subscribe (Observer.Create<TSource> ((TSource s) => {
+				try {
+					var k = keySelector (s);
+					GroupedSubject<TKey, TElement> g;
+					if (!dic.TryGetValue (k, out g)) {
+						g = new GroupedSubject<TKey, TElement> (k);
+						var dur = durationSelector (g);
+						IDisposable ddis = null;
+						// after the duration, it removes the GroupedSubject from the dictionary by key.
+						Action action = () => { if (ddis != null) ddis.Dispose (); dic.Remove (k); };
+						ddis = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); action (); }, ex => { g.OnError (ex); action (); }, () => action ()));
+						// FIXME: it is possible that the duration observable never sends events and ddis is never disposed...
+						dic.Add (k, g);
+						sub.OnNext (g);
+					}
+					g.OnNext (elementSelector (s));
+				} catch (Exception ex) {
+					sub.OnError (ex);
+					// FIXME: should we handle OnError() in groups too?
+				}
+			}, () => {
+				try {
+					// note that those groups that received expiration from durationSelector are already invoked OnCompleted().
+					foreach (var g in dic.Values)
+						g.OnCompleted ();
+					sub.OnCompleted ();
+				} catch (Exception ex) {
+					sub.OnError (ex);
+					// FIXME: should we handle OnError() in groups too?
+				}
+			}));
+			return new WrappedSubject<IGroupedObservable<TKey, TElement>> (sub, dis);
+		}
 		
 		public static IObservable<TResult> GroupJoin<TLeft, TRight, TLeftDuration, TRightDuration, TResult> (
 			this IObservable<TLeft> left,
