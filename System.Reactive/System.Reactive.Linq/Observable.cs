@@ -862,7 +862,36 @@ namespace System.Reactive.Linq
 			Func<TLeft, IObservable<TLeftDuration>> leftDurationSelector,
 			Func<TRight, IObservable<TRightDuration>> rightDurationSelector,
 			Func<TLeft, IObservable<TRight>, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			/*
+			var sub = new Subject<TResult> ();
+			IObservable<TLeftDuration> ldur;
+			IObservable<TLeftDuration> rdur;
+			var rsub = new ReplaySubject<TRight> ();
+			var rdis = right.Subscribe (v => {
+				rsub.OnNext (v);
+				if (rdur == null) {
+					rdur = rightDurationSelector (v);
+					var rddis = rdur.Subscribe (dv => {
+							rdur = null;
+						}, ex => sub.OnError (ex), () => rddis.Dispose ());
+				}
+				}, ex => sub.OnError (ex), () => {});
+			var ldis = left.Subscribe (v => {
+				if (ldur == null) {
+					ldur = leftDurationSelector (v);
+					var lddis = ldur.Subscribe (dv => {
+						sub.OnNext (resultSelector (v, rsub));
+						ldur = null;
+						}, ex => sub.OnError (ex), () => lddis.Dispose ());
+				}
+
+			var rl = new List<TRight> ();
+			var rdis = right.Subscribe (v => {
+				rl.Add (v);
+			*/
+			throw new NotImplementedException ();
+		}
 		
 		public static IObservable<TSource> IgnoreElements<TSource> (this IObservable<TSource> source)
 		{
@@ -910,7 +939,9 @@ namespace System.Reactive.Linq
 			Func<TLeft, IObservable<TLeftDuration>> leftDurationSelector,
 			Func<TRight, IObservable<TRightDuration>> rightDurationSelector,
 			Func<TLeft, TRight, TResult> resultSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return GroupJoin (left, right, leftDurationSelector, rightDurationSelector, (l, rgrp) => rgrp.Select (r => resultSelector (l, r))).Merge ();
+		}
 		
 		public static IObservable<long> LongCount<TSource> (this IObservable<TSource> source)
 		{

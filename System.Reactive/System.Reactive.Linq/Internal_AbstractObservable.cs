@@ -68,24 +68,6 @@ namespace System.Reactive.Linq
 		}
 	}
 	
-	/*
-	internal class TimerObservable : AbstractObservable<long>
-	{
-		IScheduler scheduler;
-
-		public TimerObservable (DateTimeOffset dueTime, IScheduler scheduler)
-		{
-			if (scheduler == null)
-				throw new ArgumentNullException ("scheduler");
-			this.scheduler = scheduler;
-		}
-		
-		public IScheduler Scheduler {
-			get { return scheduler; }
-		}
-	}
-	*/
-	
 	internal class ColdObservableEach<T> : IObservable<T>
 	{
 		IScheduler scheduler;
@@ -107,32 +89,6 @@ namespace System.Reactive.Linq
 			});
 		}
 	}
-	
-	/*
-	internal class ColdObservableOnce<T> : IObservable<T>
-	{
-		IObservable<T> inner;
-		Action start;
-		IScheduler scheduler;
-		bool started;
-
-		public ColdObservableOnce (IObservable<T> inner, Action start, IScheduler scheduler)
-		{
-			this.inner = inner;
-			this.start = start;
-			this.scheduler = scheduler;
-		}
-		
-		public IDisposable Subscribe (IObserver<T> observer)
-		{
-			if (!started) {
-				started = true;
-				scheduler.Schedule (start);
-			}
-			return inner.Subscribe (observer);
-		}
-	}
-	*/
 	
 	internal class WrappedSubject<T> : ISubject<T>
 	{
