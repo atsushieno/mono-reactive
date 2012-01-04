@@ -46,7 +46,7 @@ namespace System.Reactive
 		
 		public override string ToString ()
 		{
-			throw new NotImplementedException ();
+			return String.Format ("{0}@{1}", value, timestamp);
 		}
 	}
 }
