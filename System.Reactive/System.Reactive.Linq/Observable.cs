@@ -25,7 +25,26 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Aggregate<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, TSource, TSource> accumulator)
-		{ throw new NotImplementedException (); }
+		{
+			bool has_agg = false;
+			TSource result = default (TSource);
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (v => {
+				if (!has_agg)
+					result = v;
+				else
+					result = accumulator (result, v);
+				has_agg = true;
+			}, ex => sub.OnError (ex), () => {
+				if (has_agg) {
+					sub.OnNext (result);
+					sub.OnCompleted ();
+				}
+				else
+					sub.OnError (new InvalidOperationException ("There was value to aggregate."));
+			});
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TAccumulate> Aggregate<TSource, TAccumulate> (
 			this IObservable<TSource> source,
