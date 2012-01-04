@@ -1702,12 +1702,52 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Synchronize<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Synchronize (new object ());
+		}
+		
+		class SynchronizedSubject<T> : ISubject<T>
+		{
+			object gate;
+			ISubject<T> sub = new Subject<T> ();
+			
+			public SynchronizedSubject (object gate)
+			{
+				this.gate = gate;
+			}
+			
+			public IDisposable Subscribe (IObserver<T> observer)
+			{
+				return sub.Subscribe (observer);
+			}
+			
+			public void OnNext (T value)
+			{
+				lock (gate)
+					sub.OnNext (value);
+			}
+			
+			public void OnError (Exception error)
+			{
+				lock (gate)
+					sub.OnError (error);
+			}
+			
+			public void OnCompleted ()
+			{
+				lock (gate)
+					sub.OnCompleted ();
+			}
+		}
 		
 		public static IObservable<TSource> Synchronize<TSource> (
 			this IObservable<TSource> source,
 			Object gate)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new SynchronizedSubject<TSource> (gate);
+			var dis = source.Subscribe (sub);
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> Take<TSource> (
 			this IObservable<TSource> source,
