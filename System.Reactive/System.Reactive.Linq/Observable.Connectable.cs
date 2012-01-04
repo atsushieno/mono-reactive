@@ -71,7 +71,9 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> Publish<TSource, TResult>(
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			return source.Publish (selector, default (TSource));
+		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
 			this IObservable<TSource> source,
@@ -124,6 +126,148 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
 		{
 			return new RefCountObservable<TSource> (source);
+		}
+
+		static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source, Func<ReplaySubject<TSource>> createSubject)
+		{
+			return new ConnectableObservable<TSource> (source, createSubject);
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> ());
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			int bufferSize)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (bufferSize));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			IScheduler scheduler)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (scheduler));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan window)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (window));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			int bufferSize,
+			IScheduler scheduler)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (bufferSize, scheduler));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			int bufferSize,
+			TimeSpan window)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (bufferSize, window));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan window,
+			IScheduler scheduler)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (window, scheduler));
+		}
+
+		public static IConnectableObservable<TSource> Replay<TSource> (
+			this IObservable<TSource> source,
+			int bufferSize,
+			TimeSpan window,
+			IScheduler scheduler)
+		{
+			return Replay<TSource> (source, () => new ReplaySubject<TSource> (bufferSize, window, scheduler));
+		}
+
+		static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			Func<ReplaySubject<TResult>> createSubject)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> ());
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			int bufferSize)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			IScheduler scheduler)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (scheduler));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			TimeSpan window)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (window));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			int bufferSize,
+			IScheduler scheduler)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, scheduler));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			int bufferSize,
+			TimeSpan window)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, window));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			TimeSpan window,
+			IScheduler scheduler)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (window, scheduler));
+		}
+
+		public static IObservable<TResult> Replay<TSource, TResult> (
+			this IObservable<TSource> source,
+			Func<IObservable<TSource>, IObservable<TResult>> selector,
+			int bufferSize,
+			TimeSpan window,
+			IScheduler scheduler)
+		{
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, window, scheduler));
 		}
 	}
 }
