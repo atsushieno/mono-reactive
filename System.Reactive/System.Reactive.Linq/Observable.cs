@@ -1779,7 +1779,14 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan dueTime,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<TSource> ();
+			var ticker = Interval (dueTime, scheduler);
+			bool emit = true;
+			var tdis = ticker.Subscribe (v => emit = true);
+			var dis = source.Subscribe (v => { if (emit) { emit = false; sub.OnNext (v); } }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<TSource> (sub, new CompositeDisposable (tdis, dis));
+		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<TResult> Throw<TResult> (Exception exception)
