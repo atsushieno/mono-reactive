@@ -1076,7 +1076,9 @@ namespace System.Reactive.Linq
 		public static IEnumerable<TSource> MostRecent<TSource> (
 			this IObservable<TSource> source,
 			TSource initialValue)
-		{ throw new NotImplementedException (); }
+		{
+			return EnumerateLatest (source, initialValue, false);
+		}
 		
 		public static IObservable<TResult> Never<TResult> ()
 		{
@@ -1086,17 +1088,23 @@ namespace System.Reactive.Linq
 		// blocking and without buffering.
 		public static IEnumerable<TSource> Next<TSource> (this IObservable<TSource> source)
 		{
-			var wait = new AutoResetEvent (false);
+			return EnumerateLatest (source, default (TSource), true);
+		}
+		
+		static IEnumerable<TSource> EnumerateLatest<TSource> (this IObservable<TSource> source, TSource initialValue, bool block)
+		{
+			var wait = block ? new AutoResetEvent (false) : null;
 			bool ongoing = true;
-			TSource current = default (TSource);
+			TSource current = initialValue;
 			Exception error = null;
-			source.Subscribe (
-				v => { current = v; wait.Set (); },
-				ex => { error = ex; ongoing = false; wait.Set (); },
-				() => { ongoing = false; wait.Set (); }
+			var dis = source.Subscribe (
+				v => { Console.WriteLine ("!!! " + v); current = v; if (block) wait.Set (); },
+				ex => { error = ex; ongoing = false; if (block) wait.Set (); },
+				() => { ongoing = false; if (block) wait.Set (); }
 				);
 			while (true) {
-				wait.WaitOne ();
+				if (block)
+					wait.WaitOne ();
 				if (error != null)
 					throw error;
 				if (ongoing)
@@ -1104,6 +1112,7 @@ namespace System.Reactive.Linq
 				else
 					break;
 			}
+			dis.Dispose ();
 		}
 		
 		public static IObservable<TSource> ObserveOn<TSource> (
