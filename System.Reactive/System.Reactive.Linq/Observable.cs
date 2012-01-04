@@ -305,8 +305,26 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
+		class DeferredObservable<TValue> : IObservable<TValue>
+		{
+			Func<IObservable<TValue>> factory;
+			
+			public DeferredObservable (Func<IObservable<TValue>> factory)
+			{
+				this.factory = factory;
+			}
+
+			public IDisposable Subscribe (IObserver<TValue> observer)
+			{
+				var o = factory ();
+				return o.Subscribe (observer);
+			}
+		}
+		
 		public static IObservable<TValue> Defer<TValue> (Func<IObservable<TValue>> observableFactory)
-		{ throw new NotImplementedException (); }
+		{
+			return new DeferredObservable<TValue> (observableFactory);
+		}
 		
 		public static IObservable<TSource> Delay<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime)
 		{
