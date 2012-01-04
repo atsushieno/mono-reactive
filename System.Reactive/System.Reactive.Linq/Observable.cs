@@ -2037,35 +2037,40 @@ namespace System.Reactive.Linq
 			return new WrappedSubject<IList<TSource>> (sub, dis);
 		}
 		
-		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
+		public static IObservable<ILookup<TKey, TSource>> ToLookup<TSource, TKey>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector)
-		{ throw new NotImplementedException (); }
+		{
+			return ToLookup<TSource, TKey> (source, keySelector, EqualityComparer<TKey>.Default);
+		}
 		
-		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
-			this IObservable<TSource> source,
-			Func<TSource, TElement> elementSelector,
-			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
+		public static IObservable<ILookup<TKey, TSource>> ToLookup<TSource, TKey>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			return ToLookup<TSource, TKey, TSource> (source, keySelector, s => s, comparer);
+		}
 		
 		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector)
-		{ throw new NotImplementedException (); }
+		{
+			return ToLookup (source, keySelector, elementSelector, EqualityComparer<TKey>.Default);
+		}
 		
 		public static IObservable<ILookup<TKey, TElement>> ToLookup<TSource, TKey, TElement>(
 			this IObservable<TSource> source,
 			Func<TSource, TKey> keySelector,
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new Subject<ILookup<TKey, TElement>> ();
+			var l = new List<TSource> ();
+			var dis = source.Subscribe (v => l.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (Enumerable.ToLookup<TSource, TKey, TElement> (l,keySelector, elementSelector, comparer)); sub.OnCompleted (); });
+			return new WrappedSubject<ILookup<TKey, TElement>> (sub, dis);
+		}
 
 		public static IObservable<TSource> ToObservable<TSource> (this IEnumerable<TSource> source)
 		{
