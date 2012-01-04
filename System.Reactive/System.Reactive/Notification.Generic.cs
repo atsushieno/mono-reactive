@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Concurrency;
+using System.Reactive.Subjects;
 
 namespace System.Reactive
 {
@@ -37,14 +38,36 @@ namespace System.Reactive
 			return (object) left == null ? (object) right != null : !left.Equals (right);
 		}
 
+		// These were added against the documentation (they lack but they should exist)
+		public override int GetHashCode ()
+		{
+			return
+				(int) Kind +
+				((Exception != null ? Exception.GetHashCode () : 0) << 9) +
+				(HasValue ? Value.GetHashCode () : 0);
+		}
+
 		public IObservable<T> ToObservable ()
 		{
-			throw new NotImplementedException ();
+			var sub = new ReplaySubject<T> ();
+			ApplyToSubject (sub);
+			return sub;
 		}
 		
 		public IObservable<T> ToObservable (IScheduler scheduler)
 		{
-			throw new NotImplementedException ();
+			var sub = new ReplaySubject<T> (scheduler);
+			ApplyToSubject (sub);
+			return sub;
+		}
+		
+		void ApplyToSubject (ISubject<T> sub)
+		{
+			switch (Kind) {
+			case NotificationKind.OnNext: sub.OnNext (Value); break;
+			case NotificationKind.OnError: sub.OnError (Exception); break;
+			case NotificationKind.OnCompleted: sub.OnCompleted (); break;
+			}
 		}
 
 		// It is public in Microsoft.Phone.Reactive
