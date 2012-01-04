@@ -1153,12 +1153,18 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> ObserveOn<TSource> (
 			this IObservable<TSource> source,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			var sub = new SchedulerBoundSubject<TSource> (scheduler);
+			var dis = source.Subscribe (sub);
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TSource> ObserveOn<TSource> (
 			this IObservable<TSource> source,
 			SynchronizationContext context)
-		{ throw new NotImplementedException (); }
+		{
+			return ObserveOn (source, new SynchronizationContextScheduler (context));
+		}
 		
 		public static IObservable<TResult> OfType<TResult> (this IObservable<Object> source)
 		{

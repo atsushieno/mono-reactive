@@ -190,4 +190,39 @@ namespace System.Reactive.Linq
 			return Disposable.Create (() => { if (dis != null) scheduler.Schedule (() => dis.Dispose ()); });
 		}
 	}
+
+	// observations are handled on the specified scheduler.
+	internal class SchedulerBoundSubject<T> : ISubject<T>
+	{
+		IScheduler scheduler;
+		ISubject<T> sub = new Subject<T> ();
+		
+		public SchedulerBoundSubject (IScheduler scheduler)
+		{
+			this.scheduler = scheduler;
+		}
+
+		public void OnNext (T value)
+		{
+			IDisposable dis = null;
+			dis = scheduler.Schedule (() => { sub.OnNext (value); if (dis != null) dis.Dispose (); });
+		}
+
+		public void OnError (Exception error)
+		{
+			IDisposable dis = null;
+			dis = scheduler.Schedule (() => { sub.OnError (error); if (dis != null) dis.Dispose (); });
+		}
+
+		public void OnCompleted ()
+		{
+			IDisposable dis = null;
+			dis = scheduler.Schedule (() => { sub.OnCompleted (); if (dis != null) dis.Dispose (); });
+		}
+
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			return sub.Subscribe (observer);
+		}
+	}
 }
