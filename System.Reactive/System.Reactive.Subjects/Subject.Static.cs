@@ -14,12 +14,12 @@ namespace System.Reactive.Subjects
 		
 		public static ISubject<TSource, TResult> Synchronize<TSource, TResult> (ISubject<TSource, TResult> subject)
 		{
-			throw new NotImplementedException ();
+			return Synchronize (subject, Scheduler.Immediate);
 		}
 		
 		public static ISubject<TSource, TResult> Synchronize<TSource, TResult> (ISubject<TSource, TResult> subject, IScheduler scheduler)
 		{
-			throw new NotImplementedException ();
+			return new SynchronizedSubject<TSource, TResult> (subject, scheduler);
 		}
 
 		internal class DefaultVariantSubject<TSource, TResult> : ISubject<TSource, TResult>

@@ -129,6 +129,7 @@
     <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
     <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
     <Compile Include="System.Reactive.Subjects\IConnectableObservable.cs" />
+    <Compile Include="System.Reactive.Subjects\Internal_SynchronizedSubject.cs" />
     <Compile Include="System.Reactive.Subjects\ISubject.cs" />
     <Compile Include="System.Reactive.Subjects\ISubject.Variant.cs" />
     <Compile Include="System.Reactive.Subjects\ReplaySubject.cs" />
