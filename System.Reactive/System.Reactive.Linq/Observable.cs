@@ -1230,13 +1230,26 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Scan<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, TSource, TSource> accumulator)
-		{ throw new NotImplementedException (); }
+		{
+			// note the results difference between those Scan() overloads...
+			bool has_value = false;
+			TSource intermediate = default (TSource);
+			var sub = new Subject<TSource> ();
+			var dis = source.Subscribe (v => { if (has_value) intermediate = accumulator (intermediate, v); else intermediate = v; sub.OnNext (intermediate); has_value = true; }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<TSource> (sub, dis);
+		}
 		
 		public static IObservable<TAccumulate> Scan<TSource, TAccumulate> (
 			this IObservable<TSource> source,
 			TAccumulate seed,
 			Func<TAccumulate, TSource, TAccumulate> accumulator)
-		{ throw new NotImplementedException (); }
+		{
+			// note the results difference between those Scan() overloads...
+			TAccumulate intermediate = seed;
+			var sub = new Subject<TAccumulate> ();
+			var dis = source.Subscribe (v => { intermediate = accumulator (intermediate, v); sub.OnNext (intermediate); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<TAccumulate> (sub, dis);
+		}
 
 		public static IObservable<TResult> Select<TSource, TResult> (
 			this IObservable<TSource> source,
