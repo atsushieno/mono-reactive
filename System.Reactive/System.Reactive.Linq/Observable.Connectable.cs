@@ -96,7 +96,30 @@ namespace System.Reactive.Linq
 			Func<IObservable<TIntermediate>, IObservable<TResult>> selector)
 		{ throw new NotImplementedException (); }
 		
+		class RefCountObservable<T> : IObservable<T>
+		{
+			IConnectableObservable<T> source;
+			
+			public RefCountObservable (IConnectableObservable<T> source)
+			{
+				this.source = source;
+			}
+			
+			int count;
+			IDisposable connection_disposable;
+			
+			public IDisposable Subscribe (IObserver<T> observer)
+			{
+				source.Subscribe (observer);
+				if (count++ == 0)
+					connection_disposable = source.Connect ();
+				return Disposable.Create (() => { if (--count == 0) connection_disposable.Dispose (); });
+			}
+		}
+		
 		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return new RefCountObservable<TSource> (source);
+		}
 	}
 }
