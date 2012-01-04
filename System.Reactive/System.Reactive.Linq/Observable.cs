@@ -16,6 +16,10 @@ namespace System.Reactive.Linq
 {
 	// For the default scheduler in each method, see http://social.msdn.microsoft.com/Forums/en-AU/rx/thread/e032b40a-019b-496e-bb11-64c8fcc94410
 
+	// FIXME:
+	//	- should those delegating observables to subjects use try-catch statements to raise OnError() instead of letting errors being thrown/
+	//	- resubscriptions need to be examined.
+
 	public static partial class Observable
 	{
 		public static IObservable<TSource> Aggregate<TSource> (
@@ -1309,7 +1313,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TimeSpan interval,
 			IScheduler scheduler)
-		{ throw new NotImplementedException (); }
+		{
+			return Sample<TSource, long> (source, Interval (interval, scheduler));
+		}
 		
 		public static IObservable<TSource> Sample<TSource, TSample> (
 			this IObservable<TSource> source,
@@ -1675,7 +1681,29 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int count)
 		{
-			return source.Where ((s, i) => i < count);
+			var sub = new Subject<TSource> ();
+			int idx = 0;
+			bool done = false;
+			var dis = source.Subscribe (
+				v => {
+					if (!done) {
+						if (idx++ < count)
+							sub.OnNext (v);
+						else
+							sub.OnCompleted ();
+					}
+				},
+				ex => {
+					if (!done)
+						sub.OnError (ex);
+					done = true;
+				},
+				() => {
+					if (!done)
+						sub.OnCompleted ();
+					done = true;
+				});
+			return new WrappedSubject<TSource> (sub, dis);
 		}
 		
 		public static IObservable<TSource> TakeLast<TSource> (
@@ -2179,7 +2207,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
-				}, () => {
+				}, ex => sub.OnError (ex), () => {
 				try {
 					dis.Dispose ();
 					sub.OnCompleted ();

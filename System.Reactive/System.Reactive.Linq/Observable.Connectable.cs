@@ -11,16 +11,16 @@ namespace System.Reactive.Linq
 {
 	public static partial class Observable
 	{
-		class BehaviorConnectableObservable<TSource> : IConnectableObservable<TSource>
+		class ConnectableObservable<TSource> : IConnectableObservable<TSource>
 		{
 			IObservable<TSource> source;
-			TSource initial_value;
-			BehaviorSubject<TSource> sub;
+			ISubject<TSource> sub;
+			Func<ISubject<TSource>> subject_creator;
 			
-			public BehaviorConnectableObservable (IObservable<TSource> source, TSource initialValue)
+			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource>> subjectCreator)
 			{
 				this.source = source;
-				this.initial_value = initialValue;
+				this.subject_creator = subjectCreator;
 			}
 
 			bool connected;
@@ -43,13 +43,15 @@ namespace System.Reactive.Linq
 				if (connected)
 					throw new InvalidOperationException ("This connectable observable is already connected");
 				connected = true;
-				sub = new BehaviorSubject<TSource> (initial_value);
+				sub = subject_creator ();
 				disposables = new List<IDisposable> ();
 				disposables.Add (source.Subscribe (sub));
 				foreach (var o in observers)
 					disposables.Add (sub.Subscribe (o));
-				disposables.Add (Disposable.Create (() => connected = false));
-				disposables.Add (Disposable.Create (() => this.disposables = null)); // clean up itself in the final stage
+				disposables.Add (Disposable.Create (() =>  {
+					connected = false;
+					this.disposables = null; // clean up itself in the final stage
+				}));
 				return new CompositeDisposable (disposables);
 			}
 		}
@@ -63,7 +65,7 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TSource initialValue)
 		{
-			return new BehaviorConnectableObservable<TSource> (source, initialValue);
+			return new ConnectableObservable<TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
 		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
@@ -78,7 +80,9 @@ namespace System.Reactive.Linq
 		{ throw new NotImplementedException (); }
 		
 		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			return new ConnectableObservable <TSource> (source, () => new AsyncSubject<TSource> ());
+		}
 		
 		public static IObservable<TResult> PublishLast<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -120,6 +124,66 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
 		{
 			return new RefCountObservable<TSource> (source);
+		}
+	}
+	// see http://leecampbell.blogspot.com/2010/05/intro-to-rx.html
+	public sealed class PublishLastSubject<T>
+		: ISubject<T>, ISubject<T, T>, IObserver<T>, IObservable<T>, IDisposable
+	{
+		bool disposed;
+		bool done;
+
+		public void Dispose ()
+		{
+			if (n != null)
+				observers.ForEach ((o) => n.Accept (o));
+			disposed = true;
+		}
+		
+		void CheckDisposed ()
+		{
+			if (disposed)
+				throw new ObjectDisposedException ("subject");
+		}
+		
+		Notification<T> n;
+		
+		public void OnCompleted ()
+		{
+			CheckDisposed ();
+			if (!done)
+				n = Notification.CreateOnCompleted<T> ();
+			done = true;
+		}
+		
+		public void OnError (Exception error)
+		{
+			CheckDisposed ();
+			if (!done)
+				n = Notification.CreateOnError<T> (error);
+			done = true;
+		}
+		
+		public void OnNext (T value)
+		{
+			CheckDisposed ();
+			if (!done)
+				n = Notification.CreateOnNext<T> (value);
+		}
+		
+		List<IObserver<T>> observers = new List<IObserver<T>> ();
+		
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			if (observer == null)
+				throw new ArgumentNullException ("observer");
+			CheckDisposed ();
+			observers.Add (observer);
+
+			if (n != null && done)
+				n.Accept (observer);
+
+			return Disposable.Create (() => observers.Remove (observer));
 		}
 	}
 }
