@@ -16,6 +16,7 @@ namespace System.Reactive.Subjects
 			this.value = value;
 		}
 
+		bool has_value;
 		bool disposed;
 		bool done;
 		T value;
@@ -54,6 +55,7 @@ namespace System.Reactive.Subjects
 		public void OnNext (T value)
 		{
 			CheckDisposed ();
+			has_value = true;
 			if (!done) {
 				var n = Notification.CreateOnNext<T> (value);
 				observers.ForEach ((o) => n.Accept (o));
@@ -69,8 +71,8 @@ namespace System.Reactive.Subjects
 				throw new ArgumentNullException ("observer");
 			CheckDisposed ();
 			observers.Add (observer);
-
-			if (!done)
+			
+			if (!has_value)
 				OnNext (value);
 
 			return Disposable.Create (() => observers.Remove (observer));

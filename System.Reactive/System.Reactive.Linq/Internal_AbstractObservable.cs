@@ -101,9 +101,9 @@ namespace System.Reactive.Linq
 		{
 			var sub = new ReplaySubject<T> ();
 			sub.Subscribe (observer);
-			scheduler.Schedule (() => work (sub));
+			var dis = scheduler.Schedule (() => work (sub));
 			return Disposable.Create (() => {
-				sub.Dispose ();
+				dis.Dispose ();
 			});
 		}
 		

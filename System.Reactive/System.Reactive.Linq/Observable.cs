@@ -1013,17 +1013,6 @@ namespace System.Reactive.Linq
 			TSource initialValue)
 		{ throw new NotImplementedException (); }
 		
-		public static IConnectableObservable<TResult> Multicast<TSource, TResult> (
-			this IObservable<TSource> source,
-			ISubject<TSource, TResult> subject)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<TResult> Multicast<TSource, TIntermediate, TResult> (
-			this IObservable<TSource> source,
-			Func<ISubject<TSource, TIntermediate>> subjectSelector,
-			Func<IObservable<TIntermediate>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
-		
 		public static IObservable<TResult> Never<TResult> ()
 		{
 			return new NeverObservable<TResult> ();
@@ -1100,33 +1089,6 @@ namespace System.Reactive.Linq
 			return OnErrorResumeNext (new IObservable<TSource> [] {first, second});
 		}
 		
-		public static IConnectableObservable<TSource> Publish<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
-		
-		public static IConnectableObservable<TSource> Publish<TSource> (
-			this IObservable<TSource> source,
-			TSource initialValue)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<TResult> Publish<TSource, TResult>(
-			this IObservable<TSource> source,
-			Func<IObservable<TSource>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<TResult> Publish<TSource, TResult>(
-			this IObservable<TSource> source,
-			Func<IObservable<TSource>, IObservable<TResult>> selector,
-			TSource initialValue)
-		{ throw new NotImplementedException (); }
-		
-		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
-		
-		public static IObservable<TResult> PublishLast<TSource, TResult> (
-			this IObservable<TSource> source,
-			Func<IObservable<TSource>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
-		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
 		public static IObservable<int> Range (int start, int count)
 		{
@@ -1141,9 +1103,6 @@ namespace System.Reactive.Linq
 			sub.OnCompleted ();
 			return sub;
 		}
-		
-		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
-		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TSource> Repeat<TSource> (this IObservable<TSource> source)
 		{ throw new NotImplementedException (); }

@@ -120,6 +120,7 @@
     <Compile Include="System.Reactive.Linq\Observable.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Blocking.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Buffer.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Connectable.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Events.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Latest.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
