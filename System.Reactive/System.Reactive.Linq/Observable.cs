@@ -1294,7 +1294,23 @@ namespace System.Reactive.Linq
 		public static IObservable<TSource> Sample<TSource, TSample> (
 			this IObservable<TSource> source,
 			IObservable<TSample> sampler)
-		{ throw new NotImplementedException (); }
+		{
+			/* FIXME: this somehow fails to emit expected items in the sources for the following code. (Never mind that "done" never emits, that is expected.)
+			
+				var source = Observable.Interval(TimeSpan.FromMilliseconds(300)).Delay (TimeSpan.FromSeconds (2));
+				var sampler = Observable.Interval(TimeSpan.FromMilliseconds(1000)).Take (10);
+				var o = source.Sample(sampler);
+				o.Subscribe(Console.WriteLine, Console.WriteLine, () => Console.WriteLine("done"));
+			
+			*/
+
+			var sub = new Subject<TSource> ();
+			bool emit = false;
+			TSource current = default (TSource);
+			var sdis = sampler.Subscribe (v => { if (emit) sub.OnNext (current); }, ex => sub.OnError (ex), () => {}); // it does not send OnCompleted to the result.
+			var dis = source.Subscribe (v => { current = v; emit = true; }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new WrappedSubject<TSource> (sub, new CompositeDisposable (sdis, dis));
+		}
 		
 		public static IObservable<TSource> Scan<TSource> (
 			this IObservable<TSource> source,
