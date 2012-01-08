@@ -453,7 +453,7 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> ((sub) => {
 				Thread.Sleep (Scheduler.Normalize (dueTime)); 
-				source.Subscribe (sub);
+				return source.Subscribe (sub);
 				}, scheduler);
 		}
 		
@@ -803,14 +803,6 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			/* FIXME: this example snippet fails to process the 2nd. subscription.
-
-				var observable = Observable.Generate (1, x => x < 6, x => x + 1, x => x,  x=>TimeSpan.FromSeconds(1)).Timestamp();
-				observable.Subscribe(x => Console.WriteLine("{0}, {1}", x.Value, x.Timestamp));
-				Thread.Sleep (3000);
-				observable.Subscribe(x => Console.WriteLine("{0}, {1}", x.Value, x.Timestamp));
-
-			*/
 			return new ColdObservableEach<TResult> (sub => {
 				try {
 					for (var i = initialState; condition (i); i = iterate (i)) {
@@ -821,6 +813,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
+				return Disposable.Empty;
 				}, scheduler);
 		}
 		
@@ -1069,6 +1062,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
+				return Disposable.Empty;
 				}, scheduler);
 		}
 		
@@ -1393,6 +1387,7 @@ namespace System.Reactive.Linq
 					var l = new List<IDisposable> ();
 					var e = sources.GetEnumerator ();
 					OnErrorResumeNext<TSource> (null, sub, e, l);
+					return Disposable.Create (() => l.ForEach (d => d.Dispose ()));
 				},
 				Scheduler.Immediate);
 		}
@@ -1882,8 +1877,8 @@ namespace System.Reactive.Linq
 				bool enabled = initValue;
 				IDisposable dis = null, odis = null;
 				odis = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
-				dis = source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
-				}, Scheduler.Immediate); // maybe not harmful to run the starter...
+				return source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
+				}, Scheduler.CurrentThread); // maybe not harmful to run the starter...
 		}
 		
 		public static IObservable<TSource> SkipUntil<TSource, TOther> (
@@ -2373,6 +2368,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
+				return Disposable.Empty;
 				}, scheduler);
 		}
 		
@@ -2428,9 +2424,9 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			var sub = new Subject<Timestamped<TSource>> ();
-			var dis = source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<Timestamped<TSource>> (sub, dis);
+			return new ColdObservableEach<Timestamped<TSource>> (sub => {
+				return source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
+				}, scheduler);
 		}
 		
 		public static IObservable<TSource[]> ToArray<TSource> (this IObservable<TSource> source)
@@ -2630,6 +2626,7 @@ namespace System.Reactive.Linq
 				} catch (Exception ex) {
 					sub.OnError (ex);
 				}
+				return Disposable.Empty;
 				}, scheduler);
 		}
 		
@@ -2642,16 +2639,13 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("resourceFactory");
 			if (observableFactory == null)
 				throw new ArgumentNullException ("observableFactory");
-			
-			TResource rdis = default (TResource);
-			var subdis = new List<IDisposable> ();
-			var src = new ColdObservableEach<TSource> (sub => {
-				rdis = resourceFactory ();
+
+			return new ColdObservableEach<TSource> (sub => {
+				var rdis = resourceFactory ();
 				var source = observableFactory (rdis);
-				subdis.Add (source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ()));
-				}, Scheduler.Immediate); // maybe not harmful scheduler
-			Action release = () => { if (rdis != null) rdis.Dispose (); foreach (var d in subdis) d.Dispose (); };
-			return src.Do (v => {}, ex => release (), () => release ());
+				var subdis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
+				return Disposable.Create (() => { subdis.Dispose (); rdis.Dispose (); });
+				}, Scheduler.CurrentThread); // maybe not harmful scheduler
 		}
 		
 		public static IObservable<TResult> When<TResult> (this IEnumerable<Plan<TResult>> plans)

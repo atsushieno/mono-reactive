@@ -71,9 +71,9 @@ namespace System.Reactive.Linq
 	internal class ColdObservableEach<T> : IObservable<T>
 	{
 		IScheduler scheduler;
-		Action<ISubject<T>> work;
+		Func<ISubject<T>, IDisposable> work;
 		
-		public ColdObservableEach (Action<ISubject<T>> work, IScheduler scheduler)
+		public ColdObservableEach (Func<ISubject<T>, IDisposable> work, IScheduler scheduler)
 		{
 			this.work = work;
 			this.scheduler = scheduler;
@@ -83,10 +83,13 @@ namespace System.Reactive.Linq
 		{
 			var sub = new ReplaySubject<T> ();
 			var subdis = sub.Subscribe (observer);
-			var dis = scheduler.Schedule (() => work (sub));
+			IDisposable workdis = null;
+			var dis = scheduler.Schedule (() => workdis = work (sub));
 			return Disposable.Create (() => {
-				subdis.Dispose ();
+				if (workdis != null)
+					workdis.Dispose ();
 				dis.Dispose ();
+				subdis.Dispose ();
 			});
 		}
 	}
