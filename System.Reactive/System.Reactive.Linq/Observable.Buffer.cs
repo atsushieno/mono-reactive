@@ -47,6 +47,13 @@ namespace System.Reactive.Linq
 			IObservable<TBufferOpening> bufferOpenings,
 			Func<TBufferOpening, IObservable<TBufferClosing>> bufferClosingSelector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (bufferOpenings == null)
+				throw new ArgumentNullException ("bufferOpenings");
+			if (bufferClosingSelector == null)
+				throw new ArgumentNullException ("bufferClosingSelector");
+			
 			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();
 			var disc = new List<IDisposable> ();
@@ -100,6 +107,11 @@ namespace System.Reactive.Linq
 			int count,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			
 			var counter = new Subject<Unit> ();
 			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();

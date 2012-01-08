@@ -26,6 +26,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, TSource, TSource> accumulator)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (accumulator == null)
+				throw new ArgumentNullException ("accumulator");
+
 			bool has_agg = false;
 			TSource result = default (TSource);
 			var sub = new Subject<TSource> ();
@@ -126,6 +131,11 @@ namespace System.Reactive.Linq
 		
 		public static Pattern<TLeft, TRight> And<TLeft, TRight> (this IObservable<TLeft> left, IObservable<TRight> right)
 		{
+			if (left == null)
+				throw new ArgumentNullException ("left");
+			if (right == null)
+				throw new ArgumentNullException ("right");
+
 			return new Pattern<TLeft, TRight> (left, right);
 		}
 		
@@ -186,16 +196,38 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> AsObservable<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return new WrappedObservable<TSource> (source);
 		}
 		
 		public static IObservable<TResult> Cast<TResult> (this IObservable<Object> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return source.Select (v => (TResult) v);
 		}
 
 		public static IObservable<TSource> Catch<TSource> (this IEnumerable<IObservable<TSource>> sources)
-		{ throw new NotImplementedException (); }
+		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
+			var sub = new Subject<TSource> ();
+			var e = sources.GetEnumerator ();
+			var dis = new List<IDisposable> ();
+			if (!e.MoveNext ()) {
+				sub.OnCompleted ();
+				return sub;
+			} else {
+				Action subact = null;
+				subact = () => dis.Add (e.Current.Subscribe (v => sub.OnNext (v), ex => { if (e.MoveNext ()) subact (); else sub.OnError (ex); }, () => sub.OnCompleted ()));
+				subact ();
+				return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+			}
+		}
 		
 		public static IObservable<TSource> Catch<TSource> (params IObservable<TSource> [] sources)
 		{
@@ -207,6 +239,11 @@ namespace System.Reactive.Linq
 			Func<TException, IObservable<TSource>> handler)
 			where TException : Exception
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (handler == null)
+				throw new ArgumentNullException ("handler");
+
 			var sub = new Subject<TSource> ();
 			var dis = source.Subscribe (v => sub.OnNext (v), ex => { var eex = ex as TException; if (eex != null) foreach (var vv in handler (eex).ToEnumerable ()) sub.OnNext (vv); else sub.OnError (ex); }, () => sub.OnCompleted ());
 			return new WrappedSubject<TSource> (sub, dis);
@@ -216,6 +253,12 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> first,
 			IObservable<TSource> second)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+
+
 			return Catch (new IObservable<TSource> [] {first, second});
 		}
 		
@@ -224,6 +267,11 @@ namespace System.Reactive.Linq
 			IObservable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+
 			var sub = new Subject<TResult> ();
 			TFirst fv = default (TFirst);
 			TSecond sv = default (TSecond);
@@ -241,6 +289,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Concat<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
 			var sub = new Subject<TSource> ();
 			var dis = new List<IDisposable> ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
@@ -257,17 +308,28 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Concat<TSource> (this IObservable<IObservable<TSource>> sources)
 		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
 			// FIXME: don't use ToEnumerable.
 			return sources.ToEnumerable ().Concat ();
 		}
 		
 		public static IObservable<TSource> Concat<TSource> (params IObservable<TSource> [] sources)
 		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
 			return sources.AsEnumerable ().Concat ();
 		}
 		
 		public static IObservable<TSource> Concat<TSource> (this IObservable<TSource> first, IObservable<TSource> second)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+
 			return new IObservable<TSource> [] {first, second}.Concat ();
 		}
 		
@@ -292,6 +354,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<int> Count<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<int> ();
 			IDisposable dis = null;
 			int count = 0;
@@ -306,6 +371,10 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, IDisposable> subscribe)
 		{
+			if (subscribe == null)
+				throw new ArgumentNullException ("subscribe");
+
+
 			return new SimpleDisposableObservable<TSource> (subscribe);
 		}
 		
@@ -316,6 +385,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> DefaultIfEmpty<TSource> (this IObservable<TSource> source, TSource defaultValue)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<TSource> ();
 			bool hadValue = false;
 			var dis = source.Subscribe (v => { hadValue = true; sub.OnNext (v); }, ex => sub.OnError (ex), () => { if (!hadValue) sub.OnNext (defaultValue); sub.OnCompleted (); });
@@ -340,6 +412,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TValue> Defer<TValue> (Func<IObservable<TValue>> observableFactory)
 		{
+			if (observableFactory == null)
+				throw new ArgumentNullException ("observableFactory");
+
 			return new DeferredObservable<TValue> (observableFactory);
 		}
 		
@@ -358,8 +433,11 @@ namespace System.Reactive.Linq
 			DateTimeOffset dueTime,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
+
 			return Delay<TSource> (source, dueTime - scheduler.Now, scheduler);
 		}
 		
@@ -368,8 +446,11 @@ namespace System.Reactive.Linq
 			TimeSpan dueTime,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
+
 			return new ColdObservableEach<TSource> ((sub) => {
 				Thread.Sleep (Scheduler.Normalize (dueTime)); 
 				source.Subscribe (sub);
@@ -378,6 +459,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Dematerialize<TSource> (this IObservable<Notification<TSource>> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<TSource> ();
 			var dis = source.Subscribe (
 				n => {
@@ -515,6 +599,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IObserver<TSource> observer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (observer == null)
+				throw new ArgumentNullException ("observer");
+
 			var sub = new Subject<TSource> ();
 			var dis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			sub.Subscribe (observer);
@@ -558,6 +647,9 @@ namespace System.Reactive.Linq
 		
 		static IObservable<TSource> ElementAtOrDefault<TSource> (this IObservable<TSource> source, int index, bool throwError)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<TSource> ();
 			long i = 0;
 			var dis = source.Subscribe (
@@ -600,6 +692,11 @@ namespace System.Reactive.Linq
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Action<IAsyncResult> end)
 		{
+			if (begin == null)
+				throw new ArgumentNullException ("begin");
+			if (end == null)
+				throw new ArgumentNullException ("end");
+
 			var sub = new Subject<Unit> ();
 			return () => { begin ((res) => {
 				try {
@@ -618,6 +715,11 @@ namespace System.Reactive.Linq
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Func<IAsyncResult, TResult> end)
 		{
+			if (begin == null)
+				throw new ArgumentNullException ("begin");
+			if (end == null)
+				throw new ArgumentNullException ("end");
+
 			var sub = new Subject<TResult> ();
 			return () => { begin ((res) => {
 				try {
@@ -756,6 +858,15 @@ namespace System.Reactive.Linq
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (elementSelector == null)
+				throw new ArgumentNullException ("elementSelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
 			IDisposable dis = null;
 			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
@@ -819,6 +930,17 @@ namespace System.Reactive.Linq
 			Func<IGroupedObservable<TKey, TElement>, IObservable<TDuration>> durationSelector,
 			IEqualityComparer<TKey> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (elementSelector == null)
+				throw new ArgumentNullException ("elementSelector");
+			if (durationSelector == null)
+				throw new ArgumentNullException ("durationSelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
 			IDisposable dis = null;
 			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
@@ -863,6 +985,17 @@ namespace System.Reactive.Linq
 			Func<TRight, IObservable<TRightDuration>> rightDurationSelector,
 			Func<TLeft, IObservable<TRight>, TResult> resultSelector)
 		{
+			if (left == null)
+				throw new ArgumentNullException ("left");
+			if (right == null)
+				throw new ArgumentNullException ("right");
+			if (leftDurationSelector == null)
+				throw new ArgumentNullException ("leftDurationSelector");
+			if (rightDurationSelector == null)
+				throw new ArgumentNullException ("rightDurationSelector");
+			if (resultSelector == null)
+				throw new ArgumentNullException ("resultSelector");
+
 			/*
 			var sub = new Subject<TResult> ();
 			IObservable<TLeftDuration> ldur;
@@ -895,6 +1028,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> IgnoreElements<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<TSource> ();
 			var dis = source.Subscribe (v => {}, ex => sub.OnError (ex), () => sub.OnCompleted ());
 			return new WrappedSubject<TSource> (sub, dis);
@@ -920,6 +1056,9 @@ namespace System.Reactive.Linq
 			TimeSpan period,
 			IScheduler scheduler)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			return new ColdObservableEach<long> ((sub) => {
 				try {
 					long count = 0;
@@ -945,6 +1084,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<long> LongCount<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<long> ();
 			IDisposable dis = null;
 			long count = 0;
@@ -954,6 +1096,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<Notification<TSource>> Materialize<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<Notification<TSource>> ();
 			var dis = source.Subscribe (
 				v => sub.OnNext (Notification.CreateOnNext<TSource> (v)),
@@ -973,6 +1118,14 @@ namespace System.Reactive.Linq
 			IComparer<TKey> comparer)
 		
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (comparer 
+			== null)
+				throw new ArgumentNullException ("comparer");
+
 			TKey maxk = default (TKey);
 			List<TSource> max = new List<TSource> ();
 			var sub = new Subject<IList<TSource>> ();
@@ -1064,6 +1217,9 @@ namespace System.Reactive.Linq
 		{
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new Subject<TSource> ();
 			// avoided using "from source in sources select ..." for eager evaluation.
 			var dis = new List<IDisposable> ();
@@ -1092,6 +1248,13 @@ namespace System.Reactive.Linq
 			IObservable<TSource> second,
 			IScheduler scheduler)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			return Merge (scheduler, new IObservable<TSource> [] {first, second});
 		}
 		
@@ -1105,6 +1268,13 @@ namespace System.Reactive.Linq
 			Func<TSource, TKey> keySelector,
 			IComparer<TKey> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
 			TKey mink = default (TKey);
 			List<TSource> min = new List<TSource> ();
 			var sub = new Subject<IList<TSource>> ();
@@ -1159,6 +1329,9 @@ namespace System.Reactive.Linq
 		
 		static IEnumerable<TSource> EnumerateLatest<TSource> (this IObservable<TSource> source, TSource initialValue, bool block)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var wait = block ? new AutoResetEvent (false) : null;
 			bool ongoing = true;
 			TSource current = initialValue;
@@ -1185,6 +1358,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new SchedulerBoundSubject<TSource> (scheduler);
 			var dis = source.Subscribe (sub);
 			return new WrappedSubject<TSource> (sub, dis);
@@ -1199,11 +1377,17 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TResult> OfType<TResult> (this IObservable<Object> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return source.Where (v => v != null && typeof (TResult).IsAssignableFrom (v.GetType ())).Select (v => (TResult) v);
 		}
 		
 		public static IObservable<TSource> OnErrorResumeNext<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
 			return new ColdObservableEach<TSource> (
 				sub => {
 					var l = new List<IDisposable> ();
@@ -1243,6 +1427,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<int> Range (int start, int count, IScheduler scheduler)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new ReplaySubject<int> (scheduler);
 			foreach (var i in Enumerable.Range (start, count))
 				sub.OnNext (i);
@@ -1251,7 +1438,18 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TSource> Repeat<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
+			return Concat (RepeatInfinitely (source));
+		}
+		
+		static IEnumerable<IObservable<TSource>> RepeatInfinitely<TSource> (IObservable<TSource> source)
+		{
+			while (true)
+				yield return source;
+		}
 		
 		public static IObservable<TResult> Repeat<TResult> (TResult value)
 		{
@@ -1273,6 +1471,9 @@ namespace System.Reactive.Linq
 			int repeatCount,
 			IScheduler scheduler)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new ReplaySubject<TResult> (scheduler);
 			for (int i = 0; i < repeatCount; i++)
 				sub.OnNext (value);
@@ -1289,6 +1490,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int retryCount)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			/* To my understanding, this should be Replay. The example below won't print numbers at all if it is just a Subject<T>.
 			
 				var source = new ReplaySubject<int>();
@@ -1324,6 +1528,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TResult> Return<TResult> (TResult value, IScheduler scheduler)
 		{
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new ReplaySubject<TResult> (scheduler);
 			sub.OnNext (value);
 			sub.OnCompleted ();
@@ -1349,6 +1556,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IObservable<TSample> sampler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			/* FIXME: this somehow fails to emit expected items in the sources for the following code. (Never mind that "done" never emits, that is expected.)
 			
 				var source = Observable.Interval(TimeSpan.FromMilliseconds(300)).Delay (TimeSpan.FromSeconds (2));
@@ -1370,6 +1580,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, TSource, TSource> accumulator)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (accumulator == null)
+				throw new ArgumentNullException ("accumulator");
+
 			// note the results difference between those Scan() overloads...
 			bool has_value = false;
 			TSource intermediate = default (TSource);
@@ -1383,6 +1598,11 @@ namespace System.Reactive.Linq
 			TAccumulate seed,
 			Func<TAccumulate, TSource, TAccumulate> accumulator)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (accumulator == null)
+				throw new ArgumentNullException ("accumulator");
+
 			// note the results difference between those Scan() overloads...
 			TAccumulate intermediate = seed;
 			var sub = new Subject<TAccumulate> ();
@@ -1429,6 +1649,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, IEnumerable<TResult>> selector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+
 			var sub = new ReplaySubject<TResult> ();
 			source.Subscribe ((v) => {
 				foreach (var r in selector (v))
@@ -1441,6 +1666,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, IObservable<TResult>> selector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+
 			var sub = new ReplaySubject<TResult> ();
 			var dis = source.Subscribe (
 				(v) => { var o = selector (v); o.Subscribe (vv => sub.OnNext (vv)); },
@@ -1453,6 +1683,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IObservable<TOther> other)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (other == null)
+				throw new ArgumentNullException ("other");
+
 			var sub = new ReplaySubject<TOther> ();
 			int waits = 0;
 			var dis = source.Subscribe (
@@ -1476,6 +1711,15 @@ namespace System.Reactive.Linq
 			Func<Exception, IObservable<TResult>> onError,
 			Func<IObservable<TResult>> onCompleted)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (onNext == null)
+				throw new ArgumentNullException ("onNext");
+			if (onError == null)
+				throw new ArgumentNullException ("onError");
+			if (onCompleted == null)
+				throw new ArgumentNullException ("onCompleted");
+
 			var sub = new ReplaySubject<TResult> ();
 			var dis = source.Subscribe (
 				(v) => { var o = onNext (v); o.Subscribe (vv => sub.OnNext (vv)); },
@@ -1489,6 +1733,13 @@ namespace System.Reactive.Linq
 			Func<TSource, IEnumerable<TCollection>> collectionSelector,
 			Func<TSource, TCollection, TResult> resultSelector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (collectionSelector == null)
+				throw new ArgumentNullException ("collectionSelector");
+			if (resultSelector == null)
+				throw new ArgumentNullException ("resultSelector");
+
 			var sub = new Subject<TResult> ();
 			var dis = source.Subscribe (
 				v => {
@@ -1506,6 +1757,13 @@ namespace System.Reactive.Linq
 			Func<TSource, IObservable<TCollection>> collectionSelector,
 			Func<TSource, TCollection, TResult> resultSelector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (collectionSelector == null)
+				throw new ArgumentNullException ("collectionSeelctor");
+			if (resultSelector == null)
+				throw new ArgumentNullException ("resultSelector");
+
 			var sub = new Subject<TResult> ();
 			int waits = 0;
 			var dis = source.Subscribe (
@@ -1553,6 +1811,13 @@ namespace System.Reactive.Linq
 			IObservable<TSource> second,
 			IEqualityComparer<TSource> comparer)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+
 			var fo = new CountingObservable<TSource> (first);
 			var so = new CountingObservable<TSource> (second);
 			var cmp = When (fo.And (so).Then ((f, s) => comparer.Equals (f, s))).All (v => true);
@@ -1608,6 +1873,11 @@ namespace System.Reactive.Linq
 		
 		static IObservable<TSource> SwitchUntil<TSource, TOther> (this IObservable<TSource> source, IObservable<TOther> other, bool initValue)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (other == null)
+				throw new ArgumentNullException ("other");
+
 			return new ColdObservableEach<TSource> (sub => {
 				bool enabled = initValue;
 				IDisposable dis = null, odis = null;
@@ -1634,6 +1904,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
 			bool skipDone = false;
 			return source.Where ((s, i) => skipDone || (skipDone = !predicate (s, i)));
 		}
@@ -1645,6 +1920,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<Unit> Start (Action action, IScheduler scheduler)
 		{
+			if (action == null)
+				throw new ArgumentNullException ("action");
+
 			return Start<Unit> (() => { action (); return Unit.Default; }, scheduler);
 		}
 		
@@ -1655,6 +1933,11 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Start<TSource> (Func<TSource> function, IScheduler scheduler)
 		{
+			if (function == null)
+				throw new ArgumentNullException ("function");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			return new HotObservable<TSource> ((sub) => {
 				try {
 					var ret = function ();
@@ -1678,6 +1961,13 @@ namespace System.Reactive.Linq
 			IScheduler scheduler,
 			params TSource [] values)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			if (values == null)
+				throw new ArgumentNullException ("values");
+
 			return new HotObservable<TSource> ((sub) => {
 				try {
 					foreach (var v in values)
@@ -1701,6 +1991,13 @@ namespace System.Reactive.Linq
 			IObserver<TSource> observer,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (observer == null)
+				throw new ArgumentNullException ("observer");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var o = source.ToObservable ();
 			var sub = new ReplaySubject<TSource> (scheduler);
 			sub.Subscribe (observer);
@@ -1712,6 +2009,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			return new SchedulerBoundObservable<TSource> (source, scheduler);
 		}
 		
@@ -1724,11 +2026,17 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<decimal> Sum (this IObservable<decimal> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return source.NonNullableSum ((x, y) => x + y);
 		}
 		
 		public static IObservable<TSource> Switch<TSource> (this IObservable<IObservable<TSource>> sources)
 		{
+			if (sources == null)
+				throw new ArgumentNullException ("sources");
+
 			var sub = new Subject<TSource> ();
 			var dl = new List<IDisposable> ();
 			var wait = new ManualResetEvent (true);
@@ -1747,6 +2055,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Object gate)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (gate == null)
+				throw new ArgumentNullException ("gate");
+
 			var sub = new SynchronizedSubject<TSource> (gate);
 			var dis = source.Subscribe (sub);
 			return new WrappedSubject<TSource> (sub, dis);
@@ -1756,6 +2069,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			int count)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<TSource> ();
 			int idx = 0;
 			bool done = false;
@@ -1826,6 +2142,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
 		{
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
 			return source.TakeWhile ((s, i) => predicate (s));
 		}
 		
@@ -1833,6 +2152,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, int, bool> predicate)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+
 			bool stopped = false;
 			return source.Where ((s, i) => !stopped && (stopped = !predicate (s, i)));
 		}
@@ -1841,6 +2165,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, TResult> selector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+				
 			return new Plan<TSource, TResult> (new Pattern<TSource> (source), selector);
 		}
 		
@@ -1856,6 +2185,11 @@ namespace System.Reactive.Linq
 			TimeSpan dueTime,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new Subject<TSource> ();
 			var ticker = Interval (dueTime, scheduler);
 			bool emit = true;
@@ -1874,6 +2208,11 @@ namespace System.Reactive.Linq
 			Exception exception,
 			IScheduler scheduler)
 		{
+			if (exception == null)
+				throw new ArgumentNullException ("exception");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+				
 			var sub = new ReplaySubject<TResult> (scheduler);
 			sub.OnError (exception);
 			return sub;
@@ -1888,6 +2227,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			var sub = new Subject<TimeInterval<TSource>> ();
 			DateTimeOffset last = scheduler.Now;
 			var dis = source.Subscribe (
@@ -2079,15 +2423,26 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source, IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
+
 			var sub = new Subject<Timestamped<TSource>> ();
 			var dis = source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			return new WrappedSubject<Timestamped<TSource>> (sub, dis);
 		}
 		
 		public static IObservable<TSource[]> ToArray<TSource> (this IObservable<TSource> source)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
+			var sub = new Subject<TSource[]> ();
+			var a = new List<TSource> ();
+			var dis = source.Subscribe (v => a.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (a.ToArray ()); sub.OnCompleted (); });
+			return new WrappedSubject<TSource[]> (sub, dis);
+		}
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action)
 		{
@@ -2096,6 +2451,11 @@ namespace System.Reactive.Linq
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action, IScheduler scheduler)
 		{
+			if (action == null)
+				throw new ArgumentNullException ("action");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+
 			return () => Start (action, scheduler);
 		}
 		
@@ -2158,6 +2518,15 @@ namespace System.Reactive.Linq
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (elementSelector == null)
+				throw new ArgumentNullException ("elementSelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			
 			var sub = new Subject<IDictionary<TKey, TElement>> ();
 			var dic = new Dictionary<TKey, TElement> (comparer);
 			var dis = source.Subscribe (
@@ -2169,6 +2538,9 @@ namespace System.Reactive.Linq
 		
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var l = new BlockingCollection<TSource> ();
 			source.Subscribe (
 				v => { l.Add (v); },
@@ -2180,6 +2552,9 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<IList<TSource>> ToList<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();
 			var dis = source.Subscribe (
@@ -2218,6 +2593,15 @@ namespace System.Reactive.Linq
 			Func<TSource, TElement> elementSelector,
 			IEqualityComparer<TKey> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (keySelector == null)
+				throw new ArgumentNullException ("keySelector");
+			if (elementSelector == null)
+				throw new ArgumentNullException ("elementSelector");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			
 			var sub = new Subject<ILookup<TKey, TElement>> ();
 			var l = new List<TSource> ();
 			var dis = source.Subscribe (v => l.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (Enumerable.ToLookup<TSource, TKey, TElement> (l,keySelector, elementSelector, comparer)); sub.OnCompleted (); });
@@ -2233,6 +2617,11 @@ namespace System.Reactive.Linq
 			this IEnumerable<TSource> source,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			
 			return new ColdObservableEach<TSource> ((sub) => {
 				try {
 					foreach (var s in source)
@@ -2249,6 +2638,11 @@ namespace System.Reactive.Linq
 			Func<TResource, IObservable<TSource>> observableFactory)
 			where TResource : IDisposable
 		{
+			if (resourceFactory == null)
+				throw new ArgumentNullException ("resourceFactory");
+			if (observableFactory == null)
+				throw new ArgumentNullException ("observableFactory");
+			
 			TResource rdis = default (TResource);
 			var subdis = new List<IDisposable> ();
 			var src = new ColdObservableEach<TSource> (sub => {
@@ -2274,6 +2668,11 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<TSource, bool> predicate)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+			
 			return source.Where ((s, i) => predicate (s));
 		}
 		
@@ -2312,6 +2711,9 @@ namespace System.Reactive.Linq
 			IEnumerable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
 		{
+			if (second == null)
+				throw new ArgumentNullException ("second");
+			
 			return Zip (first, second.ToObservable (), resultSelector);
 		}
 		
@@ -2320,6 +2722,13 @@ namespace System.Reactive.Linq
 			IObservable<TSecond> second,
 			Func<TFirst, TSecond, TResult> resultSelector)
 		{
+			if (first == null)
+				throw new ArgumentNullException ("first");
+			if (second == null)
+				throw new ArgumentNullException ("second");
+			if (resultSelector == null)
+				throw new ArgumentNullException ("resultSelector");
+			
 			return When (first.And (second).Then (resultSelector));
 		}
 	}

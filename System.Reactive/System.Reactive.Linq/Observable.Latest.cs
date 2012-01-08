@@ -15,6 +15,9 @@ namespace System.Reactive.Linq
 	{
 		public static IEnumerable<TSource> Latest<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new LatestEnumerable<TSource> (source);
 		}
 		

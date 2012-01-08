@@ -256,6 +256,11 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Max<TSource> (this IObservable<TSource> source, IComparer<TSource> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			
 			TSource max = default (TSource);
 			var sub = new Subject<TSource> ();
 			bool got = false;
@@ -333,6 +338,11 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> Min<TSource> (this IObservable<TSource> source, IComparer<TSource> comparer)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (comparer == null)
+				throw new ArgumentNullException ("comparer");
+			
 			TSource min = default (TSource);
 			var sub = new Subject<TSource> ();
 			bool got = false;

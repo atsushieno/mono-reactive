@@ -65,6 +65,11 @@ namespace System.Reactive.Linq
 			int count,
 			IScheduler scheduler)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			
 			var counter = new Subject<Unit> ();
 			var sub = new Subject<IObservable<TSource>> ();
 			var l = new Subject<TSource> ();
@@ -103,6 +108,13 @@ namespace System.Reactive.Linq
 			IObservable<TWindowOpening> windowOpenings,
 			Func<TWindowOpening, IObservable<TWindowClosing>> windowClosingSelector)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (windowOpenings == null)
+				throw new ArgumentNullException ("windowOpenings");
+			if (windowClosingSelector == null)
+				throw new ArgumentNullException ("windowClosingSelector");
+			
 			var sub = new Subject<IObservable<TSource>> ();
 			var l = new Subject<TSource> ();
 			var disc = new List<IDisposable> ();

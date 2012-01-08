@@ -38,6 +38,11 @@ namespace System.Reactive.Linq
 		// The callers (First/FirstOrDefault) are blocking methods.
 		static TSource InternalFirstOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+			
 			// FIXME: should we use SpinWait or create some hybrid one?
 			var wait = new ManualResetEvent (false);
 			TSource ret = default (TSource);
@@ -56,6 +61,11 @@ namespace System.Reactive.Linq
 		
 		public static void ForEach<TSource> (this IObservable<TSource> source, Action<TSource> onNext)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (onNext == null)
+				throw new ArgumentNullException ("onNext");
+			
 			var wait = new ManualResetEvent (false);
 			Exception error = null;
 			var dis = source.Subscribe (v => onNext (v), ex => { error = ex; wait.Set (); }, () => wait.Set ());
@@ -88,6 +98,11 @@ namespace System.Reactive.Linq
 		// The callers (Last/LastOrDefault) are blocking methods.
 		static TSource InternalLastOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+			
 			// FIXME: should we use SpinWait or create some hybrid one?
 			var wait = new ManualResetEvent (false);
 			TSource ret = default (TSource);
@@ -127,6 +142,11 @@ namespace System.Reactive.Linq
 		// The callers (Single/SingleOrDefault) are blocking methods.
 		static TSource InternalSingleOrDefault<TSource> (this IObservable<TSource> source, Func<TSource, bool> predicate, bool throwError)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (predicate == null)
+				throw new ArgumentNullException ("predicate");
+			
 			// FIXME: should we use SpinWait or create some hybrid one?
 			var wait = new ManualResetEvent (false);
 			TSource ret = default (TSource);

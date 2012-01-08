@@ -32,6 +32,11 @@ namespace System.Reactive.Linq
 		// TDelegate must be a delegate that only takes a TEventArgs (no "object sender")
 		// FIXME: How can I implement this guy???
 		{
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+
 			throw new NotImplementedException ();
 
 			/* this is no-go, fails to bind for incompatible argument types (EventArgs vs. TEventArgs !) */
@@ -48,6 +53,13 @@ namespace System.Reactive.Linq
 			Action<TDelegate> addHandler,
 			Action<TDelegate> removeHandler)
 		{
+			if (conversion == null)
+				throw new ArgumentNullException ("conversion");
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+
 			return new EventObservable<TDelegate, TEventArgs> (conversion, addHandler, removeHandler);
 		}
 		
@@ -56,6 +68,11 @@ namespace System.Reactive.Linq
 			Action<EventHandler<TEventArgs>> removeHandler)
 			where TEventArgs : EventArgs
 		{
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+			
 			return new EventPatternObservableGeneric<TEventArgs> (addHandler, removeHandler);
 		}
 		
@@ -63,6 +80,11 @@ namespace System.Reactive.Linq
 			Action<EventHandler> addHandler,
 			Action<EventHandler> removeHandler)
 		{
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+
 			return new EventPatternObservableNonGeneric (addHandler, removeHandler);
 		}
 
@@ -71,6 +93,11 @@ namespace System.Reactive.Linq
 			Action<TDelegate> removeHandler)
 			where TEventArgs : EventArgs
 		{
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+
 			/* FIXME: this is no-go, fails to bind for incompatible argument types (EventArgs vs. TEventArgs !) */
 			ISubject<EventPattern<TEventArgs>> subject;
 			Action<object, TEventArgs> d = delegate (object sender, TEventArgs args) { subject.OnNext (new EventPattern<TEventArgs> (sender, args)); };
@@ -148,6 +175,11 @@ namespace System.Reactive.Linq
 			Action<TDelegate> removeHandler)
 			where TEventArgs : EventArgs
 		{
+			if (addHandler == null)
+				throw new ArgumentNullException ("addHandler");
+			if (removeHandler == null)
+				throw new ArgumentNullException ("removeHandler");
+
 			return new EventPatternObservable<TDelegate, TEventArgs> (conversion, addHandler, removeHandler);
 		}
 
@@ -169,6 +201,9 @@ namespace System.Reactive.Linq
 		
 		public static IEventSource<TSource> ToEvent<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return new EventSource<TSource> (source);
 		}
 		
@@ -187,6 +222,9 @@ namespace System.Reactive.Linq
 			this IObservable<EventPattern<TEventArgs>> source)
 			where TEventArgs : EventArgs
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+
 			return new EventPatternSource<TEventArgs> (source);
 		}
 	}

@@ -66,6 +66,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			TSource initialValue)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new ConnectableObservable<TSource, TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
 		}
 		
@@ -84,6 +87,9 @@ namespace System.Reactive.Linq
 		
 		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new ConnectableObservable <TSource, TSource> (source, () => new AsyncSubject<TSource> ());
 		}
 		
@@ -96,6 +102,9 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			ISubject<TSource, TResult> subject)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new ConnectableObservable<TSource, TResult> (source, () => subject);
 		}
 		
@@ -128,12 +137,18 @@ namespace System.Reactive.Linq
 		
 		public static IObservable<TSource> RefCount<TSource> (this IConnectableObservable<TSource> source)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new RefCountObservable<TSource> (source);
 		}
 
 		static IConnectableObservable<TSource> Replay<TSource> (
 			this IObservable<TSource> source, Func<ReplaySubject<TSource>> createSubject)
 		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
 			return new ConnectableObservable<TSource, TSource> (source, createSubject);
 		}
 
@@ -201,9 +216,7 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			Func<ReplaySubject<TResult>> createSubject)
-		{
-			throw new NotImplementedException ();
-		}
+		{ throw new NotImplementedException (); }
 		
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
