@@ -82,9 +82,10 @@ namespace System.Reactive.Linq
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
 			var sub = new ReplaySubject<T> ();
-			sub.Subscribe (observer);
+			var subdis = sub.Subscribe (observer);
 			var dis = scheduler.Schedule (() => work (sub));
 			return Disposable.Create (() => {
+				subdis.Dispose ();
 				dis.Dispose ();
 			});
 		}
