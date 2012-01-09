@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace System.Reactive.Tests
+namespace System.Tests
 {
 	[TestFixture]
 	public class ObservableExtensionTest

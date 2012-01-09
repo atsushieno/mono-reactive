@@ -292,13 +292,14 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			var sub = new Subject<TSource> ();
-			var dis = new List<IDisposable> ();
-			StartConcat (sources.GetEnumerator (), sub, dis);
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+			return new ColdObservableEach<TSource> (sub => {
+				var dis = new List<IDisposable> ();
+				StartConcat (sources.GetEnumerator (), sub, dis);
+				return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+				}, Scheduler.CurrentThread);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, Subject<TSource> sub, List<IDisposable> dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, List<IDisposable> dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
