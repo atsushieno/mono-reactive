@@ -1,0 +1,13 @@
+
+This is a directory for NUnit 2.6 (beta) files. See the project page for
+details and license.
+http://www.nunit.org/index.php?p=docHome&r=2.6
+
+(Note that I edited nunit-console.exe config slightly from the binary
+distribution.)
+
+You can either run "make" or open mono-reactive.sln in MonoDevelop and run
+System.Reactive.Tests.dll (as an NUnit test project).
+
+You can alternatively run nunit-console.exe on .NET Framework; just edit
+Makefile and add # prefix to "RUNTIME = mono" line to comment it out.

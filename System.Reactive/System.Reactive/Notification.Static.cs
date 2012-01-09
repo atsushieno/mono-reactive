@@ -12,6 +12,8 @@ namespace System.Reactive
 		
 		public static Notification<T> CreateOnError<T> (Exception error)
 		{
+			if (error == null)
+				throw new ArgumentNullException ("error");
 			return new Notification<T>.OnError (error);
 		}
 		

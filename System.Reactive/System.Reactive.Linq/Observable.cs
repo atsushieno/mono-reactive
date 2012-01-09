@@ -1500,7 +1500,7 @@ namespace System.Reactive.Linq
 			
 			*/
 			var sub = new ReplaySubject<TSource> ();
-			Action<Exception> onError;
+			Action<Exception> onError = null;
 			var dis = new List<IDisposable> ();
 			onError = (error) => {
 				if (retryCount-- <= 0)

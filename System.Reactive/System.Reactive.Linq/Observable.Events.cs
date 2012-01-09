@@ -99,7 +99,7 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("removeHandler");
 
 			/* FIXME: this is no-go, fails to bind for incompatible argument types (EventArgs vs. TEventArgs !) */
-			ISubject<EventPattern<TEventArgs>> subject;
+			ISubject<EventPattern<TEventArgs>> subject = null;
 			Action<object, TEventArgs> d = delegate (object sender, TEventArgs args) { subject.OnNext (new EventPattern<TEventArgs> (sender, args)); };
 			Func<ISubject<EventPattern<TEventArgs>>, TDelegate> handlerCreator =
 				sub => { subject = sub; return (TDelegate) (object) Delegate.CreateDelegate (typeof (TDelegate), d.GetType ().GetMethod ("Invoke")); };
