@@ -8,12 +8,6 @@ namespace System.Reactive.Concurrency
 {
 	public static class Scheduler
 	{
-		// FIXME: implement
-		internal static IScheduler GetDefault<T> (IObservable<T> source)
-		{
-			return Scheduler.CurrentThread;
-		}
-		
 		static object lock_obj = new object ();
 		static volatile CurrentThreadScheduler current_thread;
 		static volatile ImmediateScheduler immediate;

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
@@ -8,21 +10,28 @@ namespace System.Reactive.Concurrency
 	{
 		protected VirtualTimeScheduler ()
 		{
+			tasks = new SortedSet<IScheduledItem<TAbsolute>> ();
 		}
 		
 		protected VirtualTimeScheduler (TAbsolute initialClock, IComparer<TAbsolute> comparer)
 			: base (initialClock, comparer)
 		{
+			tasks = new SortedSet<IScheduledItem<TAbsolute>> (new ScheduledItem<TAbsolute>.Comparer (comparer));
 		}
+		
+		SortedSet<IScheduledItem<TAbsolute>> tasks;
 		
 		protected override IScheduledItem<TAbsolute> GetNext ()
 		{
-			throw new NotImplementedException ();
+			return tasks.FirstOrDefault ();
 		}
 		
 		public override IDisposable ScheduleAbsolute<TState> (TState state, TAbsolute dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			throw new NotImplementedException ();
+			ScheduledItem<TAbsolute> t = null;
+			t = new ScheduledItem<TAbsolute> (dueTime, () => { tasks.Remove (t); return action (this, state); });
+			tasks.Add (t);
+			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)), t);
 		}
 	}
 }

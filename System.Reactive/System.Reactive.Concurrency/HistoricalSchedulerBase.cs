@@ -6,17 +6,17 @@ namespace System.Reactive.Concurrency
 	{
 		protected override DateTimeOffset Add (DateTimeOffset absolute, TimeSpan relative)
 		{
-			throw new NotImplementedException ();
+			return absolute + relative;
 		}
 		
 		protected override DateTimeOffset ToDateTimeOffset (DateTimeOffset absolute)
 		{
-			throw new NotImplementedException ();
+			return absolute;
 		}
 		
 		protected override TimeSpan ToRelative (TimeSpan timeSpan)
 		{
-			throw new NotImplementedException ();
+			return timeSpan;
 		}
 	}
 }

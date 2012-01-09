@@ -23,13 +23,11 @@ namespace System.Reactive.Concurrency
 		
 		protected IComparer<TAbsolute> Comparer { get; private set; }
 		
-		protected bool IsEnabled {
-			get { throw new NotImplementedException (); }
-			private set { throw new NotImplementedException (); }
-		}
+		// what is this property for?
+		public bool IsEnabled { get; private set; }
 		
 		public DateTimeOffset Now {
-			get { return Scheduler.Now; }
+			get { return ToDateTimeOffset (Clock); }
 		}
 		
 		protected abstract TAbsolute Add (TAbsolute absolute, TRelative relative);
@@ -53,7 +51,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule<TState> (state, dueTime - DateTimeOffset.Now, action);
+			return Schedule<TState> (state, dueTime - Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
@@ -70,12 +68,12 @@ namespace System.Reactive.Concurrency
 		
 		public void Start ()
 		{
-			throw new NotImplementedException ();
+			// what is this method for?
 		}
 		
 		public void Stop ()
 		{
-			throw new NotImplementedException ();
+			// what is this method for?
 		}
 		
 		protected abstract DateTimeOffset ToDateTimeOffset (TAbsolute absolute);
