@@ -52,6 +52,7 @@ namespace System.Reactive.Linq
 
 			public LatestEnumerator (IObservable<TSource> source)
 			{
+				// FIXME: need to make it non-subscribing
 				dis = source.Subscribe (v => { cur = v; index++; wait.Set (); }, ex => { error = ex; running = false; }, () => running = false);
 			}
 

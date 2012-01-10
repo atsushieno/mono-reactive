@@ -22,6 +22,10 @@ namespace System.Reactive.Linq
 
 	public static partial class Observable
 	{
+		static IScheduler DefaultColdScheduler {
+			get { return Scheduler.Immediate; }
+		}
+		
 		public static IObservable<TSource> Aggregate<TSource> (
 			this IObservable<TSource> source,
 			Func<TSource, TSource, TSource> accumulator)
@@ -31,9 +35,10 @@ namespace System.Reactive.Linq
 			if (accumulator == null)
 				throw new ArgumentNullException ("accumulator");
 
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			bool has_agg = false;
 			TSource result = default (TSource);
-			var sub = new Subject<TSource> ();
 			var dis = source.Subscribe (v => {
 				if (!has_agg)
 					result = v;
@@ -48,14 +53,30 @@ namespace System.Reactive.Linq
 				else
 					sub.OnError (new InvalidOperationException ("There was value to aggregate."));
 			});
-			return new WrappedSubject<TSource> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TAccumulate> Aggregate<TSource, TAccumulate> (
 			this IObservable<TSource> source,
 			TAccumulate seed,
 			Func<TAccumulate, TSource, TAccumulate> accumulator)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (accumulator == null)
+				throw new ArgumentNullException ("accumulator");
+
+			// note the results difference between those Aggregate() overloads...
+			return new ColdObservableEach<TAccumulate> (sub => {
+			// ----
+			TAccumulate result = seed;
+			var dis = source.Subscribe (v => { result = accumulator (result, v); sub.OnNext (result); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
+		}
 		
 		public static IObservable<bool> All<TSource> (
 			this IObservable<TSource> source,
@@ -66,7 +87,8 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 
-			var sub = new Subject<bool> ();
+			return new ColdObservableEach<bool> (sub => {
+			// ----
 			IDisposable dis = null;
 			bool ret = true;
 			bool hasValue = false;
@@ -85,14 +107,18 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<bool> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (this IEnumerable<IObservable<TSource>> sources)
 		{
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
-			var sub = new Subject<TSource> ();
+
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			IObservable<TSource> first = null;
 
 			// avoided using "from source in sources select ..." for eager evaluation.
@@ -116,7 +142,9 @@ namespace System.Reactive.Linq
 						sub.OnCompleted ();
 				}));
 			}
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
+			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Amb<TSource> (params IObservable<TSource>[] sources)
@@ -151,7 +179,8 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 
-			var sub = new Subject<bool> ();
+			return new ColdObservableEach<bool> (sub => {
+			// ----
 			IDisposable dis = null;
 			bool hit = false;
 			dis = source.Subscribe ((s) => {
@@ -176,7 +205,9 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<bool> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		class WrappedObservable<T> : IObservable<T>
@@ -215,18 +246,21 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var e = sources.GetEnumerator ();
-			var dis = new List<IDisposable> ();
 			if (!e.MoveNext ()) {
 				sub.OnCompleted ();
-				return sub;
-			} else {
-				Action subact = null;
-				subact = () => dis.Add (e.Current.Subscribe (v => sub.OnNext (v), ex => { if (e.MoveNext ()) subact (); else sub.OnError (ex); }, () => sub.OnCompleted ()));
-				subact ();
-				return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+				return Disposable.Empty;
 			}
+			
+			var dis = new List<IDisposable> ();
+			Action subact = null;
+			subact = () => dis.Add (e.Current.Subscribe (v => sub.OnNext (v), ex => { if (e.MoveNext ()) subact (); else sub.OnError (ex); }, () => sub.OnCompleted ()));
+			subact ();
+			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Catch<TSource> (params IObservable<TSource> [] sources)
@@ -244,9 +278,12 @@ namespace System.Reactive.Linq
 			if (handler == null)
 				throw new ArgumentNullException ("handler");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var dis = source.Subscribe (v => sub.OnNext (v), ex => { var eex = ex as TException; if (eex != null) foreach (var vv in handler (eex).ToEnumerable ()) sub.OnNext (vv); else sub.OnError (ex); }, () => sub.OnCompleted ());
-			return new WrappedSubject<TSource> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Catch<TSource> (
@@ -257,7 +294,6 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("first");
 			if (second == null)
 				throw new ArgumentNullException ("second");
-
 
 			return Catch (new IObservable<TSource> [] {first, second});
 		}
@@ -272,7 +308,8 @@ namespace System.Reactive.Linq
 			if (second == null)
 				throw new ArgumentNullException ("second");
 
-			var sub = new Subject<TResult> ();
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
 			TFirst fv = default (TFirst);
 			TSecond sv = default (TSecond);
 			bool first_started = false, second_started = false, first_completed = false, second_completed = false;
@@ -284,7 +321,9 @@ namespace System.Reactive.Linq
 				s => { sv = s; second_started = true; if (first_started) sub.OnNext (resultSelector (fv, sv)); },
 				ex => sub.OnError (ex),
 				() => { second_completed = true; if (first_completed) sub.OnCompleted (); });
-			return new WrappedSubject<TResult> (sub, new CompositeDisposable (dis1, dis2));
+			return new CompositeDisposable (dis1, dis2);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Concat<TSource> (this IEnumerable<IObservable<TSource>> sources)
@@ -293,10 +332,12 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("sources");
 
 			return new ColdObservableEach<TSource> (sub => {
-				var dis = new List<IDisposable> ();
-				StartConcat (sources.GetEnumerator (), sub, dis);
-				return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
-				}, Scheduler.CurrentThread);
+			// ----
+			var dis = new List<IDisposable> ();
+			StartConcat (sources.GetEnumerator (), sub, dis);
+			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, List<IDisposable> dis)
@@ -358,11 +399,13 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<int> ();
-			IDisposable dis = null;
+			return new ColdObservableEach<int> (sub => {
+			// ----
 			int count = 0;
-			dis = source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); dis.Dispose (); });
-			return sub;
+			var dis = source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); });
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
@@ -389,10 +432,13 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			bool hadValue = false;
 			var dis = source.Subscribe (v => { hadValue = true; sub.OnNext (v); }, ex => sub.OnError (ex), () => { if (!hadValue) sub.OnNext (defaultValue); sub.OnCompleted (); });
-			return new WrappedSubject<TSource> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		class DeferredObservable<TValue> : IObservable<TValue>
@@ -452,10 +498,12 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			return new ColdObservableEach<TSource> ((sub) => {
-				Thread.Sleep (Scheduler.Normalize (dueTime)); 
-				return source.Subscribe (sub);
-				}, scheduler);
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+			Thread.Sleep (Scheduler.Normalize (dueTime)); 
+			return source.Subscribe (sub);
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TSource> Dematerialize<TSource> (this IObservable<Notification<TSource>> source)
@@ -463,8 +511,9 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource> ();
-			var dis = source.Subscribe (
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+			return source.Subscribe (
 				n => {
 					switch (n.Kind) {
 					case NotificationKind.OnNext:
@@ -478,7 +527,8 @@ namespace System.Reactive.Linq
 						break;
 					}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Distinct<TSource> (this IObservable<TSource> source)
@@ -512,10 +562,10 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
-			var sub = new Subject<TSource> ();
-			IDisposable dis = null;
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var keys = new HashSet<TKey> (comparer);
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					var k = keySelector (s);
 					if (!keys.Contains (k)) {
@@ -527,7 +577,8 @@ namespace System.Reactive.Linq
 				() => {
 					sub.OnCompleted ();
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> DistinctUntilChanged<TSource> (this IObservable<TSource> source)
@@ -561,11 +612,11 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
-			var sub = new Subject<TSource> ();
-			IDisposable dis = null;
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			bool hit = false;
 			TKey prev = default (TKey);
-			dis = source.Subscribe (s => {
+			return source.Subscribe (s => {
 				try {
 					var k = keySelector (s);
 					if (!hit) {
@@ -586,7 +637,8 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IObservable<TSource> Do<TSource> (
@@ -605,10 +657,13 @@ namespace System.Reactive.Linq
 			if (observer == null)
 				throw new ArgumentNullException ("observer");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var dis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			sub.Subscribe (observer);
-			return new WrappedSubject<TSource> (sub, dis);
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IObservable<TSource> Do<TSource> (
@@ -651,9 +706,10 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			long i = 0;
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => { if (i++ == index) sub.OnNext (v); sub.OnCompleted (); },
 				ex => sub.OnError (ex),
 				() => {
@@ -666,7 +722,8 @@ namespace System.Reactive.Linq
 						}
 					}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
@@ -698,6 +755,7 @@ namespace System.Reactive.Linq
 			if (end == null)
 				throw new ArgumentNullException ("end");
 
+			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<Unit> ();
 			return () => { begin ((res) => {
 				try {
@@ -721,6 +779,7 @@ namespace System.Reactive.Linq
 			if (end == null)
 				throw new ArgumentNullException ("end");
 
+			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<TResult> ();
 			return () => { begin ((res) => {
 				try {
@@ -805,17 +864,19 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("scheduler");
 
 			return new ColdObservableEach<TResult> (sub => {
-				try {
-					for (var i = initialState; condition (i); i = iterate (i)) {
-						Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
-						sub.OnNext (resultSelector (i));
-					}
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
+			// ----
+			try {
+				for (var i = initialState; condition (i); i = iterate (i)) {
+					Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
+					sub.OnNext (resultSelector (i));
 				}
-				return Disposable.Empty;
-				}, scheduler);
+				sub.OnCompleted ();
+			} catch (Exception ex) {
+				sub.OnError (ex);
+			}
+			return Disposable.Empty;
+			// ----
+			}, scheduler);
 		}
 		
 		public static IEnumerator<TSource> GetEnumerator<TSource> (this IObservable<TSource> source)
@@ -861,10 +922,10 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
-			IDisposable dis = null;
-			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
+			return new ColdObservableEach<IGroupedObservable<TKey, TElement>> (sub => {
+			// ----
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
-			dis = source.Subscribe ((s) => {
+			return source.Subscribe ((s) => {
 				try {
 					var k = keySelector (s);
 					GroupedSubject<TKey, TElement> g;
@@ -888,7 +949,8 @@ namespace System.Reactive.Linq
 					// FIXME: should we handle OnError() in groups too?
 				}
 			});
-			return new WrappedSubject<IGroupedObservable<TKey, TElement>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<IGroupedObservable<TKey, TSource>> GroupByUntil<TSource, TKey, TDuration> (
@@ -935,10 +997,10 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
-			IDisposable dis = null;
-			var sub = new Subject<IGroupedObservable<TKey, TElement>> ();
+			return new ColdObservableEach<IGroupedObservable<TKey, TElement>> (sub => {
+			// ----
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
-			dis = source.Subscribe (Observer.Create<TSource> ((TSource s) => {
+			return source.Subscribe (Observer.Create<TSource> ((TSource s) => {
 				try {
 					var k = keySelector (s);
 					GroupedSubject<TKey, TElement> g;
@@ -969,7 +1031,8 @@ namespace System.Reactive.Linq
 					// FIXME: should we handle OnError() in groups too?
 				}
 			}));
-			return new WrappedSubject<IGroupedObservable<TKey, TElement>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> GroupJoin<TLeft, TRight, TLeftDuration, TRightDuration, TResult> (
@@ -1025,9 +1088,11 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource> ();
-			var dis = source.Subscribe (v => {}, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<TSource> (sub, dis);
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+			return source.Subscribe (v => {}, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<long> Interval (TimeSpan period)
@@ -1053,18 +1118,20 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			return new ColdObservableEach<long> ((sub) => {
-				try {
-					long count = 0;
-					while (true) {
-						Thread.Sleep (period);
-						sub.OnNext (count++);
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
+			return new ColdObservableEach<long> (sub => {
+			// ----
+			try {
+				long count = 0;
+				while (true) {
+					Thread.Sleep (period);
+					sub.OnNext (count++);
 				}
-				return Disposable.Empty;
-				}, scheduler);
+			} catch (Exception ex) {
+				sub.OnError (ex);
+			}
+			return Disposable.Empty;
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TResult> Join<TLeft, TRight, TLeftDuration, TRightDuration, TResult>(
@@ -1082,11 +1149,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<long> ();
-			IDisposable dis = null;
+			return new ColdObservableEach<long> (sub => {
+			// ----
 			long count = 0;
-			dis = source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); dis.Dispose (); });
-			return sub;
+			return source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<Notification<TSource>> Materialize<TSource> (this IObservable<TSource> source)
@@ -1094,12 +1162,14 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<Notification<TSource>> ();
-			var dis = source.Subscribe (
+			return new ColdObservableEach<Notification<TSource>> (sub => {
+			// ----
+			return source.Subscribe (
 				v => sub.OnNext (Notification.CreateOnNext<TSource> (v)),
 				ex => sub.OnNext (Notification.CreateOnError<TSource> (ex)),
 				() => { sub.OnNext (Notification.CreateOnCompleted<TSource> ()); sub.OnCompleted (); });
-			return new WrappedSubject<Notification<TSource>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<IList<TSource>> MaxBy<TSource, TKey> (this IObservable<TSource> source, Func<TSource, TKey> keySelector)
@@ -1121,12 +1191,12 @@ namespace System.Reactive.Linq
 			== null)
 				throw new ArgumentNullException ("comparer");
 
+			return new ColdObservableEach<IList<TSource>> (sub => {
+			// ----
 			TKey maxk = default (TKey);
 			List<TSource> max = new List<TSource> ();
-			var sub = new Subject<IList<TSource>> ();
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -1152,7 +1222,8 @@ namespace System.Reactive.Linq
 						sub.OnCompleted ();
 					}
 				});
-			return new WrappedSubject<IList<TSource>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Merge<TSource> (this IEnumerable<IObservable<TSource>> sources)
@@ -1215,7 +1286,8 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			// avoided using "from source in sources select ..." for eager evaluation.
 			var dis = new List<IDisposable> ();
 			var l = new List<IObservable<TSource>> (sources);
@@ -1235,7 +1307,9 @@ namespace System.Reactive.Linq
 				});
 				dis.Add (subfunc (source));
 			}
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); sub.Dispose (); }));
+			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TSource> Merge<TSource> (
@@ -1270,12 +1344,12 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
+			return new ColdObservableEach<IList<TSource>> (sub => {
+			// ----
 			TKey mink = default (TKey);
 			List<TSource> min = new List<TSource> ();
-			var sub = new Subject<IList<TSource>> ();
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -1301,7 +1375,8 @@ namespace System.Reactive.Linq
 						sub.OnCompleted ();
 					}
 				});
-			return new WrappedSubject<IList<TSource>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IEnumerable<TSource> MostRecent<TSource> (
@@ -1358,6 +1433,7 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
+			// FIXME: need to make it non-subscribing
 			var sub = new SchedulerBoundSubject<TSource> (scheduler);
 			var dis = source.Subscribe (sub);
 			return new WrappedSubject<TSource> (sub, dis);
@@ -1383,14 +1459,14 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			return new ColdObservableEach<TSource> (
-				sub => {
-					var l = new List<IDisposable> ();
-					var e = sources.GetEnumerator ();
-					OnErrorResumeNext<TSource> (null, sub, e, l);
-					return Disposable.Create (() => l.ForEach (d => d.Dispose ()));
-				},
-				Scheduler.Immediate);
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+				var l = new List<IDisposable> ();
+				var e = sources.GetEnumerator ();
+				OnErrorResumeNext<TSource> (null, sub, e, l);
+				return Disposable.Create (() => l.ForEach (d => d.Dispose ()));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static void OnErrorResumeNext<TSource> (Exception error, ISubject<TSource> sub, IEnumerator<IObservable<TSource>> e, List<IDisposable> dis)
@@ -1488,6 +1564,14 @@ namespace System.Reactive.Linq
 		{
 			if (source == null)
 				throw new ArgumentNullException ("source");
+			if (retryCount < 0)
+				throw new ArgumentOutOfRangeException ("retryCount");
+
+			// Yes, there is an easy solution...
+			// return retryCount == 0 ? source : source.Concat (source.Retry (retryCount - 1);
+
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 
 			/* To my understanding, this should be Replay. The example below won't print numbers at all if it is just a Subject<T>.
 			
@@ -1497,10 +1581,9 @@ namespace System.Reactive.Linq
 				source.OnError(new NotSupportedException());
 				int retryCount = 2;
 				
-				sub.Subscribe(Console.WriteLine, ex => Console.WriteLine("retry exceeded"), () => Console.WriteLine ("done"));
+				source.Subscribe(Console.WriteLine, ex => Console.WriteLine("retry exceeded"), () => Console.WriteLine ("done"));
 			
 			*/
-			var sub = new ReplaySubject<TSource> ();
 			Action<Exception> onError = null;
 			var dis = new List<IDisposable> ();
 			onError = (error) => {
@@ -1513,7 +1596,9 @@ namespace System.Reactive.Linq
 				v => sub.OnNext (v),
 				ex => onError (ex),
 				() => sub.OnCompleted ()));
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dis) d.Dispose (); }));
+			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
@@ -1557,19 +1642,25 @@ namespace System.Reactive.Linq
 
 			/* FIXME: this somehow fails to emit expected items in the sources for the following code. (Never mind that "done" never emits, that is expected.)
 			
+			The first subscription would tell what is likely broken.
+			
 				var source = Observable.Interval(TimeSpan.FromMilliseconds(300)).Delay (TimeSpan.FromSeconds (2));
+				source.Subscribe (v => Console.WriteLine("--- " + v));
 				var sampler = Observable.Interval(TimeSpan.FromMilliseconds(1000)).Take (10);
 				var o = source.Sample(sampler);
 				o.Subscribe(Console.WriteLine, Console.WriteLine, () => Console.WriteLine("done"));
 			
 			*/
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			bool emit = false;
 			TSource current = default (TSource);
 			var sdis = sampler.Subscribe (v => { if (emit) sub.OnNext (current); }, ex => sub.OnError (ex), () => {}); // it does not send OnCompleted to the result.
 			var dis = source.Subscribe (v => { current = v; emit = true; }, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<TSource> (sub, new CompositeDisposable (sdis, dis));
+			return new CompositeDisposable (sdis, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Scan<TSource> (
@@ -1584,9 +1675,11 @@ namespace System.Reactive.Linq
 			// note the results difference between those Scan() overloads...
 			bool has_value = false;
 			TSource intermediate = default (TSource);
-			var sub = new Subject<TSource> ();
-			var dis = source.Subscribe (v => { if (has_value) intermediate = accumulator (intermediate, v); else intermediate = v; sub.OnNext (intermediate); has_value = true; }, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<TSource> (sub, dis);
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+			return source.Subscribe (v => { if (has_value) intermediate = accumulator (intermediate, v); else intermediate = v; sub.OnNext (intermediate); has_value = true; }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TAccumulate> Scan<TSource, TAccumulate> (
@@ -1599,11 +1692,13 @@ namespace System.Reactive.Linq
 			if (accumulator == null)
 				throw new ArgumentNullException ("accumulator");
 
+			return new ColdObservableEach<TAccumulate> (sub => {
+			// ----
 			// note the results difference between those Scan() overloads...
 			TAccumulate intermediate = seed;
-			var sub = new Subject<TAccumulate> ();
-			var dis = source.Subscribe (v => { intermediate = accumulator (intermediate, v); sub.OnNext (intermediate); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<TAccumulate> (sub, dis);
+			return source.Subscribe (v => { intermediate = accumulator (intermediate, v); sub.OnNext (intermediate); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IObservable<TResult> Select<TSource, TResult> (
@@ -1622,10 +1717,10 @@ namespace System.Reactive.Linq
 			if (selector == null)
 				throw new ArgumentNullException ("selector");
 
-			var sub = new Subject<TResult> ();
-			IDisposable dis = null;
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
 			int idx = 0;
-			dis = source.Subscribe ((s) => {
+			return source.Subscribe ((s) => {
 				try {
 					sub.OnNext (selector (s, idx++));
 				} catch (Exception ex) {
@@ -1638,7 +1733,8 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<TResult> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
@@ -1650,12 +1746,14 @@ namespace System.Reactive.Linq
 			if (selector == null)
 				throw new ArgumentNullException ("selector");
 
-			var sub = new ReplaySubject<TResult> ();
-			source.Subscribe ((v) => {
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
+			return source.Subscribe ((v) => {
 				foreach (var r in selector (v))
 					sub.OnNext (r);
 				}, (ex) => sub.OnError (ex), () => sub.OnCompleted ());
-			return sub;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
@@ -1667,12 +1765,14 @@ namespace System.Reactive.Linq
 			if (selector == null)
 				throw new ArgumentNullException ("selector");
 
-			var sub = new ReplaySubject<TResult> ();
-			var dis = source.Subscribe (
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
+			return source.Subscribe (
 				(v) => { var o = selector (v); o.Subscribe (vv => sub.OnNext (vv)); },
 				(ex) => sub.OnError (ex),
 				() => sub.OnCompleted ());
-			return new WrappedSubject<TResult> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TOther> SelectMany<TSource, TOther> (
@@ -1684,9 +1784,10 @@ namespace System.Reactive.Linq
 			if (other == null)
 				throw new ArgumentNullException ("other");
 
-			var sub = new ReplaySubject<TOther> ();
+			return new ColdObservableEach<TOther> (sub => {
+			// ----
 			int waits = 0;
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => {
 					waits++;
 					IDisposable d = null;
@@ -1698,7 +1799,8 @@ namespace System.Reactive.Linq
 				ex => sub.OnError (ex),
 				() => { if (waits == 0) sub.OnCompleted (); }
 				);
-			return new WrappedSubject<TOther> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TResult> (
@@ -1716,12 +1818,14 @@ namespace System.Reactive.Linq
 			if (onCompleted == null)
 				throw new ArgumentNullException ("onCompleted");
 
-			var sub = new ReplaySubject<TResult> ();
-			var dis = source.Subscribe (
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
+			return source.Subscribe (
 				(v) => { var o = onNext (v); o.Subscribe (vv => sub.OnNext (vv)); },
 				(ex) => { var o = onError (ex); o.Subscribe (vv => sub.OnNext (vv)); },
 				() => { var o = onCompleted (); o.Subscribe (vv => sub.OnNext (vv)); });
-			return new WrappedSubject<TResult> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TCollection, TResult> (
@@ -1736,8 +1840,9 @@ namespace System.Reactive.Linq
 			if (resultSelector == null)
 				throw new ArgumentNullException ("resultSelector");
 
-			var sub = new Subject<TResult> ();
-			var dis = source.Subscribe (
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
+			return source.Subscribe (
 				v => {
 					var c = collectionSelector (v);
 					foreach (var v2 in c)
@@ -1745,7 +1850,8 @@ namespace System.Reactive.Linq
 				},
 				ex => sub.OnError (ex),
 				() => sub.OnCompleted ());
-			return new WrappedSubject<TResult> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> SelectMany<TSource, TCollection, TResult> (
@@ -1760,9 +1866,10 @@ namespace System.Reactive.Linq
 			if (resultSelector == null)
 				throw new ArgumentNullException ("resultSelector");
 
-			var sub = new Subject<TResult> ();
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
 			int waits = 0;
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => {
 					waits++;
 					var cc = collectionSelector (v);
@@ -1774,7 +1881,8 @@ namespace System.Reactive.Linq
 				},
 				ex => sub.OnError (ex),
 				() => { if (waits == 0) sub.OnCompleted (); });
-			return new WrappedSubject<TResult> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		class CountingObservable<TSource> : IObservable<TSource>
@@ -1814,12 +1922,14 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
+			return new ColdObservableEach<bool> (sub => {
+			// ----
 			var fo = new CountingObservable<TSource> (first);
 			var so = new CountingObservable<TSource> (second);
 			var cmp = When (fo.And (so).Then ((f, s) => comparer.Equals (f, s))).All (v => true);
-			var sub = new Subject<bool> ();
-			var dis = cmp.Subscribe (v => sub.OnNext (v && fo.Count == so.Count), ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<bool> (sub, dis);
+			return cmp.Subscribe (v => sub.OnNext (v && fo.Count == so.Count), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static TSource Single<TSource> (this IObservable<TSource> source)
@@ -1843,10 +1953,10 @@ namespace System.Reactive.Linq
 			if (count < 0)
 				throw new ArgumentOutOfRangeException ("count");
 
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var q = new Queue<TSource> ();
-			var sub = new Subject<TSource> ();
-			IDisposable dis = null;
-			dis = source.Subscribe ((s) => {
+			return source.Subscribe ((s) => {
 				try {
 					q.Enqueue (s);
 					if (count > 0)
@@ -1864,7 +1974,8 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<TSource> SwitchUntil<TSource, TOther> (this IObservable<TSource> source, IObservable<TOther> other, bool initValue)
@@ -1875,11 +1986,13 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("other");
 
 			return new ColdObservableEach<TSource> (sub => {
-				bool enabled = initValue;
-				IDisposable dis = null, odis = null;
-				odis = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
-				return source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
-				}, Scheduler.CurrentThread); // maybe not harmful to run the starter...
+			// ----
+			bool enabled = initValue;
+			IDisposable dis = null, odis = null;
+			odis = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
+			return source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> SkipUntil<TSource, TOther> (
@@ -2033,13 +2146,16 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var dl = new List<IDisposable> ();
 			var wait = new ManualResetEvent (true);
 			var dis = sources.Subscribe (s => {
 				dl.Add (s.Subscribe (v => { wait.WaitOne (); sub.OnNext (v); }, ex => sub.OnError (ex), () => { wait.Set (); }));
 				}, ex => sub.OnError (ex), () => { wait.Set (); sub.OnCompleted (); });
-			return new WrappedSubject<TSource> (sub, Disposable.Create (() => { foreach (var d in dl) d.Dispose (); dis.Dispose (); }));
+			return Disposable.Create (() => { foreach (var d in dl) d.Dispose (); dis.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Synchronize<TSource> (this IObservable<TSource> source)
@@ -2057,6 +2173,7 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("gate");
 
 			var sub = new SynchronizedSubject<TSource> (gate);
+			// FIXME: make it non-subscribing
 			var dis = source.Subscribe (sub);
 			return new WrappedSubject<TSource> (sub, dis);
 		}
@@ -2068,10 +2185,11 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			int idx = 0;
 			bool done = false;
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => {
 					if (!done) {
 						if (idx++ < count)
@@ -2090,7 +2208,8 @@ namespace System.Reactive.Linq
 						sub.OnCompleted ();
 					done = true;
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> TakeLast<TSource> (
@@ -2102,10 +2221,10 @@ namespace System.Reactive.Linq
 			if (count < 0)
 				throw new ArgumentOutOfRangeException ("count");
 
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var q = new Queue<TSource> ();
-			var sub = new Subject<TSource> ();
-			IDisposable dis = null;
-			dis = source.Subscribe ((s) => {
+			return source.Subscribe ((s) => {
 				try {
 					q.Enqueue (s);
 					if (count > 0)
@@ -2124,7 +2243,8 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> TakeUntil<TSource, TOther> (
@@ -2186,12 +2306,15 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var ticker = Interval (dueTime, scheduler);
 			bool emit = true;
 			var tdis = ticker.Subscribe (v => emit = true);
 			var dis = source.Subscribe (v => { if (emit) { emit = false; sub.OnNext (v); } }, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new WrappedSubject<TSource> (sub, new CompositeDisposable (tdis, dis));
+			return new CompositeDisposable (tdis, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html
@@ -2228,13 +2351,15 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			var sub = new Subject<TimeInterval<TSource>> ();
+			return new ColdObservableEach<TimeInterval<TSource>> (sub => {
+			// ----
 			DateTimeOffset last = scheduler.Now;
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => { sub.OnNext (new TimeInterval<TSource> (v, Scheduler.Normalize (scheduler.Now - last))); last = scheduler.Now; },
 				ex => sub.OnError (ex),
 				() => sub.OnCompleted ());
-			return new WrappedSubject<TimeInterval<TSource>> (sub, dis);
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TSource> Timeout<TSource>(
@@ -2317,7 +2442,9 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("other");
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
-			var sub = new Subject<TSource> ();
+
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			var wait = new ManualResetEvent (false);
 			var dis = source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => wait.Set ());
 			var sdis = scheduler.Schedule (() => {
@@ -2331,7 +2458,9 @@ namespace System.Reactive.Linq
 				}
 				wait.Dispose ();
 			});
-			return new WrappedSubject<TSource> (sub, new CompositeDisposable (dis, sdis));
+			return new CompositeDisposable (dis, sdis);
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<long> Timer (
@@ -2362,15 +2491,17 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 			return new ColdObservableEach<long> ((sub) => {
-				try {
-					Thread.Sleep (Scheduler.Normalize (dueTime));
-					sub.OnNext (0);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				return Disposable.Empty;
-				}, scheduler);
+			// ----
+			try {
+				Thread.Sleep (Scheduler.Normalize (dueTime));
+				sub.OnNext (0);
+				sub.OnCompleted ();
+			} catch (Exception ex) {
+				sub.OnError (ex);
+			}
+			return Disposable.Empty;
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<long> Timer (
@@ -2402,7 +2533,8 @@ namespace System.Reactive.Linq
 			TimeSpan period,
 			IScheduler scheduler)
 		{
-			var sub = new Subject<long> ();
+			return new ColdObservableEach<long> (sub => {
+			// ----
 			var t = Timer (dueTime, scheduler);
 			IDisposable di = null;
 			var dt = t.Subscribe (v => {}, ex => sub.OnError (ex), () => {
@@ -2410,7 +2542,9 @@ namespace System.Reactive.Linq
 				var i = Interval (period, scheduler);
 				di = i.Subscribe ((v) => sub.OnNext (v + 1));
 			});
-			return new WrappedSubject<long> (sub, Disposable.Create (() => { dt.Dispose (); if (di != null) di.Dispose (); }));
+			return Disposable.Create (() => { dt.Dispose (); if (di != null) di.Dispose (); });
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<Timestamped<TSource>> Timestamp<TSource> (this IObservable<TSource> source)
@@ -2426,8 +2560,10 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("scheduler");
 
 			return new ColdObservableEach<Timestamped<TSource>> (sub => {
-				return source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
-				}, scheduler);
+			// ----
+			return source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TSource[]> ToArray<TSource> (this IObservable<TSource> source)
@@ -2435,10 +2571,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<TSource[]> ();
+			return new ColdObservableEach<TSource[]> ((sub) => {
+			// ----
 			var a = new List<TSource> ();
-			var dis = source.Subscribe (v => a.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (a.ToArray ()); sub.OnCompleted (); });
-			return new WrappedSubject<TSource[]> (sub, dis);
+			return source.Subscribe (v => a.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (a.ToArray ()); sub.OnCompleted (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static Func<IObservable<Unit>> ToAsync (this Action action)
@@ -2524,13 +2662,15 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 			
-			var sub = new Subject<IDictionary<TKey, TElement>> ();
+			return new ColdObservableEach<IDictionary<TKey, TElement>> ((sub) => {
+			// ----
 			var dic = new Dictionary<TKey, TElement> (comparer);
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => dic.Add (keySelector (v), elementSelector (v)),
 				ex => sub.OnError (ex),
 				() => { sub.OnNext (dic); sub.OnCompleted (); });
-			return new WrappedSubject<IDictionary<TKey, TElement>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IEnumerable<TSource> ToEnumerable<TSource> (this IObservable<TSource> source)
@@ -2552,13 +2692,15 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var sub = new Subject<IList<TSource>> ();
+			return new ColdObservableEach<IList<TSource>> ((sub) => {
+			// ----
 			var l = new List<TSource> ();
-			var dis = source.Subscribe (
+			return source.Subscribe (
 				v => l.Add (v),
 				ex => sub.OnError (ex),
 				() => { sub.OnNext (l); sub.OnCompleted (); });
-			return new WrappedSubject<IList<TSource>> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<ILookup<TKey, TSource>> ToLookup<TSource, TKey>(
@@ -2599,10 +2741,12 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 			
-			var sub = new Subject<ILookup<TKey, TElement>> ();
+			return new ColdObservableEach<ILookup<TKey, TElement>> ((sub) => {
+			// ----
 			var l = new List<TSource> ();
-			var dis = source.Subscribe (v => l.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (Enumerable.ToLookup<TSource, TKey, TElement> (l,keySelector, elementSelector, comparer)); sub.OnCompleted (); });
-			return new WrappedSubject<ILookup<TKey, TElement>> (sub, dis);
+			return source.Subscribe (v => l.Add (v), ex => sub.OnError (ex), () => { sub.OnNext (Enumerable.ToLookup<TSource, TKey, TElement> (l,keySelector, elementSelector, comparer)); sub.OnCompleted (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IObservable<TSource> ToObservable<TSource> (this IEnumerable<TSource> source)
@@ -2620,15 +2764,17 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("scheduler");
 			
 			return new ColdObservableEach<TSource> ((sub) => {
-				try {
-					foreach (var s in source)
-						sub.OnNext (s);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				return Disposable.Empty;
-				}, scheduler);
+			// ----
+			try {
+				foreach (var s in source)
+					sub.OnNext (s);
+				sub.OnCompleted ();
+			} catch (Exception ex) {
+				sub.OnError (ex);
+			}
+			return Disposable.Empty;
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<TSource> Using<TSource, TResource> (
@@ -2642,11 +2788,13 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("observableFactory");
 
 			return new ColdObservableEach<TSource> (sub => {
-				var rdis = resourceFactory ();
-				var source = observableFactory (rdis);
-				var subdis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
-				return Disposable.Create (() => { subdis.Dispose (); rdis.Dispose (); });
-				}, Scheduler.CurrentThread); // maybe not harmful scheduler
+			// ----
+			var rdis = resourceFactory ();
+			var source = observableFactory (rdis);
+			var subdis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return Disposable.Create (() => { subdis.Dispose (); rdis.Dispose (); });
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> When<TResult> (this IEnumerable<Plan<TResult>> plans)
@@ -2680,10 +2828,11 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 
-			var sub = new Subject<TSource> ();
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			IDisposable dis = null;
 			int idx = 0;
-			dis = source.Subscribe ((s) => {
+			return source.Subscribe ((s) => {
 				try {
 					if (predicate (s, idx++))
 						sub.OnNext (s);
@@ -2698,7 +2847,8 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}
 				});
-			return new WrappedSubject<TSource> (sub, dis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TResult> Zip<TFirst, TSecond, TResult> (

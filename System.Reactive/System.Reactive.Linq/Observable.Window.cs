@@ -70,8 +70,9 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 			
+			return new ColdObservableEach<IObservable<TSource>> (sub => {
+			// ----
 			var counter = new Subject<Unit> ();
-			var sub = new Subject<IObservable<TSource>> ();
 			var l = new Subject<TSource> ();
 			var dis = source.Subscribe (Observer.Create<TSource> (
 				v => { l.OnNext (v); counter.OnNext (Unit.Default); },
@@ -86,7 +87,9 @@ namespace System.Reactive.Linq
 				},
 				ex => sub.OnError (ex),
 				() => {}));
-			return new WrappedSubject<IObservable<TSource>> (sub, Disposable.Create (() => { dis.Dispose (); bdis.Dispose (); }));
+			return Disposable.Create (() => { dis.Dispose (); bdis.Dispose (); });
+			// ----
+			}, scheduler);
 		}
 		
 		public static IObservable<IObservable<TSource>> Window<TSource> (
@@ -115,7 +118,8 @@ namespace System.Reactive.Linq
 			if (windowClosingSelector == null)
 				throw new ArgumentNullException ("windowClosingSelector");
 			
-			var sub = new Subject<IObservable<TSource>> ();
+			return new ColdObservableEach<IObservable<TSource>> (sub => {
+			// ----
 			var l = new Subject<TSource> ();
 			var disc = new List<IDisposable> ();
 			var diso = windowOpenings.Subscribe (Observer.Create<TWindowOpening> (
@@ -134,7 +138,9 @@ namespace System.Reactive.Linq
 				}
 				);
 
-			return new WrappedSubject<IObservable<TSource>> (sub, new CompositeDisposable (dis, diso));
+			return new CompositeDisposable (dis, diso);
+			// ----
+			}, DefaultColdScheduler);
 		}
 	}
 }

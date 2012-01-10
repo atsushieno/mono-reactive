@@ -14,7 +14,7 @@ namespace System.Reactive.Linq
 {
 	public static partial class Observable
 	{
-		static void VerifyCompleted<T> (bool hasValue, ISubject<T> sub, T value, IDisposable dis)
+		static void VerifyCompleted<T> (bool hasValue, ISubject<T> sub, T value)
 		{
 			if (!hasValue)
 				sub.OnError (new InvalidOperationException ());
@@ -22,7 +22,6 @@ namespace System.Reactive.Linq
 				sub.OnNext (value);
 				sub.OnCompleted ();
 			}
-			dis.Dispose (); 
 		}
 		
 		static IObservable<T> NonNullableMin<T> (this IObservable<T> source)
@@ -30,11 +29,11 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T min = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
 			bool got = false;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -42,9 +41,10 @@ namespace System.Reactive.Linq
 					} else if (Comparer<T>.Default.Compare (min, s) > 0)
 						min = s;
 				},
-				() => VerifyCompleted (got, sub, min, dis)
+				() => VerifyCompleted (got, sub, min)
 				);
-			return sub;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NullableMin<T> (this IObservable<T> source)
@@ -52,11 +52,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T min = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
-			dis = source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (min, s) > 0) min = s; }, () => VerifyCompleted (true, sub, min, dis));
-			return sub;
+			return source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (min, s) > 0) min = s; }, () => VerifyCompleted (true, sub, min));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NonNullableMax<T> (this IObservable<T> source)
@@ -64,11 +65,11 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T max = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
 			bool got = false;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -76,9 +77,10 @@ namespace System.Reactive.Linq
 					} else if (Comparer<T>.Default.Compare (max, s) < 0)
 						max = s;
 				},
-				() => VerifyCompleted (got, sub, max, dis)
+				() => VerifyCompleted (got, sub, max)
 				);
-			return sub;
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NullableMax<T> (this IObservable<T> source)
@@ -86,11 +88,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T max = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
-			dis = source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, () => VerifyCompleted (true, sub, max, dis));
-			return sub;
+			return source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, () => VerifyCompleted (true, sub, max));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NonNullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
@@ -98,11 +101,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T sum = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
-			dis = source.Subscribe (s => sum = add (sum, s), () => VerifyCompleted (true, sub, sum, dis));
-			return sub;
+			return source.Subscribe (s => sum = add (sum, s), () => VerifyCompleted (true, sub, sum));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NullableSum<T> (this IObservable<T> source, Func<T,T,T> add)
@@ -110,11 +114,12 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T sum = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
-			dis = source.Subscribe (s => sum = sum != null ? s : add (sum, s), () => VerifyCompleted (true, sub, sum, dis));
-			return sub;
+			return source.Subscribe (s => sum = sum != null ? s : add (sum, s), () => VerifyCompleted (true, sub, sum));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NonNullableAverage<T> (this IObservable<T> source, Func<T,T,T> add, Func<T,int,T> avg)
@@ -122,12 +127,13 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T sum = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
 			int count = 0;
-			dis = source.Subscribe (s => { count++; sum = add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count), dis));
-			return sub;
+			return source.Subscribe (s => { count++; sum = add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count)));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		static IObservable<T> NullableAverage<T> (this IObservable<T> source, Func<T,T,T> add, Func<T,int,T> avg)
@@ -135,12 +141,13 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
+			return new ColdObservableEach<T> (sub => {
+			// ----
 			T sum = default (T);
-			var sub = new Subject<T> ();
-			IDisposable dis = null;
 			int count = 0;
-			dis = source.Subscribe (s => { count++; sum = sum != null ? s : add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count), dis));
-			return sub;
+			return source.Subscribe (s => { count++; sum = sum != null ? s : add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count)));
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		#region Average
@@ -261,11 +268,11 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 			
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			TSource max = default (TSource);
-			var sub = new Subject<TSource> ();
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -273,8 +280,9 @@ namespace System.Reactive.Linq
 					} else if (comparer.Compare (max, s) < 0)
 						max = s;
 				},
-				() => VerifyCompleted (got, sub, max, dis));
-			return sub;
+				() => VerifyCompleted (got, sub, max));
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		#endregion
@@ -343,11 +351,11 @@ namespace System.Reactive.Linq
 			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 			
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
 			TSource min = default (TSource);
-			var sub = new Subject<TSource> ();
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			return source.Subscribe (
 				(s) => {
 					if (!got) {
 						got = true;
@@ -355,8 +363,9 @@ namespace System.Reactive.Linq
 					} else if (comparer.Compare (min, s) > 0)
 						min = s;
 				},
-				() => VerifyCompleted (got, sub, min, dis));
-			return sub;
+				() => VerifyCompleted (got, sub, min));
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		#endregion
