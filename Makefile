@@ -6,7 +6,7 @@ all: System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll
 System.Reactive/bin/Debug/System.Reactive.dll:
 	xbuild
 
-System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll: System.Reactive/bin/Debug/System.Reactive.dll
+System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll: System.Reactive/bin/Debug/System.Reactive.dll System.Reactive.Tests/*/*.cs
 	xbuild
 
 run-test: all

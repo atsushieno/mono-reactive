@@ -112,23 +112,27 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 			
+			return new ColdObservableEach<IList<TSource>> (sub => {
+			// ----
 			var counter = new Subject<Unit> ();
-			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();
-			var dis = source.Subscribe (Observer.Create<TSource> (
+			var dis = new CompositeDisposable ();
+			dis.Add (source.Subscribe (Observer.Create<TSource> (
 				v => { l.Add (v); counter.OnNext (Unit.Default); },
 				ex => sub.OnError (ex),
-				() => { if (l.Count > 0) sub.OnNext (l); sub.OnCompleted (); }));
+				() => { if (l.Count > 0) sub.OnNext (l); sub.OnCompleted (); })));
 			var buffer = new TimeOrCountObservable (timeSpan, counter, count, scheduler);
-			var bdis = buffer.Subscribe (Observer.Create<Unit> (
+			dis.Add (buffer.Subscribe (Observer.Create<Unit> (
 				u => {
 					var n = l;
 					l = new List<TSource> ();
 					sub.OnNext (n);
 				},
 				ex => sub.OnError (ex),
-				() => {}));
-			return new WrappedSubject<IList<TSource>> (sub, Disposable.Create (() => { dis.Dispose (); bdis.Dispose (); }));
+				() => {})));
+			return dis;
+			// ----
+			}, scheduler);
 		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (

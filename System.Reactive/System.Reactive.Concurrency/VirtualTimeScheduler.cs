@@ -31,7 +31,7 @@ namespace System.Reactive.Concurrency
 			ScheduledItem<TAbsolute> t = null;
 			t = new ScheduledItem<TAbsolute> (dueTime, () => { tasks.Remove (t); return action (this, state); });
 			tasks.Add (t);
-			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)), t);
+			return Disposable.Create (() => { tasks.Remove (t); t.Dispose (); });
 		}
 	}
 }

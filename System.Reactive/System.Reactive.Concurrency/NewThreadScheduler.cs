@@ -43,7 +43,7 @@ namespace System.Reactive.Concurrency
 				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
 				dis.Disposable = action (this, (TState) state);
 				}).Start ();
-			return Disposable.Create (() => { dis.Dispose (); });
+			return dis;
 		}
 	}
 }

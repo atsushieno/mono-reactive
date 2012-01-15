@@ -35,7 +35,7 @@ namespace System.Reactive.Concurrency
 				dis.Disposable = action (this, state);
 				return Unit.Default;
 				});
-			return Disposable.Create (() => dis.Dispose ());
+			return dis;
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)

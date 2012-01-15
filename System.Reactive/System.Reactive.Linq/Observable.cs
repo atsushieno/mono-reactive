@@ -2595,13 +2595,13 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<long> (sub => {
 			// ----
 			var t = Timer (dueTime, scheduler);
-			var dis = new SingleAssignmentDisposable ();
-			var dt = t.Subscribe (v => {}, ex => sub.OnError (ex), () => {
+			var dis = new CompositeDisposable ();
+			dis.Add (t.Subscribe (v => {}, ex => sub.OnError (ex), () => {
 				sub.OnNext (0);
 				var i = Interval (period, scheduler);
-				dis.Disposable = i.Subscribe ((v) => sub.OnNext (v + 1));
-			});
-			return Disposable.Create (() => { dt.Dispose (); dis.Dispose (); });
+				dis.Add (i.Subscribe ((v) => sub.OnNext (v + 1)));
+			}));
+			return dis;
 			// ----
 			}, scheduler);
 		}
@@ -2848,10 +2848,12 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
+			var dis = new CompositeDisposable ();
 			var rdis = resourceFactory ();
+			dis.Add (rdis);
 			var source = observableFactory (rdis);
-			var subdis = source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return Disposable.Create (() => { subdis.Dispose (); rdis.Dispose (); });
+			dis.Add (source.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => sub.OnCompleted ()));
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}

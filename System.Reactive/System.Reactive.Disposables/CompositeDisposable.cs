@@ -20,6 +20,10 @@ namespace System.Reactive.Disposables
 		
 		public CompositeDisposable (params IDisposable[] disposables)
 		{
+			if (disposables == null)
+				throw new ArgumentNullException ("disposables");
+			if (disposables.Any (d => d == null))
+				throw new ArgumentNullException ("disposables", "Argument disposable parameter contains null");
 			items = new List<IDisposable> (disposables);
 		}
 		
@@ -44,9 +48,12 @@ namespace System.Reactive.Disposables
 		
 		public void Add (IDisposable item)
 		{
+			if (item == null)
+				throw new ArgumentNullException ("item");
 			if (disposed)
 				item.Dispose ();
-			items.Add (item);
+			else
+				items.Add (item);
 		}
 		
 		public void Clear ()
@@ -68,14 +75,18 @@ namespace System.Reactive.Disposables
 		
 		public void Dispose ()
 		{
+			if (disposed)
+				return;
 			disposed = true;
 			foreach (var item in items)
 				item.Dispose ();
+			items.Clear ();
 		}
 		
 		public IEnumerator<IDisposable> GetEnumerator ()
 		{
-			return GetEnumerator ();
+			foreach (var i in items)
+				yield return i;
 		}
 		
 		public bool Remove (IDisposable item)
