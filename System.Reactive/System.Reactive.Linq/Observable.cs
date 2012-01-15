@@ -51,7 +51,7 @@ namespace System.Reactive.Linq
 					sub.OnCompleted ();
 				}
 				else
-					sub.OnError (new InvalidOperationException ("There was value to aggregate."));
+					sub.OnError (new InvalidOperationException ("There was no value to aggregate."));
 			});
 			return dis;
 			// ----
@@ -72,7 +72,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TAccumulate> (sub => {
 			// ----
 			TAccumulate result = seed;
-			var dis = source.Subscribe (v => { result = accumulator (result, v); sub.OnNext (result); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			var dis = source.Subscribe (v => result = accumulator (result, v), ex => sub.OnError (ex), () => { sub.OnNext (result); sub.OnCompleted (); });
 			return dis;
 			// ----
 			}, DefaultColdScheduler);

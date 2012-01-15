@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using NUnit.Framework;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -34,9 +35,21 @@ namespace System.Reactive.Linq.Tests
 		}
 
 		[Test]
+		public void Amb ()
+		{
+			Check<int> (o => o.Amb (Observable.Range (1, 3)), null);
+		}
+
+		[Test]
 		public void Concat ()
 		{
 			Check<int> (o => o.Concat (Observable.Return (5)), null);
+		}
+
+		[Test]
+		public void Do ()
+		{
+			Check<int> (o => o.Do (TextWriter.Null.WriteLine), null);
 		}
 
 		[Test]
