@@ -10,7 +10,7 @@ namespace System.Reactive.Linq.Tests
 	// i.e. they check invalid attempts to subscribe when it should not.
 	// It is useful to see if things do not enter eager evaluation.
 	//
-	// They make used of ExceptionalObservable<T>.
+	// They make use of ExceptionalObservable<T>.
 	
 	[TestFixture]
 	public class ObservableInvalidSubscriptionTest

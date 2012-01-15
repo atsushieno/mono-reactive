@@ -44,15 +44,22 @@ namespace System.Reactive.Linq
 		internal class LatestEnumerator<TSource> : IEnumerator<TSource>, IEnumerator
 		{
 			int index = 0;
+			IObservable<TSource> source;
 			TSource cur = default (TSource), snapshot = default (TSource);
 			ManualResetEvent wait = new ManualResetEvent (false);
+			bool started;
 			bool running = true;
 			Exception error = null;
 			IDisposable dis;
 
 			public LatestEnumerator (IObservable<TSource> source)
 			{
-				// FIXME: need to make it non-subscribing
+				this.source = source;
+			}
+			
+			void Start ()
+			{
+				started = true;
 				dis = source.Subscribe (v => { cur = v; index++; wait.Set (); }, ex => { error = ex; running = false; }, () => running = false);
 			}
 
@@ -66,11 +73,16 @@ namespace System.Reactive.Linq
 			
 			public void Dispose ()
 			{
-				dis.Dispose ();
+				if (dis != null) {
+					dis.Dispose ();
+					dis = null;
+				}
 			}
 
 			public bool MoveNext ()
 			{
+				if (!started)
+					Start ();
 				if (!running)
 					return false;
 				
