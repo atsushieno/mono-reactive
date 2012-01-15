@@ -50,6 +50,8 @@
     <Compile Include="System.Reactive.Disposables\ContextDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\DisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\MultipleAssignmentDisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\RefCountDisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\ScheduledDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\SerialDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\SingleAssignmentDisposableTest.cs" />
     <Compile Include="System.Reactive.Linq\ExceptionalObservable.cs" />
