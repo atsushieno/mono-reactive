@@ -122,7 +122,7 @@ namespace System.Reactive.Linq
 			IObservable<TSource> first = null;
 
 			// avoided using "from source in sources select ..." for eager evaluation.
-			var dis = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			foreach (var source in sources) {
 				dis.Add (source.Subscribe (
 				s => {
@@ -142,7 +142,7 @@ namespace System.Reactive.Linq
 						sub.OnCompleted ();
 				}));
 			}
-			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -255,11 +255,11 @@ namespace System.Reactive.Linq
 				return Disposable.Empty;
 			}
 			
-			var dis = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			Action subact = null;
 			subact = () => dis.Add (e.Current.Subscribe (v => sub.OnNext (v), ex => { if (e.MoveNext ()) subact (); else sub.OnError (ex); }, () => sub.OnCompleted ()));
 			subact ();
-			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -334,14 +334,14 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
-			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, List<IDisposable> dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, CompositeDisposable dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
@@ -1346,7 +1346,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			// avoided using "from source in sources select ..." for eager evaluation.
-			var dis = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			var l = new List<IObservable<TSource>> (sources);
 			int index = 0;
 			foreach (var source in l) {
@@ -1364,7 +1364,7 @@ namespace System.Reactive.Linq
 				});
 				dis.Add (subfunc (source));
 			}
-			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			return dis;
 			// ----
 			}, scheduler);
 		}
@@ -1518,15 +1518,15 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-				var l = new List<IDisposable> ();
+				var dis = new CompositeDisposable ();
 				var e = sources.GetEnumerator ();
-				OnErrorResumeNext<TSource> (null, sub, e, l);
-				return Disposable.Create (() => l.ForEach (d => d.Dispose ()));
+				OnErrorResumeNext<TSource> (null, sub, e, dis);
+				return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static void OnErrorResumeNext<TSource> (Exception error, ISubject<TSource> sub, IEnumerator<IObservable<TSource>> e, List<IDisposable> dis)
+		static void OnErrorResumeNext<TSource> (Exception error, ISubject<TSource> sub, IEnumerator<IObservable<TSource>> e, CompositeDisposable dis)
 		{
 			if (e.MoveNext ())
 				e.Current.Subscribe (v => sub.OnNext (v), ex => OnErrorResumeNext (ex, sub, e, dis), () => sub.OnCompleted ());
@@ -1642,7 +1642,7 @@ namespace System.Reactive.Linq
 			
 			*/
 			Action<Exception> onError = null;
-			var dis = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			onError = (error) => {
 				if (retryCount-- <= 0)
 					sub.OnError (error);
@@ -1653,7 +1653,7 @@ namespace System.Reactive.Linq
 				v => sub.OnNext (v),
 				ex => onError (ex),
 				() => sub.OnCompleted ()));
-			return Disposable.Create (() => { foreach (var d in dis) d.Dispose (); });
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -2207,12 +2207,12 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dl = new List<IDisposable> ();
+			var dis = new CompositeDisposable ();
 			var wait = new ManualResetEvent (true);
-			var dis = sources.Subscribe (s => {
-				dl.Add (s.Subscribe (v => { wait.WaitOne (); sub.OnNext (v); }, ex => sub.OnError (ex), () => { wait.Set (); }));
-				}, ex => sub.OnError (ex), () => { wait.Set (); sub.OnCompleted (); });
-			return Disposable.Create (() => { foreach (var d in dl) d.Dispose (); dis.Dispose (); });
+			dis.Add (sources.Subscribe (s => {
+				dis.Add (s.Subscribe (v => { wait.WaitOne (); sub.OnNext (v); }, ex => sub.OnError (ex), () => { wait.Set (); }));
+				}, ex => sub.OnError (ex), () => { wait.Set (); sub.OnCompleted (); }));
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}

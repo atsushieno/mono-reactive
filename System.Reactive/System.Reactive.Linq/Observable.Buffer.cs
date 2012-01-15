@@ -56,7 +56,7 @@ namespace System.Reactive.Linq
 			
 			var sub = new Subject<IList<TSource>> ();
 			var l = new List<TSource> ();
-			var disc = new List<IDisposable> ();
+			var disc = new CompositeDisposable ();
 			var diso = bufferOpenings.Subscribe (Observer.Create<TBufferOpening> (
 				s => {
 					var closing = bufferClosingSelector (s);
@@ -64,7 +64,7 @@ namespace System.Reactive.Linq
 						sub.OnNext (l);
 						l = new List<TSource> ();
 						}));
-				}, () => new CompositeDisposable (disc).Dispose ()));
+				}, () => disc.Dispose ()));
 
 			var dis = source.Subscribe (
 				s => l.Add (s), ex => sub.OnError (ex), () => {

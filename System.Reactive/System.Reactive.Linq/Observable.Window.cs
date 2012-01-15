@@ -121,24 +121,25 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<IObservable<TSource>> (sub => {
 			// ----
 			var l = new Subject<TSource> ();
-			var disc = new List<IDisposable> ();
-			var diso = windowOpenings.Subscribe (Observer.Create<TWindowOpening> (
+			var dis = new CompositeDisposable ();
+			var disClosings = new CompositeDisposable ();
+			dis.Add (windowOpenings.Subscribe (Observer.Create<TWindowOpening> (
 				s => {
 					var closing = windowClosingSelector (s);
-					disc.Add (closing.Subscribe (c => {
+					disClosings.Add (closing.Subscribe (c => {
 						sub.OnNext (l);
 						l = new Subject<TSource> ();
 						}));
-				}, () => new CompositeDisposable (disc).Dispose ()));
+				}, () => disClosings.Dispose ())));
 
-			var dis = source.Subscribe (
+			dis.Add (source.Subscribe (
 				s => l.OnNext (s), ex => sub.OnError (ex), () => {
 					sub.OnNext (l);
 					sub.OnCompleted ();
 				}
-				);
+				));
 
-			return new CompositeDisposable (dis, diso);
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}

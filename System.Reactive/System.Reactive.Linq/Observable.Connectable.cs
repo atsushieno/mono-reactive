@@ -26,7 +26,7 @@ namespace System.Reactive.Linq
 
 			bool connected;
 			List<IObserver<TResult>> observers = new List<IObserver<TResult>> ();
-			new List<IDisposable> disposables;
+			CompositeDisposable disposables;
 
 			public IDisposable Subscribe (IObserver<TResult> observer)
 			{
@@ -45,7 +45,7 @@ namespace System.Reactive.Linq
 					throw new InvalidOperationException ("This connectable observable is already connected");
 				connected = true;
 				sub = subject_creator ();
-				disposables = new List<IDisposable> ();
+				disposables = new CompositeDisposable ();
 				disposables.Add (source.Subscribe (sub));
 				foreach (var o in observers)
 					disposables.Add (sub.Subscribe (o));
@@ -53,7 +53,7 @@ namespace System.Reactive.Linq
 					connected = false;
 					this.disposables = null; // clean up itself in the final stage
 				}));
-				return new CompositeDisposable (disposables);
+				return disposables;
 			}
 		}
 		
