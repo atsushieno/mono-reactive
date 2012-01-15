@@ -9,35 +9,6 @@ using System.Threading;
 
 namespace System.Reactive.Linq
 {
-	internal abstract class AbstractObservable<T> : IObservable<T>
-	{
-		List<IObserver<T>> observers = new List<IObserver<T>> ();
-		
-		bool disposed;
-
-		public IEnumerable<IObserver<T>> Observers {
-			get { return observers; }
-		}
-
-		public virtual void Dispose ()
-		{
-			disposed = true;
-		}
-		
-		void CheckDisposed ()
-		{
-			if (disposed)
-				throw new ObjectDisposedException ("observable");
-		}
-		
-		public virtual IDisposable Subscribe (IObserver<T> observer)
-		{
-			CheckDisposed ();
-			observers.Add (observer);
-			return Disposable.Create (() => observers.Remove (observer));
-		}
-	}
-	
 	internal class HotObservable<T> : IObservable<T>
 	{
 		IDisposable scheduler_disposable;

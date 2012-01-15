@@ -54,27 +54,29 @@ namespace System.Reactive.Linq
 			if (bufferClosingSelector == null)
 				throw new ArgumentNullException ("bufferClosingSelector");
 			
-			var sub = new Subject<IList<TSource>> ();
+			return new ColdObservableEach<IList<TSource>> (sub => {
+			// ----
 			var l = new List<TSource> ();
-			var disc = new CompositeDisposable ();
-			var diso = bufferOpenings.Subscribe (Observer.Create<TBufferOpening> (
+			var dis = new CompositeDisposable ();
+			var disClosing = new CompositeDisposable ();
+			dis.Add (bufferOpenings.Subscribe (Observer.Create<TBufferOpening> (
 				s => {
 					var closing = bufferClosingSelector (s);
-					disc.Add (closing.Subscribe (c => {
+					disClosing.Add (closing.Subscribe (c => {
 						sub.OnNext (l);
 						l = new List<TSource> ();
 						}));
-				}, () => disc.Dispose ()));
+				}, () => disClosing.Dispose ())));
 
-			var dis = source.Subscribe (
+			dis.Add (source.Subscribe (
 				s => l.Add (s), ex => sub.OnError (ex), () => {
 					if (l.Count > 0)
 						sub.OnNext (l);
 					sub.OnCompleted ();
-				}
-				);
-
-			return new WrappedSubject<IList<TSource>> (sub, new CompositeDisposable (dis, diso));
+				}));
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
 		}
 
 		public static IObservable<IList<TSource>> Buffer<TSource> (
