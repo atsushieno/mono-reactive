@@ -24,12 +24,12 @@ namespace System.Reactive.Disposables
 		public IDisposable Disposable {
 			get { return d; }
 			set {
+				if (d != null)
+					throw new InvalidOperationException ("Target disposable is already set to this instance");
 				if (IsDisposed) {
 					if (value != null)
 						value.Dispose ();
 				}
-				else if (d != null)
-					throw new InvalidOperationException ("Target disposable is already set to this instance");
 				d = value;
 			}
 		}

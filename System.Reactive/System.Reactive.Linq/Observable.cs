@@ -334,18 +334,18 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new CompositeDisposable ();
+			var dis = new SerialDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, CompositeDisposable dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, SerialDisposable dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
-			dis.Add (sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); }));
+			dis.Disposable = sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); });
 			return false;
 		}
 		

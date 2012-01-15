@@ -47,7 +47,11 @@
     <Compile Include="System.Reactive\NotificationTest.cs" />
     <Compile Include="System.Reactive.Disposables\BooleanDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\CompositeDisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\ContextDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\DisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\MultipleAssignmentDisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\SerialDisposableTest.cs" />
+    <Compile Include="System.Reactive.Disposables\SingleAssignmentDisposableTest.cs" />
     <Compile Include="System.Reactive.Linq\ExceptionalObservable.cs" />
     <Compile Include="System.Reactive.Linq\ObservableInvalidSubscriptionTest.cs" />
   </ItemGroup>
