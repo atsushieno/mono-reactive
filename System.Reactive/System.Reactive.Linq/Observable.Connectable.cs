@@ -31,12 +31,12 @@ namespace System.Reactive.Linq
 			public IDisposable Subscribe (IObserver<TResult> observer)
 			{
 				observers.Add (observer);
-				IDisposable dis = null;
+				var dis = new SingleAssignmentDisposable ();
 				if (connected) {
-					dis = sub.Subscribe (observer);
+					dis.Disposable = sub.Subscribe (observer);
 					disposables.Add (dis);
 				}
-				return Disposable.Create (() => { observers.Remove (observer); if (dis != null) disposables.Remove (dis); dis.Dispose (); });
+				return Disposable.Create (() => { observers.Remove (observer); disposables.Remove (dis); dis.Dispose (); });
 			}
 
 			public IDisposable Connect ()

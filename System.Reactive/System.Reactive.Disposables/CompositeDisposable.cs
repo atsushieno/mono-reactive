@@ -44,6 +44,8 @@ namespace System.Reactive.Disposables
 		
 		public void Add (IDisposable item)
 		{
+			if (disposed)
+				item.Dispose ();
 			items.Add (item);
 		}
 		
@@ -62,8 +64,11 @@ namespace System.Reactive.Disposables
 			items.CopyTo (array, arrayIndex);
 		}
 		
+		bool disposed;
+		
 		public void Dispose ()
 		{
+			disposed = true;
 			foreach (var item in items)
 				item.Dispose ();
 		}

@@ -29,19 +29,18 @@ namespace System.Reactive.Concurrency
 		}
 		
 		Func<IDisposable> action;
-		IDisposable dis;
+		SingleAssignmentDisposable dis = new SingleAssignmentDisposable ();
 		
 		public TAbsolute DueTime { get; private set; }
 		
 		public void Dispose ()
 		{
-			if (dis != null)
-				dis.Dispose ();
+			dis.Dispose ();
 		}
 		
 		public void Invoke ()
 		{
-			dis = action ();
+			dis.Disposable = action ();
 		}
 	}
 }

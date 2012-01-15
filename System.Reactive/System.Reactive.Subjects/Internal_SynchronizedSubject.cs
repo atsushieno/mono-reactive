@@ -59,24 +59,24 @@ namespace System.Reactive.Subjects
 		public void OnNext (TSource value)
 		{
 			lock (gate) {
-				IDisposable dis = null;
-				scheduler.Schedule (() => { sub.OnNext (value); if (dis != null) dis.Dispose (); });
+				var dis = new SingleAssignmentDisposable ();
+				dis.Disposable = scheduler.Schedule (() => { sub.OnNext (value); dis.Dispose (); });
 			}
 		}
 		
 		public void OnError (Exception error)
 		{
 			lock (gate) {
-				IDisposable dis = null;
-				scheduler.Schedule (() => { sub.OnError (error); if (dis != null) dis.Dispose (); });
+				var dis = new SingleAssignmentDisposable ();
+				dis.Disposable = scheduler.Schedule (() => { sub.OnError (error); dis.Dispose (); });
 			}
 		}
 		
 		public void OnCompleted ()
 		{
 			lock (gate) {
-				IDisposable dis = null;
-				scheduler.Schedule (() => { sub.OnCompleted (); if (dis != null) dis.Dispose (); });
+				var dis = new SingleAssignmentDisposable ();
+				dis.Disposable = scheduler.Schedule (() => { sub.OnCompleted (); dis.Dispose (); });
 			}
 		}
 	}

@@ -33,12 +33,12 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			IDisposable dis = null;
-			context.Post ((stat) => {
+			var dis = new SingleAssignmentDisposable ();
+			context.Post (stat => {
 				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
-				dis = action (this, (TState) stat);
+				dis.Disposable = action (this, (TState) stat);
 				}, default (TState));
-			return Disposable.Create (() => { if (dis != null) dis.Dispose (); });
+			return Disposable.Create (() => dis.Dispose ());
 		}
 	}
 }

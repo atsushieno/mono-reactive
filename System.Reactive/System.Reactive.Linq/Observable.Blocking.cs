@@ -47,13 +47,13 @@ namespace System.Reactive.Linq
 			var wait = new ManualResetEvent (false);
 			TSource ret = default (TSource);
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			var dis = source.Subscribe (
 				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
-				(s) => { if (!got && predicate (s)) { got = true; ret = s; dis.Dispose (); wait.Set (); } },
+				s => { if (!got && predicate (s)) { got = true; ret = s; wait.Set (); } },
 				() => { if (!got) wait.Set (); }
 				);
 			wait.WaitOne ();
+			dis.Dispose ();
 			if (!got && throwError)
 				throw new InvalidOperationException ();
 			return ret;
@@ -107,8 +107,7 @@ namespace System.Reactive.Linq
 			var wait = new ManualResetEvent (false);
 			TSource ret = default (TSource);
 			bool got = false;
-			IDisposable dis = null;
-			dis = source.Subscribe (
+			var dis = source.Subscribe (
 				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
 				(s) => { if (predicate (s)) { got = true; ret = s; } },
 				() => { wait.Set (); }

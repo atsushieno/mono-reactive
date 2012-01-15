@@ -3,7 +3,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive
 {
-	internal class DefaultObserver<T> : IObserver<T>, IDisposable
+	internal class DefaultObserver<T> : IObserver<T>
 	{
 		Action<T> on_next;
 		Action<Exception> on_error;
@@ -14,11 +14,6 @@ namespace System.Reactive
 			on_next = onNext;
 			on_error = onError;
 			on_completed = onCompleted;
-		}
-		
-		// FIXME: Observer.Create() returns IDisposable, which means to us this type should implement some disposition here.
-		public void Dispose ()
-		{
 		}
 		
 		public void OnCompleted ()

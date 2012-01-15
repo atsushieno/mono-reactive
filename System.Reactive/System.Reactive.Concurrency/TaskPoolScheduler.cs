@@ -28,15 +28,14 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			IDisposable disposable = null;
+			var dis = new SingleAssignmentDisposable ();
 			var task = factory.StartNew<Unit> (() => {
 				var sleep = Scheduler.Normalize (dueTime - Now);
 				Thread.Sleep (sleep);
-				var dis = action (this, state);
-				dis.Dispose ();
+				dis.Disposable = action (this, state);
 				return Unit.Default;
 				});
-			return Disposable.Create (() => (disposable ?? Disposable.Empty).Dispose ());
+			return Disposable.Create (() => dis.Dispose ());
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)

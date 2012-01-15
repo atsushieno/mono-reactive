@@ -27,12 +27,12 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
+			var dis = new SingleAssignmentDisposable ();
 			ThreadPool.QueueUserWorkItem ((s) => {
 				Thread.Sleep (Scheduler.Normalize (dueTime));
-				var dis = action (this, (TState) s);
-				dis.Dispose ();
+				dis.Disposable = action (this, (TState) s);
 			});
-			return Disposable.Empty;
+			return dis;
 		}
 	}
 }

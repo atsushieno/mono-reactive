@@ -181,9 +181,9 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<bool> (sub => {
 			// ----
-			IDisposable dis = null;
+			var dis = new SingleAssignmentDisposable ();
 			bool hit = false;
-			dis = source.Subscribe ((s) => {
+			dis.Disposable = source.Subscribe ((s) => {
 				try {
 					if (predicate (s)) {
 						hit = true;
@@ -193,6 +193,7 @@ namespace System.Reactive.Linq
 					}
 				} catch (Exception ex) {
 					sub.OnError (ex);
+					dis.Dispose ();
 				}
 				}, () => {
 				try {
@@ -1007,11 +1008,11 @@ namespace System.Reactive.Linq
 					if (!dic.TryGetValue (k, out g)) {
 						g = new GroupedSubject<TKey, TElement> (k);
 						var dur = durationSelector (g);
-						IDisposable ddis = null;
+						var ddis = new SingleAssignmentDisposable ();
 						// after the duration, it removes the GroupedSubject from the dictionary by key.
-						Action action = () => { if (ddis != null) ddis.Dispose (); dic.Remove (k); };
-						ddis = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); action (); }, ex => { g.OnError (ex); action (); }, () => action ()));
-						// FIXME: it is possible that the duration observable never sends events and ddis is never disposed...
+						Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
+						// FIXME: it is possible that this disposable is never disposed if dur submites events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
+						ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
 						dic.Add (k, g);
 						sub.OnNext (g);
 					}
@@ -1094,13 +1095,12 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
 			IObservable<TRightDuration> dright = null;
-			IDisposable rddis = null;
+			var rddis = new SingleAssignmentDisposable ();
 			ReplaySubject<TRight> rsub = null;
 
 			Action drcleanup = () => {
 				Console.WriteLine ("right duration cleanup"); 
-				if (rddis != null) // FIXME: this should always dispose it.
-					rddis.Dispose ();
+				rddis.Dispose ();
 				rddis = null;
 				rsub = null;
 				dright = null;
@@ -1112,7 +1112,7 @@ namespace System.Reactive.Linq
 					rsub = new ReplaySubject<TRight> ();
 					rsub.OnNext (v);
 					dright = rightDurationSelector (v);
-					rddis = dright.Subscribe (dv => drcleanup (), ex => { sub.OnError (ex); drcleanup (); }, () => drcleanup ());
+					rddis.Disposable = dright.Subscribe (dv => drcleanup (), ex => { sub.OnError (ex); drcleanup (); }, () => drcleanup ());
 				}
 				else
 					rsub.OnNext (v);
@@ -1123,16 +1123,15 @@ namespace System.Reactive.Linq
 			var ldis = left.Subscribe (v => {
 				var dleft = leftDurationSelector (v);
 				valid_lefts.Add (v);
-				IDisposable dldis = null;
+				var dldis = new SingleAssignmentDisposable ();
 				var rightTerminator = new Subject<TRight> ();
 				Action cleanup = () => {
 					Console.WriteLine ("left duration cleanup");
 					rightTerminator.OnCompleted ();
-					if (dldis != null) // FIXME: this condition should be removed.
-						dldis.Dispose ();
+					dldis.Dispose ();
 					valid_lefts.Remove (v);
 				};
-				dldis = dleft.Subscribe (dv => cleanup (), ex => { sub.OnError (ex); cleanup (); }, () => cleanup ());
+				dldis.Disposable = dleft.Subscribe (dv => cleanup (), ex => { sub.OnError (ex); cleanup (); }, () => cleanup ());
 				var rightObservablesForThisLeft = rightTerminator.Merge (rsub ?? Observable.Empty<TRight> ());
 				sub.OnNext (resultSelector (v, rightObservablesForThisLeft));
 				}, ex => sub.OnError (ex), () => sub.OnCompleted ());
@@ -1848,11 +1847,11 @@ namespace System.Reactive.Linq
 			return source.Subscribe (
 				v => {
 					waits++;
-					IDisposable d = null;
-					d = other.Subscribe (
+					var dis = new SingleAssignmentDisposable ();
+					dis.Disposable = other.Subscribe (
 						vv => sub.OnNext (vv),
 						ex => sub.OnError (ex),
-						() => { waits--; if (d != null) d.Dispose (); });
+						() => { waits--; dis.Dispose (); });
 				},
 				ex => sub.OnError (ex),
 				() => { if (waits == 0) sub.OnCompleted (); }
@@ -1931,11 +1930,11 @@ namespace System.Reactive.Linq
 				v => {
 					waits++;
 					var cc = collectionSelector (v);
-					IDisposable d = null;
-					d = cc.Subscribe (
+					var dis = new SingleAssignmentDisposable ();
+					dis.Disposable = cc.Subscribe (
 						c => sub.OnNext (resultSelector (v, c)),
 						ex => sub.OnError (ex),
-						() => { waits--; if (d != null) d.Dispose (); });
+						() => { waits--; dis.Dispose (); });
 				},
 				ex => sub.OnError (ex),
 				() => { if (waits == 0) sub.OnCompleted (); });
@@ -2046,9 +2045,11 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			bool enabled = initValue;
-			IDisposable dis = null, odis = null;
-			odis = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
-			return source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => { sub.OnError (ex); dis.Dispose (); }, () => { sub.OnCompleted (); dis.Dispose (); });
+			var dis = new SingleAssignmentDisposable ();
+			var odis = new SingleAssignmentDisposable ();
+			odis.Disposable = other.Subscribe (v => { enabled = !initValue; odis.Dispose (); }, ex => odis.Dispose (), () => odis.Dispose ());
+			dis.Disposable = source.Subscribe (v => { if (enabled) sub.OnNext (v); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new CompositeDisposable (odis, dis);
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -2167,9 +2168,9 @@ namespace System.Reactive.Linq
 
 			var o = source.ToObservable ();
 			var sub = new ReplaySubject<TSource> (scheduler);
-			sub.Subscribe (observer);
+			var sdis = sub.Subscribe (observer);
 			var dis = o.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return Disposable.Create (() => { dis.Dispose (); sub.Dispose (); });
+			return new CompositeDisposable (sdis, dis);
 		}
 
 		public static IObservable<TSource> SubscribeOn<TSource> (
@@ -2594,13 +2595,13 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<long> (sub => {
 			// ----
 			var t = Timer (dueTime, scheduler);
-			IDisposable di = null;
+			var dis = new SingleAssignmentDisposable ();
 			var dt = t.Subscribe (v => {}, ex => sub.OnError (ex), () => {
 				sub.OnNext (0);
 				var i = Interval (period, scheduler);
-				di = i.Subscribe ((v) => sub.OnNext (v + 1));
+				dis.Disposable = i.Subscribe ((v) => sub.OnNext (v + 1));
 			});
-			return Disposable.Create (() => { dt.Dispose (); if (di != null) di.Dispose (); });
+			return Disposable.Create (() => { dt.Dispose (); dis.Dispose (); });
 			// ----
 			}, scheduler);
 		}
@@ -2888,23 +2889,8 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			IDisposable dis = null;
 			int idx = 0;
-			return source.Subscribe ((s) => {
-				try {
-					if (predicate (s, idx++))
-						sub.OnNext (s);
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				}, ex => sub.OnError (ex), () => {
-				try {
-					dis.Dispose ();
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
+			return source.Subscribe ((s) => { if (predicate (s, idx++)) sub.OnNext (s); });
 			// ----
 			}, DefaultColdScheduler);
 		}

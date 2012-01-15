@@ -38,17 +38,16 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			IDisposable dis = null;
+			var dis = new SingleAssignmentDisposable ();
 			bool cancel = false;
 			var th = thread_factory (() => {
 				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
 				if (!cancel)
-					dis = action (this, state);
+					dis.Disposable = action (this, state);
 				});
 			th.Start ();
 			// The thread is not aborted even if it's at work (ThreadAbortException is not caught inside the action).
-			// FIXME: this should *always* dispose "dis" instance that is returned by the action even after disposable of this instance (action starts regardless of this).
-			return Disposable.Create (() => { cancel = true; if (dis != null) dis.Dispose (); });
+			return Disposable.Create (() => { cancel = true; dis.Dispose (); });
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)

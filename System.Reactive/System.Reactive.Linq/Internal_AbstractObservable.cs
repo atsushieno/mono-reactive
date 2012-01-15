@@ -53,8 +53,13 @@ namespace System.Reactive.Linq
 			scheduler_disposable = scheduler.Schedule (() => work (subject));
 		}
 		
+		bool disposed;
+		
 		public void Dispose ()
 		{
+			if (disposed)
+				return;
+			disposed = true;
 			if (scheduler_disposable != null)
 				scheduler_disposable.Dispose ();
 			var dis = Subject as IDisposable;
@@ -83,11 +88,10 @@ namespace System.Reactive.Linq
 		{
 			var sub = new ReplaySubject<T> ();
 			var subdis = sub.Subscribe (observer);
-			IDisposable workdis = null;
-			var dis = scheduler.Schedule (() => workdis = work (sub));
+			var workdis = new SingleAssignmentDisposable ();
+			var dis = scheduler.Schedule (() => workdis.Disposable = work (sub));
 			return Disposable.Create (() => {
-				if (workdis != null)
-					workdis.Dispose ();
+				workdis.Dispose ();
 				dis.Dispose ();
 				subdis.Dispose ();
 			});
@@ -145,9 +149,9 @@ namespace System.Reactive.Linq
 
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			IDisposable dis = null;
-			scheduler.Schedule (() => dis = source.Subscribe (observer));
-			return Disposable.Create (() => { if (dis != null) scheduler.Schedule (() => dis.Dispose ()); });
+			var dis = new SingleAssignmentDisposable ();
+			scheduler.Schedule (() => dis.Disposable = source.Subscribe (observer));
+			return new ScheduledDisposable (scheduler, dis);
 		}
 	}
 
@@ -164,20 +168,20 @@ namespace System.Reactive.Linq
 
 		public void OnNext (T value)
 		{
-			IDisposable dis = null;
-			dis = scheduler.Schedule (() => { sub.OnNext (value); if (dis != null) dis.Dispose (); });
+			var dis = new SingleAssignmentDisposable ();
+			dis.Disposable = scheduler.Schedule (() => { sub.OnNext (value); dis.Dispose (); });
 		}
 
 		public void OnError (Exception error)
 		{
-			IDisposable dis = null;
-			dis = scheduler.Schedule (() => { sub.OnError (error); if (dis != null) dis.Dispose (); });
+			var dis = new SingleAssignmentDisposable ();
+			dis.Disposable = scheduler.Schedule (() => { sub.OnError (error); dis.Dispose (); });
 		}
 
 		public void OnCompleted ()
 		{
-			IDisposable dis = null;
-			dis = scheduler.Schedule (() => { sub.OnCompleted (); if (dis != null) dis.Dispose (); });
+			var dis = new SingleAssignmentDisposable ();
+			dis.Disposable = scheduler.Schedule (() => { sub.OnCompleted (); dis.Dispose (); });
 		}
 
 		public IDisposable Subscribe (IObserver<T> observer)
