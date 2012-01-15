@@ -1054,33 +1054,91 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("resultSelector");
 
 			/*
-			var sub = new Subject<TResult> ();
-			IObservable<TLeftDuration> ldur;
-			IObservable<TLeftDuration> rdur;
-			var rsub = new ReplaySubject<TRight> ();
-			var rdis = right.Subscribe (v => {
-				rsub.OnNext (v);
-				if (rdur == null) {
-					rdur = rightDurationSelector (v);
-					var rddis = rdur.Subscribe (dv => {
-							rdur = null;
-						}, ex => sub.OnError (ex), () => rddis.Dispose ());
-				}
-				}, ex => sub.OnError (ex), () => {});
-			var ldis = left.Subscribe (v => {
-				if (ldur == null) {
-					ldur = leftDurationSelector (v);
-					var lddis = ldur.Subscribe (dv => {
-						sub.OnNext (resultSelector (v, rsub));
-						ldur = null;
-						}, ex => sub.OnError (ex), () => lddis.Dispose ());
-				}
+			
+			- When subscribed, left and right immediately start.
+			- When left observed a next value, it gets leftDuration observable for the value, and starts it.
+			- Results with the left value are submitted until leftDuration observed a next value or completion.
+			- Set an empty subject as the *active* right subject.
+			- When right observed a next value,
+			  - if there is no *active* rightDuration observable, then
+			    - it gets rightDuration observable for the value.
+			    - Then it creates an *active* right subject to store all right values while the rightDuration receives a next event or completes.
+			    - The duration observable starts observing.
+			  - At anytime, the right value is sent to the *active* right subject.
+			- Right value observable is submitted with each valid left value.
+			  - While the right subject is unique during one duration window (i.e. shared by many left values), each left value has to terminate the right subject in each window. To achieve that, we use Merge() with OnCompleted event for right observable.
+			- Results with the right subject are submitted until rightDuration observed a next value or completion.
+			
+			Additional notes:
+			- When left has completed, it sends OnCompleted event to the result (of the group join).
+			- On the other hand, right completion does not result in OnCompleted on the result.
+			  - The result keeps receiving OnNext with *empty* right observables whenever left value arrives.
+			
+			
+			example:
 
-			var rl = new List<TRight> ();
-			var rdis = right.Subscribe (v => {
-				rl.Add (v);
+            var ldur = new ReplaySubject<DateTime>();
+            //ldur.OnError(new Exception ("hzaaar"));
+            //ldur.OnNext(DateTime.Now);
+            ldur.OnCompleted();
+            var g = Observable.GroupJoin<long,int,DateTime,DateTime,KeyValuePair<long,IObservable<int>>> (
+                Observable.Interval (TimeSpan.FromMilliseconds(3000)),
+                Observable.Interval(TimeSpan.FromMilliseconds(1000)).Select(l => (int)l).Take(20),
+                i => ldur.Delay (TimeSpan.FromSeconds (5)).Do (v => Console.WriteLine ("leftDuration")),//Observable.Interval(TimeSpan.FromSeconds(1)).Select(l => DateTime.Now),
+                i => ldur.Delay(TimeSpan.FromSeconds(2)),//Observable.Interval(TimeSpan.FromSeconds(1)).Select(l => DateTime.Now),
+                (i, dur) => new KeyValuePair<long,IObservable<int>> (i, dur));
+            g.Subscribe(p => { Console.WriteLine("RESULT"); p.Value.Subscribe(v => Console.WriteLine("{0} - {1} / {2}", p.Key, v, DateTime.Now), () => Console.WriteLine ("windowed right completed")); }, () => Console.WriteLine("done"));
+
 			*/
-			throw new NotImplementedException ();
+
+			return new ColdObservableEach<TResult> (sub => {
+			// ----
+			IObservable<TRightDuration> dright = null;
+			IDisposable rddis = null;
+			ReplaySubject<TRight> rsub = null;
+
+			Action drcleanup = () => {
+				Console.WriteLine ("right duration cleanup"); 
+				if (rddis != null) // FIXME: this should always dispose it.
+					rddis.Dispose ();
+				rddis = null;
+				rsub = null;
+				dright = null;
+				};
+			var rdis = right.Subscribe (v => {
+				Console.WriteLine ("new right value / " + dright);
+				if (dright == null) {
+					Console.WriteLine ("new right duration");
+					rsub = new ReplaySubject<TRight> ();
+					rsub.OnNext (v);
+					dright = rightDurationSelector (v);
+					rddis = dright.Subscribe (dv => drcleanup (), ex => { sub.OnError (ex); drcleanup (); }, () => drcleanup ());
+				}
+				else
+					rsub.OnNext (v);
+				}, ex => sub.OnError (ex), () => {}); // do nothing
+
+			var valid_lefts = new List<TLeft> ();
+
+			var ldis = left.Subscribe (v => {
+				var dleft = leftDurationSelector (v);
+				valid_lefts.Add (v);
+				IDisposable dldis = null;
+				var rightTerminator = new Subject<TRight> ();
+				Action cleanup = () => {
+					Console.WriteLine ("left duration cleanup");
+					rightTerminator.OnCompleted ();
+					if (dldis != null) // FIXME: this condition should be removed.
+						dldis.Dispose ();
+					valid_lefts.Remove (v);
+				};
+				dldis = dleft.Subscribe (dv => cleanup (), ex => { sub.OnError (ex); cleanup (); }, () => cleanup ());
+				var rightObservablesForThisLeft = rightTerminator.Merge (rsub ?? Observable.Empty<TRight> ());
+				sub.OnNext (resultSelector (v, rightObservablesForThisLeft));
+				}, ex => sub.OnError (ex), () => sub.OnCompleted ());
+			return new CompositeDisposable (rdis, ldis);
+			// ----
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> IgnoreElements<TSource> (this IObservable<TSource> source)
@@ -1407,7 +1465,7 @@ namespace System.Reactive.Linq
 			TSource current = initialValue;
 			Exception error = null;
 			var dis = source.Subscribe (
-				v => { Console.WriteLine ("!!! " + v); current = v; if (block) wait.Set (); },
+				v => { current = v; if (block) wait.Set (); },
 				ex => { error = ex; ongoing = false; if (block) wait.Set (); },
 				() => { ongoing = false; if (block) wait.Set (); }
 				);
