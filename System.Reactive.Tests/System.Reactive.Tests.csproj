@@ -56,6 +56,7 @@
     <Compile Include="System.Reactive.Disposables\SingleAssignmentDisposableTest.cs" />
     <Compile Include="System.Reactive.Linq\ExceptionalObservable.cs" />
     <Compile Include="System.Reactive.Linq\ObservableInvalidSubscriptionTest.cs" />
+    <Compile Include="System.Reactive.Linq\ObservableTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Reactive\System.Reactive.csproj">

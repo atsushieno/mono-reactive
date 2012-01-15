@@ -57,7 +57,7 @@ namespace System.Reactive.Linq
 
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			var sub = new ReplaySubject<T> ();
+			var sub = new ReplaySubject<T> (scheduler);
 			var dis = new CompositeDisposable ();
 			dis.Add (sub.Subscribe (observer));
 			dis.Add (scheduler.Schedule (() => dis.Add (work (sub))));
