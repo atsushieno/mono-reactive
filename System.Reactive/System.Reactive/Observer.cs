@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Concurrency;
+using System.Reactive.Subjects;
 
 namespace System.Reactive
 {
@@ -45,7 +46,9 @@ namespace System.Reactive
 		
 		public static IObserver<T> Synchronize<T> (IObserver<T> observer, object gate)
 		{
-			throw new NotImplementedException ();
+			var ret = new SynchronizedSubject<T> (gate);
+			ret.Subscribe (observer);
+			return ret;
 		}
 		
 		public static Action<Notification<T>> ToNotifier<T> (this IObserver<T> observer)
