@@ -126,7 +126,7 @@ namespace System.Reactive.Linq
 	internal class SchedulerBoundSubject<T> : ISubject<T>
 	{
 		IScheduler scheduler;
-		ISubject<T> sub = new Subject<T> ();
+		ISubject<T> sub = new ReplaySubject<T> ();
 		
 		public SchedulerBoundSubject (IScheduler scheduler)
 		{
