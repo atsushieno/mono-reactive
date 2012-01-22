@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using NUnit.Framework;
@@ -147,6 +148,21 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (SpinWait.SpinUntil (() => j != 0, 1000), "#1");
 			Assert.AreEqual (10, i, "#2");
 			Assert.AreEqual (10, k, "#3");
+		}
+		
+		[Test]
+		public void Generate ()
+		{
+			var source = Observable.Generate (-1, x => x < 5, x => x + 1, x => x);
+			int i = 0;
+			var dis = new CompositeDisposable ();
+			int done = 0;
+			// test multiple subscription
+			foreach (var iter in Enumerable.Range (0, 5))
+				dis.Add (source.Subscribe (v => i += v, () => done++));
+			Assert.IsTrue (SpinWait.SpinUntil (() => done == 5, 1000), "#1");
+			dis.Dispose ();
+			Assert.AreEqual (45, i, "#2");
 		}
 		
 		class Resource : IDisposable
