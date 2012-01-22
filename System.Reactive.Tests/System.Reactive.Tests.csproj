@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="System\ObservableExtensionTest.cs" />
     <Compile Include="System.Reactive\NotificationTest.cs" />
+    <Compile Include="System.Reactive.Concurrency\CurrentThreadSchedulerTest.cs" />
     <Compile Include="System.Reactive.Disposables\BooleanDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\CompositeDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\ContextDisposableTest.cs" />
