@@ -16,7 +16,7 @@ namespace System.Reactive.Concurrency.Tests
 		public void Concurrency ()
 		{
 			// this is to test some race condition in scheduling (which used to fail)
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < 500; i++)
 				RunConcurrencyTest ();
 		}
 		

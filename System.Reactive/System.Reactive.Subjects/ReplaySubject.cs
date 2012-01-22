@@ -83,7 +83,8 @@ namespace System.Reactive.Subjects
 			if (!done) {
 				done = true;
 				var n = Notification.CreateOnCompleted<T> ();
-				notifications.Add (n);
+				lock (lock_obj)
+					notifications.Add (n);
 				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
 			}
 		}
@@ -94,7 +95,8 @@ namespace System.Reactive.Subjects
 			if (!done) {
 				done = true;
 				var n = Notification.CreateOnError<T> (error);
-				notifications.Add (n);
+				lock (lock_obj)
+					notifications.Add (n);
 				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
 			}
 		}
@@ -104,18 +106,21 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			if (!done) {
 				var n = Notification.CreateOnNext<T> (value);
-				notifications.Add (n);
+				lock (lock_obj)
+					notifications.Add (n);
 				Schedule (() => observers.ForEach ((o) => n.Accept (o)));
 			}
 		}
 		
 		List<IObserver<T>> observers = new List<IObserver<T>> ();
+		object lock_obj = new object ();
 		
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
 			CheckDisposed ();
 			observers.Add (observer);
-			Schedule (() => notifications.ForEach ((n) => n.Accept (observer)));
+			lock (lock_obj)
+				Schedule (() => notifications.ForEach ((n) => n.Accept (observer)));
 			return Disposable.Create (() => observers.Remove (observer));
 		}
 
