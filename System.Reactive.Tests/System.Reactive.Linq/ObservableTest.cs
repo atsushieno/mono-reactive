@@ -124,7 +124,7 @@ namespace System.Reactive.Linq.Tests
 					Assert.Fail ("Unexpected Generate() iteration");
 				iter++;
 				}, () => done = true);
-			SpinWait.SpinUntil (() => done == true, 2000);
+			Assert.IsTrue (SpinWait.SpinUntil (() => done == true, 2000), "#5");
 			dis.Dispose ();
 		}
 		
@@ -147,6 +147,40 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (SpinWait.SpinUntil (() => j != 0, 1000), "#1");
 			Assert.AreEqual (10, i, "#2");
 			Assert.AreEqual (10, k, "#3");
+		}
+		
+		class Resource : IDisposable
+		{
+			public bool Disposed;
+			
+			public Resource ()
+			{
+			}
+			
+			public void Dispose ()
+			{
+				Disposed = true;
+			}
+			
+			public IObservable<int> GetObservable ()
+			{
+				return Observable.Range (0, 3);
+			}
+		}
+		
+		[Test]
+		public void Using ()
+		{
+			var res = new Resource ();
+			var ro = Observable.Using<int,Resource> (() => res, r => r.GetObservable ());
+			Assert.IsFalse (res.Disposed, "#1");
+			int i = 0;
+			bool done = false;
+			var dis = ro.Subscribe (v => i += v, () => done = true);
+			Assert.IsTrue (SpinWait.SpinUntil (() => done, TimeSpan.FromSeconds (1)), "#2");
+			Assert.IsFalse (res.Disposed, "#2");
+			dis.Dispose ();
+			Assert.IsTrue (res.Disposed, "#3");
 		}
 	}
 }
