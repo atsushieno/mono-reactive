@@ -1,5 +1,5 @@
 
-RUNTIME = mono
+RUNTIME = mono --debug
 
 all: System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll
 
