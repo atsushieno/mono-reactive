@@ -48,16 +48,23 @@ namespace System.Reactive.Linq
 	{
 		IScheduler scheduler;
 		Func<ISubject<T>, IDisposable> work;
+		Func<ISubject<T>> subject_creator;
 		
 		public ColdObservableEach (Func<ISubject<T>, IDisposable> work, IScheduler scheduler)
+			: this (work, scheduler, () => new ReplaySubject<T> (scheduler))
+		{
+		}
+		
+		public ColdObservableEach (Func<ISubject<T>, IDisposable> work, IScheduler scheduler, Func<ISubject<T>> subjectCreator)
 		{
 			this.work = work;
 			this.scheduler = scheduler;
+			subject_creator = subjectCreator;
 		}
 
 		public IDisposable Subscribe (IObserver<T> observer)
 		{
-			var sub = new ReplaySubject<T> (scheduler);
+			var sub = subject_creator ();
 			var dis = new CompositeDisposable ();
 			dis.Add (sub.Subscribe (observer));
 			dis.Add (scheduler.Schedule (() => dis.Add (work (sub))));

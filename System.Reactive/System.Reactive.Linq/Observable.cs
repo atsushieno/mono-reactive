@@ -1623,9 +1623,8 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("source");
 			if (retryCount < 0)
 				throw new ArgumentOutOfRangeException ("retryCount");
-
-			// Yes, there is an easy solution...
-			// return retryCount == 0 ? source : source.Concat (source.Retry (retryCount - 1);
+			if (retryCount == 0)
+				return Observable.Empty<TSource> ();
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
@@ -1642,20 +1641,21 @@ namespace System.Reactive.Linq
 			
 			*/
 			Action<Exception> onError = null;
-			var dis = new CompositeDisposable ();
+			var dis = new SerialDisposable ();
 			onError = (error) => {
-				if (retryCount-- <= 0)
+				--retryCount;
+				if (retryCount <= 0)
 					sub.OnError (error);
 				else
-					dis.Add (source.Subscribe (v => sub.OnNext (v), ex => onError (ex), () => {}));
+					dis.Disposable = source.Subscribe (v => sub.OnNext (v), ex => onError (ex), () => sub.OnCompleted ());
 				};
-			dis.Add (source.Subscribe (
+			dis.Disposable = source.Subscribe (
 				v => sub.OnNext (v),
 				ex => onError (ex),
-				() => sub.OnCompleted ()));
+				() => sub.OnCompleted ());
 			return dis;
 			// ----
-			}, DefaultColdScheduler);
+			}, DefaultColdScheduler, () => new Subject<TSource> ());
 		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html

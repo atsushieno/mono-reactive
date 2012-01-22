@@ -137,6 +137,13 @@ namespace System.Reactive.Linq.Tests
 			source.Subscribe (v => i += v, () => j++);
 			Assert.IsTrue (SpinWait.SpinUntil (() => j != 0, 1000), "#1");
 			Assert.AreEqual (46, i, "#2");
+
+			source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new NotImplementedException ("failure")));
+			try {
+				source.ToEnumerable ().All (v => true);
+				Assert.Fail ("should not complete");
+			} catch (NotImplementedException) {
+			}
 		}
 		
 		[Test]
@@ -163,6 +170,30 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (SpinWait.SpinUntil (() => done == 5, 1000), "#1");
 			dis.Dispose ();
 			Assert.AreEqual (45, i, "#2");
+		}
+		
+		[Test]
+		public void Retry ()
+		{
+			Retry (2, 12);
+			Retry (0, 0);
+		}
+		
+		void Retry (int repeat, int result)
+		{
+			var source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new Exception ("failure"))).Retry (repeat);
+			var i = 0;
+			bool done = false, error = false;
+			var dis = source.Subscribe (
+				v => i += v,
+				ex => { error = true; done = true; Assert.AreEqual ("failure", ex.Message, "#1"); },
+				() => Assert.Fail ("should not complete"));
+			
+			Assert.IsTrue (SpinWait.SpinUntil (() => done, 500), "#2");
+			
+			dis.Dispose ();
+			Assert.IsTrue (error, "#3");
+			Assert.AreEqual (result, i, "#4");
 		}
 		
 		class Resource : IDisposable
