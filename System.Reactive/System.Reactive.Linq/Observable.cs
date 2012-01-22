@@ -1101,7 +1101,7 @@ namespace System.Reactive.Linq
 			Action drcleanup = () => {
 				Console.WriteLine ("right duration cleanup"); 
 				rddis.Dispose ();
-				rddis = null;
+				rddis = new SingleAssignmentDisposable ();
 				rsub = null;
 				dright = null;
 				};
