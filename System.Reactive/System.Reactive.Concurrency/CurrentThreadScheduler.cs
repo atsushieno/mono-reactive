@@ -78,9 +78,14 @@ namespace System.Reactive.Concurrency
 			} else {
 				try {
 					task.Invoke ();
-					while (tasks.Count > 0) {
-						var t = (Task) tasks.First ();
-						tasks.Remove (t);
+					while (true) {
+						Task t;
+						lock (tasks) {
+							t = (Task) tasks.FirstOrDefault ();
+							if (t == null)
+								break;
+							tasks.Remove (t);
+						}
 						t.Invoke ();
 					}
 				} finally {
