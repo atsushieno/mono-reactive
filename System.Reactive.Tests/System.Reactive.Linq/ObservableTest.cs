@@ -104,6 +104,31 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void BufferTimeAndCount ()
+		{
+			// This emites events as: 0 <0ms> 1 <100ms> 2 ... 5 <500ms>
+			var o1 = Observable.Generate<int, int> (0, i => i < 6, i => { Thread.Sleep (i * 50); return i + 1; }, i => i);
+			var source = o1.Buffer (TimeSpan.FromMilliseconds (500), 3);
+			bool done = false;
+			DateTime start = DateTime.Now;
+			int iter = 0;
+			var dis = source.Subscribe (l => {
+				if (iter == 0) {
+					Assert.IsTrue (DateTime.Now - start <= TimeSpan.FromMilliseconds (500), "#1");
+					Assert.AreEqual (3, l.Count, "#2");
+				} else if (iter == 1) {
+					Assert.IsTrue (l.Count < 3, "#3");
+					Assert.IsTrue (DateTime.Now - start >= TimeSpan.FromMilliseconds (500), "#4");
+				}
+				else
+					Assert.Fail ("Unexpected Generate() iteration");
+				iter++;
+				}, () => done = true);
+			SpinWait.SpinUntil (() => done == true, 2000);
+			dis.Dispose ();
+		}
+		
+		[Test]
 		public void Concat ()
 		{
 			int i = 0, j = 0;

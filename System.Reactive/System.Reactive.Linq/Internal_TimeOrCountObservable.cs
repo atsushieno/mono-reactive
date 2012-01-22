@@ -16,7 +16,6 @@ namespace System.Reactive.Linq
 		IScheduler scheduler;
 		bool started, stop;
 		AutoResetEvent wait;
-		IDisposable schedule_disposable;
 		IObservable<Unit> counter;
 		int threshold_count;
 		int current_count;
@@ -31,22 +30,22 @@ namespace System.Reactive.Linq
 		
 		public IDisposable Subscribe (IObserver<Unit> observer)
 		{
-			var dis = subject.Subscribe (observer);
+			var dis = new CompositeDisposable ();
+			dis.Add (subject.Subscribe (observer));
 
 			if (started)
 				return dis;
 			started = true;
-			schedule_disposable = scheduler.Schedule (() => {
+			dis.Add (scheduler.Schedule (() => {
 				wait = new AutoResetEvent (false);
-				counter.Subscribe (Observer.Create<Unit> (u => { if (++current_count == threshold_count) wait.Set (); }, ex => subject.OnError (ex)));
+				dis.Add (counter.Subscribe (Observer.Create<Unit> (u => { if (++current_count == threshold_count) wait.Set (); }, ex => subject.OnError (ex))));
 				Tick ();
-			});
+			}));
 			return Disposable.Create (() => {
 				stop = true;
 				if (wait != null)
 					wait.Set ();
 				dis.Dispose ();
-				schedule_disposable.Dispose ();
 			});
 		}
 		

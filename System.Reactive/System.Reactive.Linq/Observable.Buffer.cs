@@ -119,19 +119,19 @@ namespace System.Reactive.Linq
 			var counter = new Subject<Unit> ();
 			var l = new List<TSource> ();
 			var dis = new CompositeDisposable ();
-			dis.Add (source.Subscribe (Observer.Create<TSource> (
-				v => { l.Add (v); counter.OnNext (Unit.Default); },
-				ex => sub.OnError (ex),
-				() => { if (l.Count > 0) sub.OnNext (l); sub.OnCompleted (); })));
 			var buffer = new TimeOrCountObservable (timeSpan, counter, count, scheduler);
-			dis.Add (buffer.Subscribe (Observer.Create<Unit> (
+			dis.Add (buffer.Subscribe (
 				u => {
 					var n = l;
 					l = new List<TSource> ();
 					sub.OnNext (n);
 				},
 				ex => sub.OnError (ex),
-				() => {})));
+				() => {}));
+			dis.Add (source.Subscribe (
+				v => { l.Add (v); counter.OnNext (Unit.Default); },
+				ex => sub.OnError (ex),
+				() => { if (l.Count > 0) sub.OnNext (l); sub.OnCompleted (); }));
 			return dis;
 			// ----
 			}, scheduler);
