@@ -72,7 +72,7 @@ namespace System.Reactive.Concurrency
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			var task = new Task (() => action (this, state), dueTime);
-			if (Interlocked.CompareExchange (ref busy, 1, busy) == 1) {
+			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
 				tasks.Add (task);
 				return Disposable.Create (() => tasks.Remove (task));
 			} else {
@@ -89,7 +89,7 @@ namespace System.Reactive.Concurrency
 						t.Invoke ();
 					}
 				} finally {
-					busy = 0;
+					busy--;
 				}
 				return Disposable.Empty;
 			}
