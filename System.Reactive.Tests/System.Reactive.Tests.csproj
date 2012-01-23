@@ -59,6 +59,7 @@
     <Compile Include="System.Reactive.Linq\ObservableInvalidSubscriptionTest.cs" />
     <Compile Include="System.Reactive.Linq\ObservableEventsTest.cs" />
     <Compile Include="System.Reactive.Linq\ObservableTest.cs" />
+    <Compile Include="System.Reactive.Subjects\SubjectSequenceTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Reactive\System.Reactive.csproj">
