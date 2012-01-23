@@ -46,6 +46,18 @@ namespace System.Reactive.Subjects.Tests
 		}
 
 		[Test]
+		public void NoOnNextAfterOnError ()
+		{
+			RunTest<int> (Subjects.ProcessAll | Subjects.Async, sub => {
+				bool error = false;
+				sub.Subscribe (v => Assert.Fail ("should not raise OnNext : " + sub), ex => error = true, () => Assert.Fail ("should not complete : " + sub));
+				sub.OnError (new Exception ());
+				sub.OnNext (0);
+				Assert.IsTrue (error, "#1: " + sub);
+			});
+		}
+
+		[Test]
 		public void OnNextAfterOnCompletedIgnored ()
 		{
 			RunTest<int> (Subjects.ProcessAll, sub => {

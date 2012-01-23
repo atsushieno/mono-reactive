@@ -27,6 +27,23 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsFalse (ee.MoveNext (), "#7");
 		}
 
+		public class MyObservable<T> : IObservable<T>
+		{
+			public IDisposable Subscribe (IObserver<T> observer)
+			{
+				throw new NotImplementedException ();
+			}
+		}
+
+		[Test]
+		[ExpectedException (typeof (NotImplementedException))]
+		public void ErrorFlow ()
+		{
+			// throw error on main
+			new MyObservable<int> ().Timestamp ().Subscribe (v => {});
+			Assert.Fail ("should not reach here");
+		}
+
 		// tests for individual method follow...
 
 		[Test]
@@ -233,6 +250,18 @@ namespace System.Reactive.Linq.Tests
 			public IObservable<int> GetObservable ()
 			{
 				return Observable.Range (0, 3);
+			}
+		}
+		
+		[Test]
+		public void Start ()
+		{
+			bool next = false;
+			try {
+				Observable.Start (() => { Thread.Sleep (200); throw new NotImplementedException (); }); // run it in another thread.
+				next = true;
+			} catch (NotImplementedException) {
+				Assert.IsTrue (next, "#1");
 			}
 		}
 		
