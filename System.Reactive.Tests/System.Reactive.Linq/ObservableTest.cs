@@ -147,6 +147,18 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void Concat2 ()
+		{
+			var expected = new NotificationKind [] {
+				NotificationKind.OnNext,
+				NotificationKind.OnNext,
+				NotificationKind.OnError };
+			var source = Observable.Range (0, 2).Concat (Observable.Throw<int> (new Exception ("failure")));
+			var arr = from n in source.Materialize ().ToEnumerable () select n.Kind;
+			Assert.AreEqual (expected, arr.ToArray (), "#1");
+		}
+		
+		[Test]
 		public void Do ()
 		{
 			int i = 0, j = 0, k = 0;
@@ -175,13 +187,7 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Retry ()
 		{
-			Retry (2, 12);
-			Retry (0, 0);
-		}
-		
-		void Retry (int repeat, int result)
-		{
-			var source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new Exception ("failure"))).Retry (repeat);
+			var source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new Exception ("failure"))).Retry (2);
 			var i = 0;
 			bool done = false, error = false;
 			var dis = source.Subscribe (
@@ -193,7 +199,22 @@ namespace System.Reactive.Linq.Tests
 			
 			dis.Dispose ();
 			Assert.IsTrue (error, "#3");
-			Assert.AreEqual (result, i, "#4");
+			Assert.AreEqual (12, i, "#4");
+		}
+		
+		[Test]
+		public void RetryZero ()
+		{
+			var source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new Exception ("failure"))).Retry (0);
+			bool done = false;
+			var dis = source.Subscribe (
+				v => Assert.Fail ("should not increment", "#1"),
+				ex => Assert.Fail ("should not fail", "#2"),
+				() => done = true
+				);
+			
+			Assert.IsTrue (SpinWait.SpinUntil (() => done, 500), "#3");
+			Assert.IsTrue (done, "#4");
 		}
 		
 		class Resource : IDisposable
