@@ -2622,7 +2622,7 @@ namespace System.Reactive.Linq
 			// ----
 			return source.Subscribe (v => sub.OnNext (new Timestamped<TSource> (v, scheduler.Now)), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			// ----
-			}, scheduler);
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource[]> ToArray<TSource> (this IObservable<TSource> source)
