@@ -20,36 +20,10 @@ namespace System.Reactive.Concurrency
 			get { return Scheduler.Now; }
 		}
 		
-		class Task : IScheduledItem<DateTimeOffset>
-		{
-			public Task (Func<IDisposable> action, DateTimeOffset dueTime)
-			{
-				Action = action;
-				DueTime = dueTime;
-			}
-			
-			public Func<IDisposable> Action;
-			public DateTimeOffset DueTime { get; private set; }
-
-			public void Invoke ()
-			{
-				Thread.Sleep (Scheduler.Normalize (DueTime - Scheduler.CurrentThread.Now));
-				var dis = Action ();
-				dis.Dispose ();
-			}
-		}
-		
-		public class TaskComparer : IComparer<IScheduledItem<DateTimeOffset>>
-		{
-			public int Compare (IScheduledItem<DateTimeOffset> i1, IScheduledItem<DateTimeOffset> i2)
-			{
-				return Comparer<DateTimeOffset>.Default.Compare (i1.DueTime, i2.DueTime);
-			}
-		}
-		
 		int busy = 0;
 
-		ISet<IScheduledItem<DateTimeOffset>> tasks = new SortedSet<IScheduledItem<DateTimeOffset>> (new TaskComparer ());
+		IComparer<IScheduledItem<DateTimeOffset>> comparer = new ScheduledItem<DateTimeOffset>.Comparer (Comparer<DateTimeOffset>.Default);
+		List<IScheduledItem<DateTimeOffset>> tasks = new List<IScheduledItem<DateTimeOffset>> ();
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
@@ -71,17 +45,18 @@ namespace System.Reactive.Concurrency
 		*/
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			var task = new Task (() => action (this, state), dueTime);
+			var task = new ScheduledItem<DateTimeOffset> (dueTime, () => action (this, state));
 			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
 				tasks.Add (task);
+				tasks.Sort (comparer);
 				return Disposable.Create (() => tasks.Remove (task));
 			} else {
 				try {
 					task.Invoke ();
 					while (true) {
-						Task t;
+						ScheduledItem<DateTimeOffset> t;
 						lock (tasks) {
-							t = (Task) tasks.FirstOrDefault ();
+							t = (ScheduledItem<DateTimeOffset>) tasks.FirstOrDefault ();
 							if (t == null)
 								break;
 							tasks.Remove (t);
