@@ -37,15 +37,7 @@ namespace System.Reactive.Linq
 			if (removeHandler == null)
 				throw new ArgumentNullException ("removeHandler");
 
-			throw new NotImplementedException ();
-
-			/* this is no-go, fails to bind for incompatible argument types (EventArgs vs. TEventArgs !) */
-			ISubject<TEventArgs> subject;
-			Action<TEventArgs> d = delegate (TEventArgs args) { subject.OnNext (args); };
-			Func<ISubject<TEventArgs>, TDelegate> handlerCreator =
-				sub => { subject = sub; return (TDelegate) (object) Delegate.CreateDelegate (typeof (TDelegate), d.Method); };
-
-			return new EventObservable2<TDelegate, TEventArgs> (handlerCreator, addHandler, removeHandler);
+			return FromEvent<TDelegate, TEventArgs> (a => CastDelegate<TDelegate> (a), addHandler, removeHandler);
 		}
 		
 		public static IObservable<TEventArgs> FromEvent<TDelegate, TEventArgs> (
@@ -98,13 +90,7 @@ namespace System.Reactive.Linq
 			if (removeHandler == null)
 				throw new ArgumentNullException ("removeHandler");
 
-			/* FIXME: this is no-go, fails to bind for incompatible argument types (EventArgs vs. TEventArgs !) */
-			ISubject<EventPattern<TEventArgs>> subject = null;
-			Action<object, TEventArgs> d = delegate (object sender, TEventArgs args) { subject.OnNext (new EventPattern<TEventArgs> (sender, args)); };
-			Func<ISubject<EventPattern<TEventArgs>>, TDelegate> handlerCreator =
-				sub => { subject = sub; return (TDelegate) (object) Delegate.CreateDelegate (typeof (TDelegate), d.GetType ().GetMethod ("Invoke")); };
-
-			return new EventPatternObservable2<TDelegate, TEventArgs> (handlerCreator, addHandler, removeHandler);
+			return FromEventPattern<TDelegate, TEventArgs> (a => CastDelegate<TDelegate> (a), addHandler, removeHandler);
 		}
 		
 		public static IObservable<EventPattern<EventArgs>> FromEventPattern (
@@ -226,6 +212,11 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("source");
 
 			return new EventPatternSource<TEventArgs> (source);
+		}
+		
+		static T CastDelegate<T> (Delegate source)
+		{
+			return (T) (object) Delegate.Combine ((from i in source.GetInvocationList () select Delegate.CreateDelegate (typeof (T), i.Target, i.Method)).ToArray ());
 		}
 	}
 }
