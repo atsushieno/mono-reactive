@@ -1223,7 +1223,7 @@ namespace System.Reactive.Linq
 			// ----
 			return source.Subscribe (
 				v => sub.OnNext (Notification.CreateOnNext<TSource> (v)),
-				ex => sub.OnNext (Notification.CreateOnError<TSource> (ex)),
+				ex => { sub.OnNext (Notification.CreateOnError<TSource> (ex)); sub.OnCompleted (); },
 				() => { sub.OnNext (Notification.CreateOnCompleted<TSource> ()); sub.OnCompleted (); });
 			// ----
 			}, DefaultColdScheduler);
@@ -2737,13 +2737,26 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 
-			var l = new BlockingCollection<TSource> ();
-			source.Subscribe (
-				v => { l.Add (v); },
-				() => { l.CompleteAdding (); }
+			var wait = new AutoResetEvent (false);
+			var q = new Queue<TSource> ();
+			var dis = new SingleAssignmentDisposable ();
+			bool active = true;
+			Exception error = null;
+			Action onDone = () => { active = false; dis.Dispose (); wait.Set (); };
+			dis.Disposable = source.Subscribe (
+				v => { q.Enqueue (v); wait.Set (); },
+				ex => { error = ex; onDone (); },
+				onDone
 				);
-			foreach (var s in l)
-				yield return s;
+			while (active) {
+				wait.WaitOne (TimeSpan.FromSeconds (1));
+				while (q.Count > 0)
+					yield return q.Dequeue ();
+			}
+			while (q.Count > 0)
+				yield return q.Dequeue ();
+			if (error != null)
+				throw error;
 		}
 		
 		public static IObservable<IList<TSource>> ToList<TSource> (this IObservable<TSource> source)

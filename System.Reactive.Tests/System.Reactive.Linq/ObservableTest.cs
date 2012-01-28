@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -25,6 +26,36 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (ee.MoveNext (), "#5");
 			Assert.AreEqual (2, ee.Current, "#6");
 			Assert.IsFalse (ee.MoveNext (), "#7");
+		}
+
+		[Test]
+		public void ToEnumerableWithInterval ()
+		{
+			var obs = Observable.Interval (TimeSpan.FromMilliseconds (100)).Take (5);
+			obs.Subscribe (v => {}); // should not affect ToEnumerable() startup.
+			int i = 0;
+			Thread.Sleep (200);
+			DateTime start = DateTime.Now;
+			var e = obs.ToEnumerable ();
+			foreach (var v in e)
+				i ++;
+			Assert.AreEqual (5, i, "#1");
+			Assert.IsTrue (DateTime.Now - start > TimeSpan.FromMilliseconds (500), "#2"); // if it enumerates in incorrect time, it will result in false.
+		}
+		
+		[Test]
+		public void Materialize ()
+		{
+			var expected = new NotificationKind [] {
+				NotificationKind.OnNext,
+				NotificationKind.OnNext,
+				NotificationKind.OnError };
+			var source = Observable.Range (0, 2).Concat (Observable.Throw<int> (new Exception ("failure")));
+			var l = new List<NotificationKind> ();
+			bool done = false;
+			var dis = source.Materialize ().Subscribe (v => l.Add (v.Kind), () => done = true); // test that Materialize() yields OnCompleted event after yielding OnError.
+			Assert.IsTrue (SpinWait.SpinUntil (() => done, TimeSpan.FromSeconds (1)), "#1");
+			Assert.AreEqual (expected, l.ToArray (), "#3");
 		}
 
 		public class MyObservable<T> : IObservable<T>
