@@ -112,7 +112,7 @@ namespace System.Reactive.Linq.Tests
 			cdis2.Dispose ();
 		}
 
-		[Test]
+		[Test] // FIXME: this test is somewhat processing-speed dependent. Sleep() is not enough very often.
 		public void Replay ()
 		{
 			var hot = Observable.Interval (TimeSpan.FromMilliseconds (20)).Take (5).Publish ();
