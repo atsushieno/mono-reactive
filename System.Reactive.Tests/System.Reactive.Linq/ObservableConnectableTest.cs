@@ -82,7 +82,7 @@ namespace System.Reactive.Linq.Tests
 			observable.Connect ();
 			long result = 0;
 			var dis = observable.Subscribe (i => result += i);
-			Thread.Sleep (200); // should finish hot observable
+			Thread.Sleep (1000); // should finish hot observable
 			Assert.AreEqual (4, result, "#1");
 			dis.Dispose ();
 			var dis2 = observable.Subscribe (i => result += i);
@@ -107,7 +107,7 @@ namespace System.Reactive.Linq.Tests
 			Thread.Sleep (400); // should be enough to raise interval event if it were active (which should *not*)
 			Assert.AreEqual (oldSide, side, "#2");
 			var cdis2 = connected.Subscribe (i => result++);
-			Thread.Sleep (400); // should be enough to receive some events
+			Thread.Sleep (1000); // should be enough to receive some events
 			Assert.IsTrue (side > oldSide, "#3");
 			cdis2.Dispose ();
 		}
@@ -121,7 +121,7 @@ namespace System.Reactive.Linq.Tests
 			observable.Connect ();
 			int result = 0;
 			var dis1 = observable.Subscribe (i => result++);
-			Thread.Sleep (200); // should finish hot observable
+			Thread.Sleep (1000); // should finish hot observable
 			Assert.AreEqual (5, result, "#1");
 			var dis2 = observable.Subscribe (i => result++);
 			Assert.AreEqual (10, result, "#1");
