@@ -22,17 +22,17 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, dueTime - Now, action);
+			var dis = new SingleAssignmentDisposable ();
+			ThreadPool.QueueUserWorkItem (s => {
+				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
+				dis.Disposable = action (this, state);
+			});
+			return dis;
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			var dis = new SingleAssignmentDisposable ();
-			ThreadPool.QueueUserWorkItem (s => {
-				Thread.Sleep (Scheduler.Normalize (dueTime));
-				dis.Disposable = action (this, state);
-			});
-			return dis;
+			return Schedule<TState> (state, Now + Scheduler.Normalize (dueTime), action);
 		}
 	}
 }

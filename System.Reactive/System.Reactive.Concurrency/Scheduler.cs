@@ -111,9 +111,10 @@ namespace System.Reactive.Concurrency
 			return Schedule (scheduler, Now + Normalize (dueTime), action);
 		}
 		
-		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action<Action> action)
+		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action<Action<TimeSpan>> action)
 		{
-			return Schedule (scheduler, Now + Normalize (dueTime), action);
+			var state = new object ();
+			return Schedule<object> (scheduler, state, dueTime, (object stat, Action<object, TimeSpan> act) => action (ts => act (stat, ts)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, TimeSpan dueTime, Action<TState, Action<TState, TimeSpan>> action)

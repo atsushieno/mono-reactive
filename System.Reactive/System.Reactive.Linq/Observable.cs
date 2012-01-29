@@ -503,8 +503,9 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			Thread.Sleep (Scheduler.Normalize (dueTime)); 
-			return source.Subscribe (sub);
+			var dis = new SingleAssignmentDisposable ();
+			scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) dis.Disposable = source.Subscribe (sub); });
+			return dis;
 			// ----
 			}, scheduler);
 		}
@@ -866,18 +867,20 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
+			var dis = new CompositeDisposable ();
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
 			try {
 				for (var i = initialState; condition (i); i = iterate (i)) {
-					Thread.Sleep (Scheduler.Normalize (timeSelector (i)));
-					sub.OnNext (resultSelector (i));
+					var sdis = new SingleAssignmentDisposable ();
+					dis.Add (sdis);
+					sdis.Disposable = scheduler.Schedule (timeSelector (i), () => { if (!sdis.IsDisposed) sub.OnNext (resultSelector (i)); });
 				}
 				sub.OnCompleted ();
 			} catch (Exception ex) {
 				sub.OnError (ex);
 			}
-			return Disposable.Empty;
+			return dis;
 			// ----
 			}, scheduler);
 		}
@@ -1161,14 +1164,7 @@ namespace System.Reactive.Linq
 
 		/* It Notifies "current count" to *each* observer i.e. this
 		   observable holds different count numbers to the observers.
-		
-		Example of different counts:
-		
-		var interval = Observable.Interval(TimeSpan.FromMilliseconds(250));
-		interval.Subscribe(Console.WriteLine);
-		Thread.Sleep(3000);
-		interval.Subscribe((s) => Console.WriteLine ("x " + s)); 
-
+		   See ObservableTest.Interval() as an example.
 		*/
 		public static IObservable<long> Interval (
 			TimeSpan period,
@@ -1179,16 +1175,21 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<long> (sub => {
 			// ----
+			var dis = new SingleAssignmentDisposable ();
 			try {
 				long count = 0;
+#if true // FIXME: eliminate use of Thread.Sleep().
 				while (true) {
 					Thread.Sleep (period);
 					sub.OnNext (count++);
 				}
+#else
+				dis.Disposable = scheduler.Schedule (period, (Action<TimeSpan> a) => { if (!dis.IsDisposed) sub.OnNext (count++); });
+#endif
 			} catch (Exception ex) {
 				sub.OnError (ex);
 			}
-			return Disposable.Empty;
+			return dis;
 			// ----
 			}, scheduler);
 		}
@@ -2553,14 +2554,13 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("scheduler");
 			return new ColdObservableEach<long> ((sub) => {
 			// ----
+			var dis = new SingleAssignmentDisposable ();
 			try {
-				Thread.Sleep (Scheduler.Normalize (dueTime));
-				sub.OnNext (0);
-				sub.OnCompleted ();
+				dis.Disposable = scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) sub.OnNext (0); sub.OnCompleted (); } });
 			} catch (Exception ex) {
 				sub.OnError (ex);
 			}
-			return Disposable.Empty;
+			return dis;
 			// ----
 			}, scheduler);
 		}

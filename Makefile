@@ -10,4 +10,4 @@ System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll: System.Reactive/bin/D
 	xbuild
 
 run-test: all
-	$(RUNTIME) external/nunit26/nunit-console.exe System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll
+	$(RUNTIME) external/nunit26/nunit-console.exe System.Reactive.Tests/bin/Debug/System.Reactive.Tests.dll $(NUNIT_OPTIONS)
