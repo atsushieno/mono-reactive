@@ -1178,14 +1178,7 @@ namespace System.Reactive.Linq
 			var dis = new SingleAssignmentDisposable ();
 			try {
 				long count = 0;
-#if true // FIXME: eliminate use of Thread.Sleep().
-				while (true) {
-					Thread.Sleep (period);
-					sub.OnNext (count++);
-				}
-#else
-				dis.Disposable = scheduler.Schedule (period, (Action<TimeSpan> a) => { if (!dis.IsDisposed) sub.OnNext (count++); });
-#endif
+				dis.Disposable = scheduler.Schedule (period, a => { if (!dis.IsDisposed) { sub.OnNext (count++); a (period); } });
 			} catch (Exception ex) {
 				sub.OnError (ex);
 			}

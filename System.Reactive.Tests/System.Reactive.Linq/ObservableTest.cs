@@ -267,21 +267,23 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (45, i, "#2");
 		}
 		
-		[Test]
+		[Test] // FIXME: this test is processing-speed dependent.
 		public void Interval ()
 		{
-			var interval = Observable.Interval(TimeSpan.FromMilliseconds(50)).Take (10);
+			var interval = Observable.Interval (TimeSpan.FromMilliseconds (100)).Take (6);
 			long v1 = 0, v2 = 0;
 			int done = 0;
 			long diff = 0;
 			var sub1 = interval.Subscribe (v => v1++, () => { done++; diff = v1 - v2; });
-			Thread.Sleep (200);
+			Thread.Sleep (400);
 			var sub2 = interval.Subscribe (v => v2++, () => done++);
 			Assert.IsTrue (v1 != v2, "#1"); // at arbitrary time
 			SpinWait.SpinUntil (() => done == 2, 1000);
 			Assert.AreEqual (2, done, "#2");
 			// test that two sequences runs in different time, same speed.
 			Assert.IsTrue (diff > 2, "#3");
+			sub1.Dispose ();
+			sub2.Dispose ();
 		}
 		
 		[Test]
