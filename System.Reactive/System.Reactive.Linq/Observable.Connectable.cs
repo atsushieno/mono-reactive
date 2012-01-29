@@ -33,12 +33,20 @@ namespace System.Reactive.Linq
 			public IDisposable Subscribe (IObserver<TResult> observer)
 			{
 				observers.Add (observer);
-				var dis = new SingleAssignmentDisposable ();
-				if (connected) {
+				SingleAssignmentDisposable dis = null;
+				bool wasConnected = connected;
+				if (wasConnected) {
+					dis = new SingleAssignmentDisposable ();
 					dis.Disposable = sub.Subscribe (observer);
 					disposables.Add (dis);
 				}
-				return Disposable.Create (() => { observers.Remove (observer); disposables.Remove (dis); dis.Dispose (); });
+				return Disposable.Create (() => {
+					observers.Remove (observer);
+					if (wasConnected) { // note: local variable. If it was not added, then do not add it.
+						disposables.Remove (dis);
+						dis.Dispose ();
+					}
+				});
 			}
 
 			public IDisposable Connect ()
@@ -55,7 +63,7 @@ namespace System.Reactive.Linq
 				disposables.Add (source.Subscribe (sub));
 				disposables.Add (Disposable.Create (() =>  {
 					connected = false;
-					// commented out. This is not necessary, and if any subscription is disposed *after* this disposable is disposed, this causes NRE.
+					// commented out. If any subscription is disposed *after* this disposable is disposed, this causes NRE.
 					// this.disposables = null; // clean up itself in the final stage
 				}));
 				return disposables;
