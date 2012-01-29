@@ -23,7 +23,7 @@ namespace System.Reactive.Linq
 	public static partial class Observable
 	{
 		static IScheduler DefaultColdScheduler {
-			get { return Scheduler.Immediate; }
+			get { return Scheduler.CurrentThread; }
 		}
 		
 		public static IObservable<TSource> Aggregate<TSource> (
@@ -2367,13 +2367,25 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var ticker = Interval (dueTime, scheduler);
-			bool emit = true;
-			var tdis = ticker.Subscribe (v => emit = true);
-			var dis = source.Subscribe (v => { if (emit) { emit = false; sub.OnNext (v); } }, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new CompositeDisposable (tdis, dis);
+			DateTimeOffset last = scheduler.Now;
+			bool fire = false;
+			TSource value;
+			return source.Subscribe (Observer.Create<TSource> (v => {
+				if (scheduler.Now - last >= dueTime) {
+					last = scheduler.Now;
+					sub.OnNext (v);
+				} else {
+					value = v;
+					if (!fire) {
+						fire = true;
+						var slotDueTime = dueTime - (scheduler.Now - last);
+						var ddis = new SingleAssignmentDisposable ();
+						ddis.Disposable = scheduler.Schedule (slotDueTime, () => { last = scheduler.Now; sub.OnNext (value); fire = false; value = default (TSource); ddis.Dispose ();});
+					}
+				}
+			}, ex => sub.OnError (ex), () => sub.OnCompleted ()));
 			// ----
-			}, DefaultColdScheduler);
+			}, scheduler);
 		}
 		
 		// see http://leecampbell.blogspot.com/2010/05/rx-part-2-static-and-extension-methods.html

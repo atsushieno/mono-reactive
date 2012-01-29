@@ -208,6 +208,39 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void Concat3 ()
+		{
+			var expected = new NotificationKind [] {
+				NotificationKind.OnNext,
+				NotificationKind.OnNext,
+				NotificationKind.OnNext,
+				NotificationKind.OnNext,
+				NotificationKind.OnCompleted };
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50)));
+			bool done = false;
+			var l = new List<NotificationKind> ();
+			source.Materialize ().Subscribe (v => l.Add (v.Kind), () => done = true);
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.AreEqual (expected, l.ToArray (), "#1");
+			Assert.IsTrue (done, "#2");
+		}
+		
+		
+		[Test]
+		public void Delay ()
+		{
+			var source = Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50)).Materialize ();
+			var l = new List<NotificationKind> ();
+			bool done = false;
+			source.Subscribe (v => l.Add (v.Kind), () => done = true);
+			Assert.IsTrue (SpinWait.SpinUntil (() => done, 1000), "#1");
+			Assert.IsTrue (done, "#2");
+			Assert.AreEqual (new NotificationKind [] {
+				NotificationKind.OnNext,
+				NotificationKind.OnCompleted }, l.ToArray (), "#3");
+		}
+		
+		[Test]
 		public void Do ()
 		{
 			int i = 0, j = 0, k = 0;
@@ -295,6 +328,19 @@ namespace System.Reactive.Linq.Tests
 			} catch (NotImplementedException) {
 				Assert.IsTrue (next, "#1");
 			}
+		}
+		
+		[Test]
+		public void Throttle ()
+		{
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (100))).Throttle (TimeSpan.FromMilliseconds (50));
+			bool done = false;
+			var l = new List<int> ();
+			var dis = source.Subscribe (v => l.Add (v), () => done = true);
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.IsTrue (done, "#1");
+			Assert.AreEqual (new int [] {3, 2}, l.ToArray (), "#2");
+			dis.Dispose ();
 		}
 		
 		[Test]
