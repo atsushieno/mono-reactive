@@ -334,18 +334,20 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new SerialDisposable ();
+			// FIXME: this should be SerialDisposable as there should be only one disposable at a time.
+			// ... Though currently that one does not work, need to investigate why.
+			var dis = new CompositeDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, SerialDisposable dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, CompositeDisposable dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
-			dis.Disposable = sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); });
+			dis.Add (sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); }));
 			return false;
 		}
 		

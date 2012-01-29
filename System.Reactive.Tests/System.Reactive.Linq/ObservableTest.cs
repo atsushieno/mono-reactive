@@ -216,7 +216,7 @@ namespace System.Reactive.Linq.Tests
 				NotificationKind.OnNext,
 				NotificationKind.OnNext,
 				NotificationKind.OnCompleted };
-			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50)));
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread));
 			bool done = false;
 			var l = new List<NotificationKind> ();
 			source.Materialize ().Subscribe (v => l.Add (v.Kind), () => done = true);
@@ -229,7 +229,7 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Delay ()
 		{
-			var source = Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50)).Materialize ();
+			var source = Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread).Materialize ();
 			var l = new List<NotificationKind> ();
 			bool done = false;
 			source.Subscribe (v => l.Add (v.Kind), () => done = true);
@@ -333,7 +333,7 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Throttle ()
 		{
-			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (100))).Throttle (TimeSpan.FromMilliseconds (50));
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (100), Scheduler.CurrentThread)).Throttle (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread);
 			bool done = false;
 			var l = new List<int> ();
 			var dis = source.Subscribe (v => l.Add (v), () => done = true);
