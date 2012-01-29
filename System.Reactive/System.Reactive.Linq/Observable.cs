@@ -2418,7 +2418,7 @@ namespace System.Reactive.Linq
 				ex => sub.OnError (ex),
 				() => sub.OnCompleted ());
 			// ----
-			}, scheduler);
+			}, DefaultColdScheduler);
 		}
 		
 		public static IObservable<TSource> Timeout<TSource>(

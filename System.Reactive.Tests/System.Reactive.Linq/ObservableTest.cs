@@ -297,31 +297,6 @@ namespace System.Reactive.Linq.Tests
 			}
 		}
 		
-		class ErrorScheduler : IScheduler
-		{
-			public DateTimeOffset Now { get { return DateTimeOffset.Now; } }
-			public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new Exception ();
-			}
-			public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new Exception ();
-			}
-			public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new Exception ();
-			}
-		}
-		
-		[Test]
-		public void TimestampScheduler ()
-		{
-			var o = Observable.Range (1, 3).Timestamp (new ErrorScheduler ()); // This ensures that Timestamp() does *not* use IScheduler to *schedule* tasks.
-			var a = from t in o.ToEnumerable () select t.Value;
-			Assert.AreEqual (new int [] {1, 2, 3}, a.ToArray (), "#1");
-		}
-		
 		[Test]
 		public void Using ()
 		{
