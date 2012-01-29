@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C3403D3D-408A-4FD8-8C34-A8CD818D489A}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Reactive</RootNamespace>
+    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
+    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+    <AssemblyName>System.Reactive.Android</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AndroidLinkMode>None</AndroidLinkMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <ConsolePause>false</ConsolePause>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="Mono.Android" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="System\ObservableExtensions.cs" />
+    <Compile Include="System.Reactive\EventPattern.cs" />
+    <Compile Include="System.Reactive\IEventPatternSource.cs" />
+    <Compile Include="System.Reactive\IEventSource.cs" />
+    <Compile Include="System.Reactive\Internal_DefaultObserver.cs" />
+    <Compile Include="System.Reactive\Internal_WrappedObserver.cs" />
+    <Compile Include="System.Reactive\Notification.Generic.cs" />
+    <Compile Include="System.Reactive\Notification.Static.cs" />
+    <Compile Include="System.Reactive\NotificationKind.cs" />
+    <Compile Include="System.Reactive\Observer.cs" />
+    <Compile Include="System.Reactive\TimeInterval.cs" />
+    <Compile Include="System.Reactive\Timestamped.cs" />
+    <Compile Include="System.Reactive\Unit.cs" />
+    <Compile Include="System.Reactive.Concurrency\CurrentThreadScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\EventLoopScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\HistoricalScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\HistoricalSchedulerBase.cs" />
+    <Compile Include="System.Reactive.Concurrency\ImmediateScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\Internal_ScheduledItem.cs" />
+    <Compile Include="System.Reactive.Concurrency\IScheduledItem.cs" />
+    <Compile Include="System.Reactive.Concurrency\IScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\NewThreadScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\Scheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\SynchronizationContextScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\TaskPoolScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\ThreadPoolScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\VirtualTimeScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\VirtualTimeSchedulerBase.cs" />
+    <Compile Include="System.Reactive.Disposables\BooleanDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\CancellationDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\CompositeDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\ContextDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\Disposable.cs" />
+    <Compile Include="System.Reactive.Disposables\MultipleAssignmentDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\RefCountDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\ScheduledDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\SerialDisposable.cs" />
+    <Compile Include="System.Reactive.Disposables\SingleAssignmentDisposable.cs" />
+    <Compile Include="System.Reactive.Joins\Pattern.cs" />
+    <Compile Include="System.Reactive.Joins\Plan.cs" />
+    <Compile Include="System.Reactive.Joins\System.Reactive.Joins.generated.cs" />
+    <Compile Include="System.Reactive.Joins\gen\gen-code.cs" />
+    <Compile Include="System.Reactive.Linq\IGroupedObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_AbstractObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_EventObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_EventPatternObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_GroupedSubject.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_NeverObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_SimpleDisposableObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Internal_TimeOrCountObservable.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Blocking.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Buffer.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Connectable.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Events.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Latest.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
+    <Compile Include="System.Reactive.Linq\Observable.Window.cs" />
+    <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />
+    <Compile Include="System.Reactive.Linq\gen\gen-code.cs" />
+    <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
+    <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
+    <Compile Include="System.Reactive.Subjects\IConnectableObservable.cs" />
+    <Compile Include="System.Reactive.Subjects\Internal_SynchronizedSubject.cs" />
+    <Compile Include="System.Reactive.Subjects\ISubject.cs" />
+    <Compile Include="System.Reactive.Subjects\ISubject.Variant.cs" />
+    <Compile Include="System.Reactive.Subjects\ReplaySubject.cs" />
+    <Compile Include="System.Reactive.Subjects\Subject.Generic.cs" />
+    <Compile Include="System.Reactive.Subjects\Subject.Static.cs" />
+    <Compile Include="System.Reactive.Threading.Tasks\TaskObservableExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="System.Reactive.Joins\gen\gen-code.exe" />
+    <None Include="System.Reactive.Joins\gen\gen-code.exe.mdb" />
+    <None Include="System.Reactive.Linq\gen\gen-code.exe" />
+    <None Include="System.Reactive.Linq\gen\gen-code.exe.mdb" />
+  </ItemGroup>
+</Project>

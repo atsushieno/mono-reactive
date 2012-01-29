@@ -5,8 +5,8 @@ Right now it is almost about System.Reactive.dll implementation, but I'm
 looking forward to seeing it running ReativeUI [*2] for MonoTouch as well as
 Mono for Android support.
 
-Not a few things are still not implemented, and there are many things known
-to fail. Also since I'm pretty much newbie in Rx land, there are likely
+A few things are still not implemented, and there are couple of things that
+are known to fail. Also since I'm still newbie in Rx land, there are likely
 stupid implementation and nasty hacks. Patches are welcome.
 
 [*1] http://msdn.microsoft.com/en-us/library/hh242985.aspx
