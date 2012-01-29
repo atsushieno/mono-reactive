@@ -58,7 +58,6 @@ namespace System.Reactive.Linq.Tests
 			var source = Observable.Interval (TimeSpan.FromMilliseconds (50));
 
 			int result = 0;
-			bool started = false;
 			var published = source.Publish ();
 			var pdis1 = published.Subscribe (i => result++);
 			var cdis1 = published.Connect ();
@@ -74,7 +73,23 @@ namespace System.Reactive.Linq.Tests
 			cdis2.Dispose ();
 		}
 
-		
+		[Test]
+		public void PublishLast ()
+		{
+			var hot = Observable.Interval (TimeSpan.FromMilliseconds (20)).Skip (4).Take (1).PublishLast ();
+			hot.Connect ();
+			var observable = hot.Replay ();
+			observable.Connect ();
+			long result = 0;
+			var dis = observable.Subscribe (i => result += i);
+			Thread.Sleep (200); // should finish hot observable
+			Assert.AreEqual (4, result, "#1");
+			dis.Dispose ();
+			var dis2 = observable.Subscribe (i => result += i);
+			Assert.AreEqual (8, result, "#2");
+			dis2.Dispose ();
+		}
+
 		[Test] // FIXME: this test is somewhat processing-speed dependent. Sleep() is not enough very often.
 		public void RefCount ()
 		{
@@ -82,7 +97,6 @@ namespace System.Reactive.Linq.Tests
 			var source = Observable.Interval (TimeSpan.FromMilliseconds (50)).Do (i => side++);
 
 			int result = 0;
-			bool started = false;
 			var published = source.Publish ();
 			var connected = published.RefCount ();
 			var cdis1 = connected.Subscribe (i => result++);
@@ -96,6 +110,23 @@ namespace System.Reactive.Linq.Tests
 			Thread.Sleep (400); // should be enough to receive some events
 			Assert.IsTrue (side > oldSide, "#3");
 			cdis2.Dispose ();
+		}
+
+		[Test]
+		public void Replay ()
+		{
+			var hot = Observable.Interval (TimeSpan.FromMilliseconds (20)).Take (5).Publish ();
+			hot.Connect ();
+			var observable = hot.Replay ();
+			observable.Connect ();
+			int result = 0;
+			var dis1 = observable.Subscribe (i => result++);
+			Thread.Sleep (200); // should finish hot observable
+			Assert.AreEqual (5, result, "#1");
+			var dis2 = observable.Subscribe (i => result++);
+			Assert.AreEqual (10, result, "#1");
+			dis1.Dispose ();
+			dis2.Dispose ();
 		}
 	}
 }
