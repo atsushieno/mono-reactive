@@ -2556,7 +2556,7 @@ namespace System.Reactive.Linq
 			// ----
 			var dis = new SingleAssignmentDisposable ();
 			try {
-				dis.Disposable = scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) sub.OnNext (0); sub.OnCompleted (); } });
+				dis.Disposable = scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) sub.OnNext (0); sub.OnCompleted (); });
 			} catch (Exception ex) {
 				sub.OnError (ex);
 			}
