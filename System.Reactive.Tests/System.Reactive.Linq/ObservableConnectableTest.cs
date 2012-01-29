@@ -35,5 +35,21 @@ namespace System.Reactive.Linq.Tests
 			pdis1.Dispose ();
 			pdis2.Dispose ();
 		}
+
+		[Test]
+		public void PublishConnectTwice ()
+		{
+			var source = Observable.Range (2, 3);
+
+			int result = 1;
+			bool started = false;
+			var published = source.Publish ();
+			var pdis1 = published.Subscribe (i => { started = true; result *= i; });
+			Assert.IsFalse (started, "#1");
+			var cdis1 = published.Connect ();
+			var cdis2 = published.Connect (); // no error
+			Assert.AreEqual (cdis1, cdis2, "#2");
+			cdis1.Dispose ();
+		}
 	}
 }

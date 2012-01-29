@@ -11,17 +11,19 @@ namespace System.Reactive.Linq
 {
 	public static partial class Observable
 	{
-		class ConnectableObservable<TSource, TResult> : IConnectableObservable<TResult>
+		class ConnectableObservable<TSource, TIntermediate, TResult> : IConnectableObservable<TResult>
 		{
 			IObservable<TSource> source;
 			ISubject<TSource, TResult> sub;
-			Func<ISubject<TSource, TResult>> subject_creator;
+			Func<ISubject<TSource, TIntermediate>> subject_creator;
+			Func<IObservable<TIntermediate>, IObservable<TResult>> result_selector;
 			
 			// FIXME: is it safe to leave created subject not disposed? (though also note that Multicast() does not *create* returned subject; it's just passing the argument)
-			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource, TResult>> subjectCreator)
+			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource, TIntermediate>> subjectCreator, Func<IObservable<TIntermediate>, IObservable<TResult>> resultSelector)
 			{
 				this.source = source;
 				this.subject_creator = subjectCreator;
+				this.result_selector = resultSelector;
 			}
 
 			bool connected;
@@ -42,9 +44,11 @@ namespace System.Reactive.Linq
 			public IDisposable Connect ()
 			{
 				if (connected)
-					throw new InvalidOperationException ("This connectable observable is already connected");
+					return disposables;
+
 				connected = true;
-				sub = subject_creator ();
+				var isub = subject_creator ();
+				sub = Subject.Create (isub, result_selector (isub));
 				disposables = new CompositeDisposable ();
 				foreach (var o in observers)
 					disposables.Add (sub.Subscribe (o));
@@ -63,14 +67,14 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable<TSource, TSource> (source, () => new Subject<TSource> ());
+			return new ConnectableObservable<TSource, TSource, TSource> (source, () => new Subject<TSource> (), o => o);
 		}
 		
 		public static IConnectableObservable<TSource> Publish<TSource> (
 			this IObservable<TSource> source,
 			TSource initialValue)
 		{
-			return new ConnectableObservable<TSource, TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
+			return new ConnectableObservable<TSource, TSource, TSource> (source, () => new BehaviorSubject<TSource> (initialValue), o => o);
 		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
@@ -82,7 +86,7 @@ namespace System.Reactive.Linq
 			if (selector == null)
 				throw new ArgumentNullException ("selector");
 			
-			return new ConnectableObservable<TSource, TResult> (source, () => { var b = new Subject<TSource> (); return Subject.Create (b, selector (b)); });
+			return Multicast<TSource, TSource, TResult> (source, () => new Subject<TSource> (), selector);
 		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
@@ -95,7 +99,7 @@ namespace System.Reactive.Linq
 			if (selector == null)
 				throw new ArgumentNullException ("selector");
 			
-			return new ConnectableObservable<TSource, TResult> (source, () => { var b = new BehaviorSubject<TSource> (initialValue); return Subject.Create (b, selector (b)); });
+			return Multicast<TSource, TSource, TResult> (source, () => new BehaviorSubject<TSource> (initialValue), selector);
 		}
 		
 		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
@@ -103,7 +107,7 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable <TSource, TSource> (source, () => new AsyncSubject<TSource> ());
+			return new ConnectableObservable <TSource, TSource, TSource> (source, () => new AsyncSubject<TSource> (), o => o);
 		}
 		
 		public static IObservable<TResult> PublishLast<TSource, TResult> (
@@ -113,7 +117,7 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable <TSource, TResult> (source, () => { var s = new AsyncSubject<TSource> (); return Subject.Create (s, selector (s)); });
+			return Multicast<TSource, TSource, TResult> (source, () => new AsyncSubject<TSource> (), selector);
 		}
 		
 		public static IConnectableObservable<TResult> Multicast<TSource, TResult> (
@@ -123,14 +127,23 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable<TSource, TResult> (source, () => subject);
+			return new ConnectableObservable<TSource, TResult, TResult> (source, () => subject, o => o);
 		}
 		
 		public static IObservable<TResult> Multicast<TSource, TIntermediate, TResult> (
 			this IObservable<TSource> source,
 			Func<ISubject<TSource, TIntermediate>> subjectSelector,
 			Func<IObservable<TIntermediate>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (subjectSelector == null)
+				throw new ArgumentNullException ("subjectSelector");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+			
+			return new ConnectableObservable<TSource, TIntermediate, TResult> (source, subjectSelector, selector);
+		}
 		
 		class RefCountObservable<T> : IObservable<T>
 		{
@@ -167,7 +180,7 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable<TSource, TSource> (source, createSubject);
+			return new ConnectableObservable<TSource, TSource, TSource> (source, createSubject, o => o);
 		}
 
 		public static IConnectableObservable<TSource> Replay<TSource> (
@@ -238,7 +251,7 @@ namespace System.Reactive.Linq
 			if (source == null)
 				throw new ArgumentNullException ("source");
 			
-			return new ConnectableObservable<TSource, TResult> (source, () => { var b = createSubject (); return Subject.Create (b, selector (b)); });
+			return Multicast<TSource, TSource, TResult> (source, createSubject, selector);
 		}
 		
 		public static IObservable<TResult> Replay<TSource, TResult> (
