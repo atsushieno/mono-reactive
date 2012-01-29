@@ -46,12 +46,13 @@ namespace System.Reactive.Linq
 				connected = true;
 				sub = subject_creator ();
 				disposables = new CompositeDisposable ();
-				disposables.Add (source.Subscribe (sub));
 				foreach (var o in observers)
 					disposables.Add (sub.Subscribe (o));
+				disposables.Add (source.Subscribe (sub));
 				disposables.Add (Disposable.Create (() =>  {
 					connected = false;
-					this.disposables = null; // clean up itself in the final stage
+					// commented out. This is not necessary, and if any subscription is disposed *after* this disposable is disposed, this causes NRE.
+					// this.disposables = null; // clean up itself in the final stage
 				}));
 				return disposables;
 			}
@@ -59,16 +60,16 @@ namespace System.Reactive.Linq
 		
 		public static IConnectableObservable<TSource> Publish<TSource> (this IObservable<TSource> source)
 		{
-			return source.Publish (default (TSource));
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
+			return new ConnectableObservable<TSource, TSource> (source, () => new Subject<TSource> ());
 		}
 		
 		public static IConnectableObservable<TSource> Publish<TSource> (
 			this IObservable<TSource> source,
 			TSource initialValue)
 		{
-			if (source == null)
-				throw new ArgumentNullException ("source");
-			
 			return new ConnectableObservable<TSource, TSource> (source, () => new BehaviorSubject<TSource> (initialValue));
 		}
 		
@@ -76,14 +77,26 @@ namespace System.Reactive.Linq
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
 		{
-			return source.Publish (selector, default (TSource));
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+			
+			return new ConnectableObservable<TSource, TResult> (source, () => { var b = new Subject<TSource> (); return Subject.Create (b, selector (b)); });
 		}
 		
 		public static IObservable<TResult> Publish<TSource, TResult>(
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			TSource initialValue)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (selector == null)
+				throw new ArgumentNullException ("selector");
+			
+			return new ConnectableObservable<TSource, TResult> (source, () => { var b = new BehaviorSubject<TSource> (initialValue); return Subject.Create (b, selector (b)); });
+		}
 		
 		public static IConnectableObservable<TSource> PublishLast<TSource> (this IObservable<TSource> source)
 		{
@@ -96,7 +109,12 @@ namespace System.Reactive.Linq
 		public static IObservable<TResult> PublishLast<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
-		{ throw new NotImplementedException (); }
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
+			return new ConnectableObservable <TSource, TResult> (source, () => { var s = new AsyncSubject<TSource> (); return Subject.Create (s, selector (s)); });
+		}
 		
 		public static IConnectableObservable<TResult> Multicast<TSource, TResult> (
 			this IObservable<TSource> source,
@@ -215,14 +233,19 @@ namespace System.Reactive.Linq
 		static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
-			Func<ReplaySubject<TResult>> createSubject)
-		{ throw new NotImplementedException (); }
+			Func<ReplaySubject<TSource>> createSubject)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			
+			return new ConnectableObservable<TSource, TResult> (source, () => { var b = createSubject (); return Subject.Create (b, selector (b)); });
+		}
 		
 		public static IObservable<TResult> Replay<TSource, TResult> (
 			this IObservable<TSource> source,
 			Func<IObservable<TSource>, IObservable<TResult>> selector)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> ());
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> ());
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -230,7 +253,7 @@ namespace System.Reactive.Linq
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			int bufferSize)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (bufferSize));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -238,7 +261,7 @@ namespace System.Reactive.Linq
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			IScheduler scheduler)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (scheduler));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (scheduler));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -246,7 +269,7 @@ namespace System.Reactive.Linq
 			Func<IObservable<TSource>, IObservable<TResult>> selector,
 			TimeSpan window)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (window));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (window));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -255,7 +278,7 @@ namespace System.Reactive.Linq
 			int bufferSize,
 			IScheduler scheduler)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, scheduler));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (bufferSize, scheduler));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -264,7 +287,7 @@ namespace System.Reactive.Linq
 			int bufferSize,
 			TimeSpan window)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, window));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (bufferSize, window));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -273,7 +296,7 @@ namespace System.Reactive.Linq
 			TimeSpan window,
 			IScheduler scheduler)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (window, scheduler));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (window, scheduler));
 		}
 
 		public static IObservable<TResult> Replay<TSource, TResult> (
@@ -283,7 +306,7 @@ namespace System.Reactive.Linq
 			TimeSpan window,
 			IScheduler scheduler)
 		{
-			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TResult> (bufferSize, window, scheduler));
+			return Replay<TSource, TResult> (source, selector, () => new ReplaySubject<TSource> (bufferSize, window, scheduler));
 		}
 	}
 }
