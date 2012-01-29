@@ -2,8 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using NUnit.Framework;
 
@@ -12,6 +14,27 @@ namespace System.Reactive.Subjects.Tests
 	[TestFixture]
 	public class ReplaySubjectTest
 	{
+		class MyException : Exception
+		{
+		}
+		
+		class ErrorScheduler : IScheduler
+		{
+			public DateTimeOffset Now { get { return DateTimeOffset.Now; } }
+			public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
+			{
+				throw new MyException ();
+			}
+			public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
+			{
+				throw new MyException ();
+			}
+			public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+			{
+				throw new MyException ();
+			}
+		}
+		
 		[Test]
 		public void OnNextThenSubscription ()
 		{
@@ -43,6 +66,13 @@ namespace System.Reactive.Subjects.Tests
 			sub.Subscribe (s => s2 += s, ex => error = true);
 			Assert.AreEqual ("X", s1, "#2");
 			Assert.AreEqual ("X", s2, "#3");
+		}
+		
+		[Test]
+		public void SchedulerUsage ()
+		{
+			var sub = new ReplaySubject<int> (new ErrorScheduler ());
+			sub.Subscribe (Console.WriteLine);
 		}
 	}
 }

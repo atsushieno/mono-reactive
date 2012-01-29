@@ -120,7 +120,8 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 			observers.Add (observer);
 			lock (lock_obj)
-				Schedule (() => notifications.ForEach ((n) => n.Accept (observer)));
+				if (notifications.Any ())
+					Schedule (() => notifications.ForEach ((n) => n.Accept (observer)));
 			return Disposable.Create (() => observers.Remove (observer));
 		}
 
