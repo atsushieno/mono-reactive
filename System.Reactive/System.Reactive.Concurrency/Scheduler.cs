@@ -79,18 +79,17 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule (this IScheduler scheduler, Action<Action> action)
 		{
-			return Schedule (scheduler, Now, action);
+			return Schedule (scheduler, TimeSpan.Zero, a => action (() => a (TimeSpan.Zero)));
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action action)
 		{
-			return Schedule (scheduler, dueTime, (a) => action ());
+			return Schedule (scheduler, dueTime, a => action ());
 		}
 		
-		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action<Action> action)
+		public static IDisposable Schedule (this IScheduler scheduler, DateTimeOffset dueTime, Action<Action<DateTimeOffset>> action)
 		{
-			// FIXME: pass some useful state.
-			return Schedule<object> (scheduler, null, dueTime, (stat, stdtact) => action (() => stdtact (stat, dueTime)));
+			return Schedule<object> (scheduler, new object (), dueTime, (stat, act) => action (dt => act (stat, dt)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, Action<TState, Action<TState>> action)
@@ -100,29 +99,36 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, DateTimeOffset dueTime, Action<TState, Action<TState, DateTimeOffset>> action)
 		{
-			return scheduler.Schedule<TState> (state, dueTime, delegate (IScheduler sch, TState stat) {
-				action (state, (st, dt) => Thread.Sleep (dt - Now));
-				return Disposable.Empty;
-			});
+			// invoke IScheduler.Schedule<TState> (TState, DateTimeOffset, Func<IScheduler, TState, IDisposable>)
+			Func<IScheduler,TState,IDisposable> f = null;
+			f = (sch, stat) => {
+				var dis = new SingleAssignmentDisposable ();
+				action (stat, (st, dt) => { if (!dis.IsDisposed) dis.Disposable = sch.Schedule (st, dt, f); });
+				return dis;
+			};
+			return scheduler.Schedule<TState> (state, dueTime, f);
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action action)
 		{
-			return Schedule (scheduler, Now + Normalize (dueTime), action);
+			return Schedule (scheduler, dueTime, a => action ());
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, TimeSpan dueTime, Action<Action<TimeSpan>> action)
 		{
-			var state = new object ();
-			return Schedule<object> (scheduler, state, dueTime, (object stat, Action<object, TimeSpan> act) => action (ts => act (stat, ts)));
+			return Schedule<object> (scheduler, new object (), dueTime, (stat, act) => action (ts => act (stat, ts)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, TimeSpan dueTime, Action<TState, Action<TState, TimeSpan>> action)
 		{
-			return scheduler.Schedule<TState> (state, dueTime, delegate (IScheduler sch, TState stat) {
-				action (state, (st, dt) => Thread.Sleep (dt));
-				return Disposable.Empty;
-			});
+			// invoke IScheduler.Schedule<TState> (TState, TimeSpan, Func<IScheduler, TState, IDisposable>)
+			Func<IScheduler,TState,IDisposable> f = null;
+			f = (sch, stat) => {
+				var dis = new SingleAssignmentDisposable ();
+				action (stat, (st, dt) => { if (!dis.IsDisposed) dis.Disposable = sch.Schedule (st, dt, f); });
+				return dis;
+			};
+			return scheduler.Schedule<TState> (state, dueTime, f);
 		}
 	}
 }

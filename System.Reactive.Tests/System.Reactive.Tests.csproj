@@ -52,6 +52,7 @@
     <Compile Include="System\ObservableExtensionTest.cs" />
     <Compile Include="System.Reactive\NotificationTest.cs" />
     <Compile Include="System.Reactive.Concurrency\CurrentThreadSchedulerTest.cs" />
+    <Compile Include="System.Reactive.Concurrency\SchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\ThreadPoolSchedulerTest.cs" />
     <Compile Include="System.Reactive.Disposables\BooleanDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\CompositeDisposableTest.cs" />
