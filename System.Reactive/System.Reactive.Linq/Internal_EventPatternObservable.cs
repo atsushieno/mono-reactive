@@ -93,28 +93,4 @@ namespace System.Reactive.Linq
 			return Disposable.Create (() => { dis.Dispose (); remove_handler (handler); });
 		}
 	}
-
-	// FIXME: This is no-go (see code that uses this)
-	class EventPatternObservable2<THandlerType, TEventArgs> : IObservable<EventPattern<TEventArgs>> where TEventArgs : EventArgs
-	{
-		Func<ISubject<EventPattern<TEventArgs>>, THandlerType> handler_creator;
-		Action<THandlerType> add_handler;
-		Action<THandlerType> remove_handler;
-		
-		public EventPatternObservable2 (Func<ISubject<EventPattern<TEventArgs>>, THandlerType> handlerCreator, Action<THandlerType> addHandler, Action<THandlerType> removeHandler)
-		{
-			handler_creator = handlerCreator;
-			add_handler = addHandler;
-			remove_handler = removeHandler;
-		}
-		
-		public IDisposable Subscribe (IObserver<EventPattern<TEventArgs>> observer)
-		{
-			var sub = new Subject<EventPattern<TEventArgs>> ();
-			var handler = handler_creator (sub);
-			add_handler (handler);
-			var dis = sub.Subscribe (observer);
-			return Disposable.Create (() => { dis.Dispose (); remove_handler (handler); });
-		}
-	}
 }

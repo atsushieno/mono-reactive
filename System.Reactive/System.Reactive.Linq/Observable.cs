@@ -1013,7 +1013,7 @@ namespace System.Reactive.Linq
 						var ddis = new SingleAssignmentDisposable ();
 						// after the duration, it removes the GroupedSubject from the dictionary by key.
 						Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
-						// FIXME: it is possible that this disposable is never disposed if dur submites events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
+						// FIXME: it is possible that this disposable is never disposed if dur submits events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
 						ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
 						dic.Add (k, g);
 						sub.OnNext (g);
@@ -1698,18 +1698,6 @@ namespace System.Reactive.Linq
 		{
 			if (source == null)
 				throw new ArgumentNullException ("source");
-
-			/* FIXME: this somehow fails to emit expected items in the sources for the following code. (Never mind that "done" never emits, that is expected.)
-			
-			The first subscription would tell what is likely broken.
-			
-				var source = Observable.Interval(TimeSpan.FromMilliseconds(300)).Delay (TimeSpan.FromSeconds (2));
-				source.Subscribe (v => Console.WriteLine("--- " + v));
-				var sampler = Observable.Interval(TimeSpan.FromMilliseconds(1000)).Take (10);
-				var o = source.Sample(sampler);
-				o.Subscribe(Console.WriteLine, Console.WriteLine, () => Console.WriteLine("done"));
-			
-			*/
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----

@@ -49,6 +49,7 @@ namespace System.Reactive.Linq.Tests
 			var cdis1 = published.Connect ();
 			var cdis2 = published.Connect (); // no error
 			Assert.AreEqual (cdis1, cdis2, "#2");
+			pdis1.Dispose ();
 			cdis1.Dispose ();
 		}
 		
@@ -63,6 +64,7 @@ namespace System.Reactive.Linq.Tests
 			var cdis1 = published.Connect ();
 			Thread.Sleep (200); // should be enough to receive some events
 			Assert.IsTrue (result > 0, "#1");
+			pdis1.Dispose ();
 			cdis1.Dispose (); // disconnect
 			int oldResult = result;
 			Thread.Sleep (200); // should be enough to raise interval event if it were active (which should *not*)

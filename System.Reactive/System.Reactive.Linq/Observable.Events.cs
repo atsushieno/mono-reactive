@@ -30,7 +30,6 @@ namespace System.Reactive.Linq
 			Action<TDelegate> addHandler,
 			Action<TDelegate> removeHandler)
 		// TDelegate must be a delegate that only takes a TEventArgs (no "object sender")
-		// FIXME: How can I implement this guy???
 		{
 			if (addHandler == null)
 				throw new ArgumentNullException ("addHandler");

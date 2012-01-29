@@ -57,6 +57,7 @@ namespace System.Reactive.Linq.Tests
 			var dis = source.Materialize ().Subscribe (v => l.Add (v.Kind), () => done = true); // test that Materialize() yields OnCompleted event after yielding OnError.
 			Assert.IsTrue (SpinWait.SpinUntil (() => done, TimeSpan.FromSeconds (1)), "#1");
 			Assert.AreEqual (expected, l.ToArray (), "#3");
+			dis.Dispose ();
 		}
 
 		public class MyObservable<T> : IObservable<T>
@@ -297,26 +298,21 @@ namespace System.Reactive.Linq.Tests
 			
 			Assert.IsTrue (SpinWait.SpinUntil (() => done, 500), "#3");
 			Assert.IsTrue (done, "#4");
+			dis.Dispose ();
 		}
 		
-		class Resource : IDisposable
+		/*
+		[Test] FIXME: make it testable
+		public void Sample ()
 		{
-			public bool Disposed;
-			
-			public Resource ()
-			{
-			}
-			
-			public void Dispose ()
-			{
-				Disposed = true;
-			}
-			
-			public IObservable<int> GetObservable ()
-			{
-				return Observable.Range (0, 3);
-			}
+			var source = Observable.Interval (TimeSpan.FromMilliseconds (300)).Delay (TimeSpan.FromSeconds (2));
+			source.Subscribe (v => Console.WriteLine ("--- " + v));
+			var sampler = Observable.Interval (TimeSpan.FromMilliseconds (1000)).Take (10);
+			var o = source.Sample (sampler);
+			o.Subscribe (Console.WriteLine, Console.WriteLine, () => Console.WriteLine ("done"));
+			Console.ReadLine ();
 		}
+		*/
 		
 		[Test]
 		public void Start ()
@@ -341,6 +337,25 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (done, "#1");
 			Assert.AreEqual (new int [] {3, 2}, l.ToArray (), "#2");
 			dis.Dispose ();
+		}
+		
+		class Resource : IDisposable
+		{
+			public bool Disposed;
+			
+			public Resource ()
+			{
+			}
+			
+			public void Dispose ()
+			{
+				Disposed = true;
+			}
+			
+			public IObservable<int> GetObservable ()
+			{
+				return Observable.Range (0, 3);
+			}
 		}
 		
 		[Test]
