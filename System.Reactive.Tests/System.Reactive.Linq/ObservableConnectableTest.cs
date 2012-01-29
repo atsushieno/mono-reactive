@@ -51,6 +51,7 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (cdis1, cdis2, "#2");
 			cdis1.Dispose ();
 		}
+		
 		[Test] // FIXME: this test is somewhat processing-speed dependent. Sleep() is not enough very often.
 		public void PublishReconnect ()
 		{
@@ -70,6 +71,30 @@ namespace System.Reactive.Linq.Tests
 			var cdis2 = published.Connect ();
 			Thread.Sleep (400); // should be enough to receive some events
 			Assert.IsTrue (result > oldResult, "#3");
+			cdis2.Dispose ();
+		}
+
+		
+		[Test] // FIXME: this test is somewhat processing-speed dependent. Sleep() is not enough very often.
+		public void RefCount ()
+		{
+			int side = 0;
+			var source = Observable.Interval (TimeSpan.FromMilliseconds (50)).Do (i => side++);
+
+			int result = 0;
+			bool started = false;
+			var published = source.Publish ();
+			var connected = published.RefCount ();
+			var cdis1 = connected.Subscribe (i => result++);
+			Thread.Sleep (400); // should be enough to receive some events
+			Assert.IsTrue (result > 0, "#1");
+			cdis1.Dispose (); // also disconnects.
+			int oldSide = side;
+			Thread.Sleep (400); // should be enough to raise interval event if it were active (which should *not*)
+			Assert.AreEqual (oldSide, side, "#2");
+			var cdis2 = connected.Subscribe (i => result++);
+			Thread.Sleep (400); // should be enough to receive some events
+			Assert.IsTrue (side > oldSide, "#3");
 			cdis2.Dispose ();
 		}
 	}
