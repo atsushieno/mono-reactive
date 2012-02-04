@@ -35,11 +35,24 @@ namespace System.Reactive.Concurrency
 		public void AdvanceBy (TRelative time)
 		{
 			Clock = Add (Clock, time);
+			ProcessTasks ();
 		}
 		
 		public void AdvanceTo (TAbsolute time)
 		{
 			Clock = time;
+			ProcessTasks ();
+		}
+		
+		void ProcessTasks ()
+		{
+			do {
+				var task = GetNext ();
+				if (task != null && Comparer.Compare (task.DueTime, Clock) <= 0)
+					task.Invoke ();
+				else
+					break;
+			} while (true);
 		}
 		
 		protected abstract IScheduledItem<TAbsolute> GetNext ();
@@ -56,7 +69,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return ScheduleRelative<TState> (state, ToRelative (Scheduler.Normalize (dueTime)), action);
+			return ScheduleRelative<TState> (state, ToRelative (dueTime), action);
 		}
 		
 		public abstract IDisposable ScheduleAbsolute<TState> (TState state, TAbsolute dueTime, Func<IScheduler, TState, IDisposable> action);

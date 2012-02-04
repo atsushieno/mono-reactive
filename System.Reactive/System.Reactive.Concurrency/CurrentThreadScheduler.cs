@@ -27,7 +27,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule<TState> (state, Scheduler.Now, action);
+			return Schedule<TState> (state, Now, action);
 		}
 		
 		/* verified with:

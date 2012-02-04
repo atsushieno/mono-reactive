@@ -74,7 +74,9 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule (this IScheduler scheduler, Action action)
 		{
-			return Schedule (scheduler, Now, action);
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Schedule (scheduler, scheduler.Now, action);
 		}
 		
 		public static IDisposable Schedule (this IScheduler scheduler, Action<Action> action)
@@ -94,7 +96,9 @@ namespace System.Reactive.Concurrency
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, Action<TState, Action<TState>> action)
 		{
-			return Schedule (scheduler, state, Now, (stat, stdtact) => action (stat, (st) => stdtact (st, Now)));
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			return Schedule (scheduler, state, scheduler.Now, (stat, stdtact) => action (stat, (st) => stdtact (st, scheduler.Now)));
 		}
 		
 		public static IDisposable Schedule<TState> (this IScheduler scheduler, TState state, DateTimeOffset dueTime, Action<TState, Action<TState, DateTimeOffset>> action)

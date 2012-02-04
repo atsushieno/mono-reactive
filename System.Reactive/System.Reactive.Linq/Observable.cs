@@ -2580,7 +2580,7 @@ namespace System.Reactive.Linq
 		{
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
-			return Timer (dueTime - Scheduler.Now, period, scheduler);
+			return Timer (dueTime - scheduler.Now, period, scheduler);
 		}
 		
 		public static IObservable<long> Timer (

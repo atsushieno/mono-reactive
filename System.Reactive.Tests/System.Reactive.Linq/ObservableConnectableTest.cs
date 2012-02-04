@@ -56,20 +56,25 @@ namespace System.Reactive.Linq.Tests
 		[Test] // FIXME: this test is somewhat processing-speed dependent. Sleep() is not enough very often.
 		public void PublishReconnect ()
 		{
-			var source = Observable.Interval (TimeSpan.FromMilliseconds (50));
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Interval (TimeSpan.FromMilliseconds (50)/*, scheduler*/);
 
 			int result = 0;
 			var published = source.Publish ();
 			var pdis1 = published.Subscribe (i => result++);
+			Assert.AreEqual (0, result, "#0");
 			var cdis1 = published.Connect ();
+			//scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200));
 			Thread.Sleep (200); // should be enough to receive some events
 			Assert.IsTrue (result > 0, "#1");
 			pdis1.Dispose ();
 			cdis1.Dispose (); // disconnect
 			int oldResult = result;
+			//scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200));
 			Thread.Sleep (200); // should be enough to raise interval event if it were active (which should *not*)
 			Assert.AreEqual (oldResult, result, "#2");
 			var cdis2 = published.Connect ();
+			//scheduler.AdvanceBy (TimeSpan.FromMilliseconds (400));
 			Thread.Sleep (400); // should be enough to receive some events
 			Assert.IsTrue (result > oldResult, "#3");
 			cdis2.Dispose ();

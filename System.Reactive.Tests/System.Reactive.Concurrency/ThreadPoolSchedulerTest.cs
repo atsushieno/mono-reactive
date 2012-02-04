@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using NUnit.Framework;
@@ -30,11 +31,16 @@ namespace System.Reactive.Concurrency.Tests
 			// FIXME: not very good, time-dependent test (i.e. lengthy and inconsistent).
 			var s = Scheduler.ThreadPool;
 			var l = new List<int> ();
-			s.Schedule (() => { Thread.Sleep (1000); l.Add (1); });
-			s.Schedule (() => { Thread.Sleep (500); l.Add (2); });
-			s.Schedule (() => { Thread.Sleep (100); l.Add (3); });
-			SpinWait.SpinUntil (() => l.Count == 3, 1000);
-			Assert.AreEqual (new int [] {3, 2, 1}, l.ToArray (), "#1");
+			var dis = new CompositeDisposable ();
+			try {
+				dis.Add (s.Schedule (() => { Thread.Sleep (1500); l.Add (1); }));
+				dis.Add (s.Schedule (() => { Thread.Sleep (1000); l.Add (2); }));
+				dis.Add (s.Schedule (() => { Thread.Sleep (50); l.Add (3); }));
+				SpinWait.SpinUntil (() => l.Count == 3, 2000);
+				Assert.AreEqual (new int [] {3, 2, 1}, l.ToArray (), "#1");
+			} finally {
+				dis.Dispose ();
+			}
 		}
 	}
 }
