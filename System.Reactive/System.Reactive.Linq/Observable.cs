@@ -874,7 +874,8 @@ namespace System.Reactive.Linq
 				for (var i = initialState; condition (i); i = iterate (i)) {
 					var sdis = new SingleAssignmentDisposable ();
 					dis.Add (sdis);
-					sdis.Disposable = scheduler.Schedule (timeSelector (i), () => { if (!sdis.IsDisposed) sub.OnNext (resultSelector (i)); });
+					Thread.Sleep (timeSelector (i));
+					sdis.Disposable = scheduler.Schedule (/*timeSelector (i),*/ () => { if (!sdis.IsDisposed) sub.OnNext (resultSelector (i)); });
 				}
 				sub.OnCompleted ();
 			} catch (Exception ex) {
@@ -1633,7 +1634,7 @@ namespace System.Reactive.Linq
 				source.OnError(new NotSupportedException());
 				int retryCount = 2;
 				
-				source.Subscribe(Console.WriteLine, ex => Console.WriteLine("retry exceeded"), () => Console.WriteLine ("done"));
+				source.Retry (retryCount).Subscribe(Console.WriteLine, ex => Console.WriteLine("retry exceeded"), () => Console.WriteLine ("done"));
 			
 			*/
 			Action<Exception> onError = null;

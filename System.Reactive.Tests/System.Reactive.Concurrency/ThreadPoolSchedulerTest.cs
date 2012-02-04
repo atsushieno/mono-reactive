@@ -14,6 +14,17 @@ namespace System.Reactive.Concurrency.Tests
 	public class ThreadPoolSchedulerTest
 	{
 		[Test]
+		public void ScheduleErrorneousAction ()
+		{
+			var s = Scheduler.ThreadPool;
+			bool done = false;
+			s.Schedule (() => { try { throw new Exception (); } finally { done = true; } });
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.IsTrue (done, "#1");
+			// the exception does not occur in *this* thread, so it passes here.
+		}
+		
+		[Test]
 		public void Order ()
 		{
 			// FIXME: not very good, time-dependent test (i.e. lengthy and inconsistent).

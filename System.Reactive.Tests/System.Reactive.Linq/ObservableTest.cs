@@ -76,6 +76,24 @@ namespace System.Reactive.Linq.Tests
 			new MyObservable<int> ().Timestamp ().Subscribe (v => {});
 			Assert.Fail ("should not reach here");
 		}
+		
+		[Test]
+		public void ErrorSubscription ()
+		{
+			bool done = false;
+			bool shouldNotPass = false;
+			var o = Observable.Create<int> (observer => { try { throw new Exception (); return Disposable.Empty; } finally { done = true; } });
+			var dis = new SingleAssignmentDisposable ();
+			try {
+				dis.Disposable = o.SubscribeOn (Scheduler.ThreadPool).Subscribe (v => {}, ex => shouldNotPass = true);
+			} finally {
+				dis.Dispose ();
+			}
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.IsTrue (done, "#1");
+			Assert.IsFalse (shouldNotPass, "#2");
+			// the exception does not occur in *this* thread, so it passes here.
+		}
 
 		// tests for individual method follow...
 
