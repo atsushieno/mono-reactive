@@ -338,18 +338,24 @@ namespace System.Reactive.Linq.Tests
 			dis.Dispose ();
 		}
 		
-		/*
-		[Test] FIXME: make it testable
+		[Test]
 		public void Sample ()
 		{
-			var source = Observable.Interval (TimeSpan.FromMilliseconds (300)).Delay (TimeSpan.FromSeconds (2));
-			source.Subscribe (v => Console.WriteLine ("--- " + v));
-			var sampler = Observable.Interval (TimeSpan.FromMilliseconds (1000)).Take (10);
+			var l = new List<long> ();
+			var l2 = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Interval (TimeSpan.FromMilliseconds (300), scheduler).Delay (TimeSpan.FromSeconds (2), scheduler);
+			source.Subscribe (v => l.Add (v));
+			var sampler = Observable.Interval (TimeSpan.FromMilliseconds (1000), scheduler).Take (10);
 			var o = source.Sample (sampler);
-			o.Subscribe (Console.WriteLine, Console.WriteLine, () => Console.WriteLine ("done"));
-			Console.ReadLine ();
+			bool done = false;
+			o.Subscribe (v => l2.Add (v), () => done = true);
+			for (int i = 0; i < 50; i++)
+				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (300));
+			Assert.AreEqual (43, l.Count, "#1");
+			Assert.AreEqual (new long [] {2, 5, 8, 12, 15, 18, 22, 25}, l2.ToArray (), "#2");
+			Assert.IsFalse (done, "#3"); // while sampler finishes, sample observable never does.
 		}
-		*/
 		
 		[Test]
 		public void Start ()
