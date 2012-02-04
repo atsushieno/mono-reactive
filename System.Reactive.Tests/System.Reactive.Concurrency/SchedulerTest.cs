@@ -72,6 +72,17 @@ namespace System.Reactive.Concurrency.Tests
 			Assert.AreEqual (10, i, "#1");
 			dis.Dispose ();
 		}
+
+		[Test]
+		public void RecursiveActionTimeSpan2 ()
+		{
+			int i = 0;
+			var scheduler = new HistoricalScheduler ();
+			var span = TimeSpan.FromMilliseconds (50);
+			scheduler.Schedule<object> (null, span, (object obj,Action<object,TimeSpan> a) => { i++; a (obj, span); });
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			Assert.AreEqual (20, i, "#1");
+		}
 		
 		[Test]
 		public void RecursiveActionDateTimeOffset ()
