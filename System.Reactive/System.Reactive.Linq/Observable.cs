@@ -18,7 +18,6 @@ namespace System.Reactive.Linq
 
 	// FIXME:
 	//	- should those delegating observables to subjects use try-catch statements to raise OnError() instead of letting errors being thrown/
-	//	- resubscriptions need to be examined.
 
 	public static partial class Observable
 	{
@@ -336,18 +335,18 @@ namespace System.Reactive.Linq
 			// ----
 			// FIXME: this should be SerialDisposable as there should be only one disposable at a time.
 			// ... Though currently that one does not work, need to investigate why.
-			var dis = new CompositeDisposable ();
+			var dis = new SerialDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, CompositeDisposable dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, SerialDisposable dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
-			dis.Add (sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); }));
+			dis.Disposable = sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); });
 			return false;
 		}
 		
