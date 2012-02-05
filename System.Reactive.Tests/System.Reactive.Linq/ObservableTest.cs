@@ -147,6 +147,14 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void AllPredicateError ()
+		{
+			var source = Observable.Range (0, 20).All (i => { throw new MyException (); });
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
+		}
+		
+		[Test]
 		public void Amb ()
 		{
 			var s1 = Observable.Range (1, 3).Delay (TimeSpan.FromMilliseconds (500));
@@ -170,6 +178,14 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsFalse (Observable.Empty<int> ().Any (v => true).ToEnumerable ().First (), "#1");
 			Assert.IsTrue (Observable.Return<int> (1).Any (v => true).ToEnumerable ().First (), "#2");
 			Assert.IsTrue (Observable.Range (1, 3).Any (v => v % 2 == 0).ToEnumerable ().First (), "#3");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void AnyPredicateError ()
+		{
+			var source = Observable.Range (0, 20).Any (i => { throw new MyException (); });
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
 		}
 		
 		[Test]
@@ -260,6 +276,26 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void DistinctUntilChanged ()
+		{
+			var l = new List<int> ();
+			var source = new int [] {3, 3, 5, 5, 4, 3}.ToObservable ().DistinctUntilChanged<int,int> (i => i);
+			bool done = false;
+			source.Subscribe (v => l.Add (v), () => done = true);
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.IsTrue (done, "#1");
+			Assert.AreEqual (new int [] {3, 5, 4, 3}, l.ToArray (), "#2");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void DistinctUntilChangedErrorSelector ()
+		{
+			var source = new int [] {3, 3, 5, 5, 4, 3}.ToObservable ().DistinctUntilChanged<int,int> (i => { throw new MyException (); });
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
+		}
+		
+		[Test]
 		public void Do ()
 		{
 			int i = 0, j = 0, k = 0;
@@ -283,6 +319,14 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (SpinWait.SpinUntil (() => done == 5, 1000), "#1");
 			dis.Dispose ();
 			Assert.AreEqual (45, i, "#2");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void GenerateErrorSelector ()
+		{
+			var source = Observable.Generate<int,int> (-1, x => x < 5, x => x + 1, x => { throw new MyException (); });
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
 		}
 		
 		[Test]

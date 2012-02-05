@@ -16,9 +16,6 @@ namespace System.Reactive.Linq
 {
 	// For the default scheduler in each method, see http://social.msdn.microsoft.com/Forums/en-AU/rx/thread/e032b40a-019b-496e-bb11-64c8fcc94410
 
-	// FIXME:
-	//	- should those delegating observables to subjects use try-catch statements to raise OnError() instead of letting errors being thrown/
-
 	public static partial class Observable
 	{
 		static IScheduler DefaultColdScheduler {
@@ -93,19 +90,11 @@ namespace System.Reactive.Linq
 			bool hasValue = false;
 			dis = source.Subscribe ((s) => {
 				hasValue = true;
-				try {
-					ret &= predicate (s);
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				}, () => {
-				try {
-					sub.OnNext (hasValue && ret);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
+				ret &= predicate (s);
+			}, () => {
+				sub.OnNext (hasValue && ret);
+				sub.OnCompleted ();
+			});
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
@@ -183,28 +172,19 @@ namespace System.Reactive.Linq
 			var dis = new SingleAssignmentDisposable ();
 			bool hit = false;
 			dis.Disposable = source.Subscribe ((s) => {
-				try {
-					if (predicate (s)) {
-						hit = true;
-						sub.OnNext (true);
-						sub.OnCompleted ();
-						dis.Dispose ();
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
+				if (predicate (s)) {
+					hit = true;
+					sub.OnNext (true);
+					sub.OnCompleted ();
 					dis.Dispose ();
 				}
-				}, () => {
-				try {
-					if (!hit) {
-						sub.OnNext (false);
-						sub.OnCompleted ();
-						dis.Dispose ();
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
+			}, () => {
+				if (!hit) {
+					sub.OnNext (false);
+					sub.OnCompleted ();
+					dis.Dispose ();
 				}
-				});
+			});
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
@@ -618,26 +598,16 @@ namespace System.Reactive.Linq
 			bool hit = false;
 			TKey prev = default (TKey);
 			return source.Subscribe (s => {
-				try {
-					var k = keySelector (s);
-					if (!hit) {
-						hit = true;
-						prev = k;
-						sub.OnNext (s);
-					} else if (!comparer.Equals (k, prev)) {
-						prev = k;
-						sub.OnNext (s);
-					}
-				} catch (Exception ex) {
-					sub.OnError (ex);
+				var k = keySelector (s);
+				if (!hit) {
+					hit = true;
+					prev = k;
+					sub.OnNext (s);
+				} else if (!comparer.Equals (k, prev)) {
+					prev = k;
+					sub.OnNext (s);
 				}
-				}, () => {
-				try {
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
+			}, () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -759,13 +729,9 @@ namespace System.Reactive.Linq
 			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<Unit> ();
 			return () => { begin ((res) => {
-				try {
-					end (res);
-					sub.OnNext (Unit.Default);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				end (res);
+				sub.OnNext (Unit.Default);
+				sub.OnCompleted ();
 				}, sub);
 				return sub;
 			};
@@ -783,13 +749,9 @@ namespace System.Reactive.Linq
 			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<TResult> ();
 			return () => { begin ((res) => {
-				try {
-					var result = end (res);
-					sub.OnNext (result);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				var result = end (res);
+				sub.OnNext (result);
+				sub.OnCompleted ();
 				}, sub);
 				return sub;
 			};
@@ -867,17 +829,12 @@ namespace System.Reactive.Linq
 			var dis = new CompositeDisposable ();
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-			try {
-				for (var i = initialState; condition (i); i = iterate (i)) {
-					var sdis = new SingleAssignmentDisposable ();
-					dis.Add (sdis);
-					Thread.Sleep (timeSelector (i));
-					sdis.Disposable = scheduler.Schedule (/*timeSelector (i),*/ () => { if (!sdis.IsDisposed) sub.OnNext (resultSelector (i)); });
-				}
-				sub.OnCompleted ();
-			} catch (Exception ex) {
-				sub.OnError (ex);
+			for (var i = initialState; condition (i); i = iterate (i)) {
+				var sdis = new SingleAssignmentDisposable ();
+				dis.Add (sdis);
+				sdis.Disposable = scheduler.Schedule (timeSelector (i), () => { if (!sdis.IsDisposed) sub.OnNext (resultSelector (i)); });
 			}
+			sub.OnCompleted ();
 			return dis;
 			// ----
 			}, scheduler);
@@ -995,35 +952,25 @@ namespace System.Reactive.Linq
 			// ----
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
 			return source.Subscribe (Observer.Create<TSource> ((TSource s) => {
-				try {
-					var k = keySelector (s);
-					GroupedSubject<TKey, TElement> g;
-					if (!dic.TryGetValue (k, out g)) {
-						g = new GroupedSubject<TKey, TElement> (k);
-						var dur = durationSelector (g);
-						var ddis = new SingleAssignmentDisposable ();
-						// after the duration, it removes the GroupedSubject from the dictionary by key.
-						Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
-						// FIXME: it is possible that this disposable is never disposed if dur submits events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
-						ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
-						dic.Add (k, g);
-						sub.OnNext (g);
-					}
-					g.OnNext (elementSelector (s));
-				} catch (Exception ex) {
-					sub.OnError (ex);
-					// FIXME: should we handle OnError() in groups too?
+				var k = keySelector (s);
+				GroupedSubject<TKey, TElement> g;
+				if (!dic.TryGetValue (k, out g)) {
+					g = new GroupedSubject<TKey, TElement> (k);
+					var dur = durationSelector (g);
+					var ddis = new SingleAssignmentDisposable ();
+					// after the duration, it removes the GroupedSubject from the dictionary by key.
+					Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
+					// FIXME: it is possible that this disposable is never disposed if dur submits events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
+					ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
+					dic.Add (k, g);
+					sub.OnNext (g);
 				}
+				g.OnNext (elementSelector (s));
 			}, () => {
-				try {
-					// note that those groups that received expiration from durationSelector are already invoked OnCompleted().
-					foreach (var g in dic.Values)
-						g.OnCompleted ();
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-					// FIXME: should we handle OnError() in groups too?
-				}
+				// note that those groups that received expiration from durationSelector are already invoked OnCompleted().
+				foreach (var g in dic.Values)
+					g.OnCompleted ();
+				sub.OnCompleted ();
 			}));
 			// ----
 			}, DefaultColdScheduler);
@@ -1164,12 +1111,8 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<long> (sub => {
 			// ----
 			var dis = new SingleAssignmentDisposable ();
-			try {
-				long count = 0;
-				dis.Disposable = scheduler.Schedule (period, a => { if (!dis.IsDisposed) { sub.OnNext (count++); a (period); } });
-			} catch (Exception ex) {
-				sub.OnError (ex);
-			}
+			long count = 0;
+			dis.Disposable = scheduler.Schedule (period, a => { if (!dis.IsDisposed) { sub.OnNext (count++); a (period); } });
 			return dis;
 			// ----
 			}, scheduler);
@@ -1749,19 +1692,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
 			int idx = 0;
-			return source.Subscribe ((s) => {
-				try {
-					sub.OnNext (selector (s, idx++));
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				}, () => {
-				try {
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
-				});
+			return source.Subscribe ((s) => sub.OnNext (selector (s, idx++)), () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -1986,22 +1917,14 @@ namespace System.Reactive.Linq
 			// ----
 			var q = new Queue<TSource> ();
 			return source.Subscribe ((s) => {
-				try {
-					q.Enqueue (s);
-					if (count > 0)
-						count--;
-					else
-						sub.OnNext (q.Dequeue ());
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				q.Enqueue (s);
+				if (count > 0)
+					count--;
+				else
+					sub.OnNext (q.Dequeue ());
 				}, () => {
-				try {
-					q.Clear ();
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				q.Clear ();
+				sub.OnCompleted ();
 				});
 			// ----
 			}, DefaultColdScheduler);
@@ -2079,13 +2002,9 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("scheduler");
 
 			return new HotObservable<TSource> ((sub) => {
-				try {
-					var ret = function ();
-					sub.OnNext (ret);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				var ret = function ();
+				sub.OnNext (ret);
+				sub.OnCompleted ();
 				}, scheduler);
 		}
 		
@@ -2109,13 +2028,9 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("values");
 
 			return new HotObservable<TSource> ((sub) => {
-				try {
-					foreach (var v in values)
-						sub.OnNext (v);
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				foreach (var v in values)
+					sub.OnNext (v);
+				sub.OnCompleted ();
 				}, scheduler);
 		}
 		
@@ -2256,23 +2171,15 @@ namespace System.Reactive.Linq
 			// ----
 			var q = new Queue<TSource> ();
 			return source.Subscribe ((s) => {
-				try {
-					q.Enqueue (s);
-					if (count > 0)
-						count--;
-					else
-						q.Dequeue ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				q.Enqueue (s);
+				if (count > 0)
+					count--;
+				else
+					q.Dequeue ();
 				}, () => {
-				try {
-					while (q.Count > 0)
-						sub.OnNext (q.Dequeue ());
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-				}
+				while (q.Count > 0)
+					sub.OnNext (q.Dequeue ());
+				sub.OnCompleted ();
 				});
 			// ----
 			}, DefaultColdScheduler);
@@ -2536,11 +2443,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<long> ((sub) => {
 			// ----
 			var dis = new SingleAssignmentDisposable ();
-			try {
-				dis.Disposable = scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) sub.OnNext (0); sub.OnCompleted (); });
-			} catch (Exception ex) {
-				sub.OnError (ex);
-			}
+			dis.Disposable = scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) sub.OnNext (0); sub.OnCompleted (); });
 			return dis;
 			// ----
 			}, scheduler);
@@ -2820,13 +2723,9 @@ namespace System.Reactive.Linq
 			
 			return new ColdObservableEach<TSource> ((sub) => {
 			// ----
-			try {
-				foreach (var s in source)
-					sub.OnNext (s);
-				sub.OnCompleted ();
-			} catch (Exception ex) {
-				sub.OnError (ex);
-			}
+			foreach (var s in source)
+				sub.OnNext (s);
+			sub.OnCompleted ();
 			return Disposable.Empty;
 			// ----
 			}, scheduler);
