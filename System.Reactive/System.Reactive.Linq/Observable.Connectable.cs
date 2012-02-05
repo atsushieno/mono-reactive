@@ -35,15 +35,16 @@ namespace System.Reactive.Linq
 				observers.Add (observer);
 				SingleAssignmentDisposable dis = null;
 				bool wasConnected = connected;
+				var coll = disposables; // this is used to detach field reference at disposal (the field might be already null).
 				if (wasConnected) {
 					dis = new SingleAssignmentDisposable ();
 					dis.Disposable = sub.Subscribe (observer);
-					disposables.Add (dis);
+					coll.Add (dis);
 				}
 				return Disposable.Create (() => {
 					observers.Remove (observer);
 					if (wasConnected) { // note: local variable. If it was not added, then do not add it.
-						disposables.Remove (dis);
+						coll.Remove (dis);
 						dis.Dispose ();
 					}
 				});
@@ -63,8 +64,7 @@ namespace System.Reactive.Linq
 				disposables.Add (source.Subscribe (sub));
 				disposables.Add (Disposable.Create (() =>  {
 					connected = false;
-					// commented out. If any subscription is disposed *after* this disposable is disposed, this causes NRE.
-					// this.disposables = null; // clean up itself in the final stage
+					this.disposables = null; // clean up itself in the final stage
 				}));
 				return disposables;
 			}

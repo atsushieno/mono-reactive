@@ -63,16 +63,25 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (0, result, "#0");
 			var cdis1 = published.Connect ();
 			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200)); // should be enough to receive some events
-			Assert.IsTrue (result > 0, "#1");
+			Assert.AreEqual (4, result, "#1");
 			pdis1.Dispose ();
 			cdis1.Dispose (); // disconnect
-			int oldResult = result;
 			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200)); // should be enough to raise interval event if it were active (which should *not*)
-			Assert.AreEqual (oldResult, result, "#2");
+			Assert.AreEqual (4, result, "#2");
+
+			// Step 2: Without any *new* subscription, it does not result in events.
 			var cdis2 = published.Connect ();
-			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (400)); // should be enough to receive some events
-			Assert.IsTrue (result > oldResult, "#3");
+			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200)); // should be enough to receive some events
+			Assert.AreEqual (4, result , "#3");
 			cdis2.Dispose ();
+			
+			// Step 3: with new subscription, it should result in events again.
+			var pdis3 = published.Subscribe (i => result++);
+			var cdis3 = published.Connect (); // without any *new* subscription, it does not result in events.
+			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (200)); // should be enough to receive some events
+			Assert.AreEqual (8, result , "#3");
+			cdis3.Dispose ();
+			pdis3.Dispose (); // This should not result in NRE (possibly because of the internal cleanup). Note that this is in reverse order to pdis1
 		}
 
 		[Test]

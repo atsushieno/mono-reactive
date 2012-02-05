@@ -285,7 +285,7 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (45, i, "#2");
 		}
 		
-		[Test] // FIXME: this test is processing-speed dependent.
+		[Test] // this test is processing-speed dependent, but (unlike other tests) I think testing this with default (ThreadPool) scheduler should make sense...
 		public void Interval ()
 		{
 			var interval = Observable.Interval (TimeSpan.FromMilliseconds (100)).Take (6);

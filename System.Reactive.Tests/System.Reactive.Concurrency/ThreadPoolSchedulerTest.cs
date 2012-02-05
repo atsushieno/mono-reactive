@@ -28,7 +28,7 @@ namespace System.Reactive.Concurrency.Tests
 		[Test]
 		public void Order ()
 		{
-			// FIXME: not very good, time-dependent test (i.e. lengthy and inconsistent).
+			// It is time-dependent test (i.e. lengthy and inconsistent), which is not very good but we cannot use HistoricalScheduler to test it...
 			var s = Scheduler.ThreadPool;
 			var l = new List<int> ();
 			var dis = new CompositeDisposable ();
