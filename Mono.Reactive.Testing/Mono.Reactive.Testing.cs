@@ -22,6 +22,66 @@ namespace Mono.Reactive.Testing
 		IList<Recorded<Notification<T>>> Messages { get; }
 	}
 	
+	internal class TestableObservable<T> : ITestableObservable<T>
+	{
+		IList<Recorded<Notification<T>>> messages;
+		IList<Subscription> subscriptions = new List<Subscription> ();
+		ISubject<T> subject;
+		bool hot;
+		TestScheduler scheduler;
+
+		public TestableObservable (TestScheduler scheduler, bool hot, Recorded<Notification<T>> [] messages)
+		{
+			this.scheduler = scheduler;
+			this.hot = hot;
+			this.messages = messages;
+			subject = hot ? (ISubject<T>) new Subject<T> () : new ReplaySubject<T> ();
+		}
+
+		public IDisposable Subscribe (IObserver<T> observer)
+		{
+			var subscription = ReactiveTest.Subscribe (scheduler.Clock);
+			subscriptions.Add (subscription);
+			// FIXME: I wonder if Subscription records the actual disposal time. If so, this should return IDisposable that involves setting disposal time on the subscription instance.
+			return subject.Subscribe (observer);
+		}
+
+		public IList<Recorded<Notification<T>>> Messages {
+			get { return messages; }
+		}
+		
+		public IList<Subscription> Subscriptions {
+			get { return subscriptions; }
+		}
+	}
+	
+	internal class TestableObserver<T> : ITestableObserver<T>
+	{
+		TestScheduler scheduler;
+		
+		public TestableObserver (TestScheduler scheduler)
+		{
+			this.scheduler = scheduler;
+			Messages = new List<Recorded<Notification<T>>> ();
+		}
+
+		public IList<Recorded<Notification<T>>> Messages { get; private set; }
+		public void OnNext (T value)
+		{
+			Messages.Add (ReactiveTest.OnNext<T> (scheduler.Clock, value));
+		}
+
+		public void OnError (Exception exception)
+		{
+			Messages.Add (ReactiveTest.OnError<T> (scheduler.Clock, exception));
+		}
+
+		public void OnCompleted ()
+		{
+			Messages.Add (ReactiveTest.OnCompleted<T> (scheduler.Clock));
+		}
+	}
+	
 	public static class ReactiveAssert
 	{
 		public static void AreElementsEqual<T> (IEnumerable<T> expected, IEnumerable<T> actual)
@@ -295,17 +355,17 @@ namespace Mono.Reactive.Testing
 		
 		public ITestableObservable<T> CreateColdObservable<T> (params Recorded<Notification<T>> [] messages)
 		{
-			throw new NotImplementedException ();
+			return new TestableObservable<T> (this, false, messages);
 		}
 		
 		public ITestableObservable<T> CreateHotObservable<T> (params Recorded<Notification<T>> [] messages)
 		{
-			throw new NotImplementedException ();
+			return new TestableObservable<T> (this, true, messages);
 		}
 		
 		public ITestableObserver<T> CreateObserver<T> ()
 		{
-			throw new NotImplementedException ();
+			return new TestableObserver<T> (this);
 		}
 		
 		public ITestableObserver<T> Start<T> (Func<IObservable<T>> create)
