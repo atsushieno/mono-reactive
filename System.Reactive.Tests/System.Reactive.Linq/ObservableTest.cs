@@ -454,11 +454,12 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Throttle ()
 		{
-			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (100), Scheduler.CurrentThread)).Throttle (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread);
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (100), scheduler)).Throttle (TimeSpan.FromMilliseconds (50), scheduler);
 			bool done = false;
 			var l = new List<int> ();
 			var dis = source.Subscribe (v => l.Add (v), () => done = true);
-			SpinWait.SpinUntil (() => done, 1000);
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
 			Assert.IsTrue (done, "#1");
 			Assert.AreEqual (new int [] {3, 2}, l.ToArray (), "#2");
 			dis.Dispose ();
