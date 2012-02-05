@@ -62,5 +62,20 @@ namespace System.Reactive.Concurrency.Tests
 			Assert.AreEqual (1, x, "#5");
 			dis.Dispose ();
 		}
+		
+		[Test]
+		public void AdvanceByRaisesEvent2 ()
+		{
+			// This is actually very complicated pattern of error, caused by all of:
+			// - Concat() when it internally uses SerialDisposable instead of CompositeDisposable.
+			// - Delay() with non-zero duration.
+			// - Delay() with HistoricalScheduler.
+			var scheduler = new HistoricalScheduler ();
+			var o = Observable.Empty<int> (scheduler).Delay (TimeSpan.FromSeconds (1), scheduler);
+			bool done = false;
+			Observable.Range (0, 3).Concat (o).Subscribe (v => {}, () => done = true);
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (2));
+			Assert.IsTrue (done, "#1");
+		}
 	}
 }
