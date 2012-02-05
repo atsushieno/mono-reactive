@@ -49,6 +49,7 @@
     <Folder Include="System.Reactive.Subjects\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mono.Reactive.Testing\TestSchedulerTest.cs" />
     <Compile Include="System\MyException.cs" />
     <Compile Include="System\ErrorScheduler.cs" />
     <Compile Include="System\ObservableExtensionTest.cs" />
@@ -82,6 +83,10 @@
     <ProjectReference Include="..\System.Reactive\System.Reactive.csproj">
       <Project>{0D7D238E-9FB4-4923-99EA-53CC34640235}</Project>
       <Name>System.Reactive</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mono.Reactive.Testing\Mono.Reactive.Testing.csproj">
+      <Project>{9FE08AE0-EF24-4498-A50F-6D314F51F18C}</Project>
+      <Name>Mono.Reactive.Testing</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

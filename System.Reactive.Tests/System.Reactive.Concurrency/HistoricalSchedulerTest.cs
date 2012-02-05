@@ -48,7 +48,7 @@ namespace System.Reactive.Concurrency.Tests
 		{
 			var scheduler = new MyHistoricalScheduler ();
 			Assert.AreEqual (DateTimeOffset.MinValue.AddDays (1), scheduler.PublicAdd (TimeSpan.FromDays (1)), "#0");
-			Assert.AreEqual (TimeSpan.FromDays (1), scheduler.PublicToRelative (TimeSpan.FromDays (1)), "#0");
+			Assert.AreEqual (TimeSpan.FromDays (1), scheduler.PublicToRelative (TimeSpan.FromDays (1)), "#0-2");
 			var source = Observable.Interval (TimeSpan.FromDays (1), scheduler);
 			int x = 0;
 			var dis = source.Subscribe (v => x++);
@@ -60,6 +60,7 @@ namespace System.Reactive.Concurrency.Tests
 			var item = scheduler.PublicGetNext ();
 			Assert.IsNotNull (item, "#5");
 			Assert.AreEqual (1, x, "#5");
+			dis.Dispose ();
 		}
 	}
 }

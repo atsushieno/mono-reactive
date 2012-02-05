@@ -314,11 +314,6 @@ namespace Mono.Reactive.Testing
 
 	public class TestScheduler : VirtualTimeScheduler<long, long>
 	{
-		static readonly Comparer<long> long_comparer = Comparer<long>.Default;
-		static readonly Comparison<Task> comparison = (t1, t2) => long_comparer.Compare (t1.DueTime, t2.DueTime);
-		
-		List<Task> tasks = new List<Task> ();
-
 		// VirtualTimeScheduler members.
 		
 		protected override long Add (long absolute, long relative)
@@ -328,27 +323,12 @@ namespace Mono.Reactive.Testing
 		
 		protected override DateTimeOffset ToDateTimeOffset (long absolute)
 		{
-			return new DateTimeOffset (new DateTime (absolute));
+			return new DateTimeOffset (DateTime.MinValue.AddTicks (absolute), TimeSpan.Zero);
 		}
 		
 		protected override long ToRelative (TimeSpan timeSpan)
 		{
 			return timeSpan.Ticks;
-		}
-		
-		class Task
-		{
-			public long DueTime;
-			public Func<IDisposable> Action;
-		}
-		
-		public override IDisposable ScheduleAbsolute<TState> (TState state, long dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			Task t = default (Task);
-			t = new Task () { DueTime = dueTime, Action = () => { tasks.Remove (t); return action (this, state); }};
-			tasks.Add (t);
-			tasks.Sort (comparison);
-			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)));
 		}
 		
 		// TestScheduler specific.

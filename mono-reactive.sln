@@ -38,7 +38,7 @@ Global
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = System.Reactive\System.Reactive.csproj
+		StartupItem = System.Reactive.Tests\System.Reactive.Tests.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
