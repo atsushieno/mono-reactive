@@ -12,35 +12,24 @@ using NUnit.Framework;
 namespace System.Reactive.Concurrency.Tests
 {
 	[TestFixture]
-	public class ThreadPoolSchedulerTest
+	public class TaskPoolSchedulerTest
 	{
 		[Test]
 		public void Cancellation ()
 		{
 			bool raised = false;
-			var dis = Scheduler.ThreadPool.Schedule<object> (null, TimeSpan.FromMilliseconds (100), (sch, stat) => raised = true);
+			var dis = Scheduler.TaskPool.Schedule<object> (null, TimeSpan.FromMilliseconds (100), (sch, stat) => raised = true);
 			Assert.IsFalse (raised, "#1");
 			dis.Dispose (); // immediately, to not raise event.
 			Thread.Sleep (200);
 			Assert.IsFalse (raised, "#2");
-		}
-
-		[Test]
-		public void ScheduleErrorneousAction ()
-		{
-			var s = Scheduler.ThreadPool;
-			bool done = false;
-			s.Schedule (() => { try { throw new Exception (); } finally { done = true; } });
-			SpinWait.SpinUntil (() => done, 1000);
-			Assert.IsTrue (done, "#1");
-			// the exception does not occur in *this* thread, so it passes here.
 		}
 		
 		[Test]
 		public void Order ()
 		{
 			// It is time-dependent test (i.e. lengthy and inconsistent), which is not very good but we cannot use HistoricalScheduler to test it...
-			var s = Scheduler.ThreadPool;
+			var s = Scheduler.TaskPool;
 			var l = new List<int> ();
 			var dis = new CompositeDisposable ();
 			try {

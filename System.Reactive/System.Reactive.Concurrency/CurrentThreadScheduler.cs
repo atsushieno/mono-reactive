@@ -52,6 +52,7 @@ namespace System.Reactive.Concurrency
 				return Disposable.Create (() => tasks.Remove (task));
 			} else {
 				try {
+					Thread.Sleep (Scheduler.Normalize (task.DueTime - Now));
 					task.Invoke ();
 					while (true) {
 						ScheduledItem<DateTimeOffset> t;
@@ -61,6 +62,7 @@ namespace System.Reactive.Concurrency
 								break;
 							tasks.Remove (t);
 						}
+						Thread.Sleep (Scheduler.Normalize (t.DueTime - Now));
 						t.Invoke ();
 					}
 				} finally {

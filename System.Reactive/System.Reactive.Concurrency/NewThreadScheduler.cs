@@ -38,10 +38,13 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			var dis = new SingleAssignmentDisposable ();
+			bool cancel = false;
+			var dis = new CompositeDisposable ();
+			dis.Add (Disposable.Create (() => cancel = true));
 			thread_factory (() => {
 				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
-				dis.Disposable = action (this, (TState) state);
+				if (!cancel)
+					dis.Add (action (this, (TState) state));
 				}).Start ();
 			return dis;
 		}

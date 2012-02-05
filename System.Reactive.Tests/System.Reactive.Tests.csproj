@@ -56,7 +56,9 @@
     <Compile Include="System.Reactive.Concurrency\CurrentThreadSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\EventLoopSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\HistoricalSchedulerTest.cs" />
+    <Compile Include="System.Reactive.Concurrency\NewThreadSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\SchedulerTest.cs" />
+    <Compile Include="System.Reactive.Concurrency\TaskPoolSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\ThreadPoolSchedulerTest.cs" />
     <Compile Include="System.Reactive.Disposables\BooleanDisposableTest.cs" />
     <Compile Include="System.Reactive.Disposables\CompositeDisposableTest.cs" />

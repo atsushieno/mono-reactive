@@ -22,10 +22,13 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			var dis = new SingleAssignmentDisposable ();
+			bool cancel = false;
+			var dis = new CompositeDisposable ();
+			dis.Add (Disposable.Create (() => cancel = true));
 			ThreadPool.QueueUserWorkItem (s => {
 				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
-				dis.Disposable = action (this, state);
+				if (!cancel)
+					dis.Add (action (this, state));
 			});
 			return dis;
 		}
