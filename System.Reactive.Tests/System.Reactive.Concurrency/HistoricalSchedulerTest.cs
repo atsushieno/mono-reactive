@@ -69,7 +69,7 @@ namespace System.Reactive.Concurrency.Tests
 			// This is actually very complicated pattern of error, caused by all of:
 			// - Concat() when it internally uses SerialDisposable instead of CompositeDisposable.
 			// - Delay() with non-zero duration.
-			// - Delay() with HistoricalScheduler.
+			// - Delay() with non-CurrentThreadScheduler.
 			var scheduler = new HistoricalScheduler ();
 			var o = Observable.Empty<int> (scheduler).Delay (TimeSpan.FromSeconds (1), scheduler);
 			bool done = false;

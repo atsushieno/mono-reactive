@@ -313,18 +313,19 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new SerialDisposable ();
+			// FIXME: SerialDisposable might be still applicable. I historically switched between those disposables. Composite is safer but inefficient.
+			var dis = new CompositeDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
 		
-		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, SerialDisposable dis)
+		static bool StartConcat<TSource> (IEnumerator<IObservable<TSource>> sources, ISubject<TSource> sub, CompositeDisposable dis)
 		{
 			if (!sources.MoveNext ())
 				return true;
-			dis.Disposable = sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); });
+			dis.Add (sources.Current.Subscribe (v => sub.OnNext (v), ex => sub.OnError (ex), () => { if (StartConcat (sources, sub, dis)) sub.OnCompleted (); }));
 			return false;
 		}
 		
@@ -333,8 +334,43 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			// FIXME: don't use ToEnumerable.
-			return sources.ToEnumerable ().Concat ();
+			// FIXME: don't use ToEnumerable
+			return Concat (sources.ToEnumerable ());
+
+			/* -- untested --
+			
+			return new ColdObservableEach<TSource> (sub => {
+			// ----
+			var dis = new CompositeDisposable ();
+			var sdis = new SerialDisposable ();
+			dis.Add (sdis);
+			var l = new List<IObservable<TSource>> ();
+			bool busy = false;
+			bool quit = false;
+			dis.Add (sources.Subscribe (source => {
+				if (quit)
+					return;
+				if (busy)
+					l.Add (source);
+				else {
+					busy = true;
+					IObserver<TSource> o = null;
+					o = Observer.Create<TSource> (v => sub.OnNext (v), ex => { quit = true; throw ex; }, () => {
+						if (l.Count > 0) {
+							var next = l [0];
+							l.RemoveAt (0);
+							sdis.Disposable = next.Subscribe (o);
+						}
+						else
+							busy = false;
+					});
+					sdis.Disposable = source.Subscribe (o);
+				}
+			}, () => sub.OnCompleted ()));
+			return dis;
+			// ----
+			}, DefaultColdScheduler);
+			*/
 		}
 		
 		public static IObservable<TSource> Concat<TSource> (params IObservable<TSource> [] sources)
@@ -480,8 +516,8 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new SingleAssignmentDisposable ();
-			scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) dis.Disposable = source.Subscribe (sub); });
+			var dis = new CompositeDisposable ();
+			dis.Add (scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) dis.Add (source.Subscribe (sub)); }));
 			return dis;
 			// ----
 			}, scheduler);
