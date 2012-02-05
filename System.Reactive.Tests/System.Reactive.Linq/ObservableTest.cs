@@ -285,6 +285,36 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (45, i, "#2");
 		}
 		
+		[Test]
+		public void GroupBy ()
+		{
+			var dic = new Dictionary<int, List<int>> ();
+			var source = Observable.Range (0, 20).GroupBy (i => i / 5);
+			bool done = false;
+			var dis = new CompositeDisposable ();
+			dis.Add (source.Subscribe (g => dis.Add (g.Subscribe (v => {
+				List<int> l;
+				if (!dic.TryGetValue (g.Key, out l)) {
+					l = new List<int> ();
+					dic [g.Key] = l;
+				}
+				l.Add (v);
+				})), () => done = true));
+			SpinWait.SpinUntil (() => done, 1000);
+			Assert.IsTrue (done, "#1");
+			Assert.AreEqual (new int [] {0, 1, 2, 3, 4}, dic [0].ToArray (), "#2");
+			Assert.AreEqual (new int [] {15, 16, 17, 18, 19}, dic [3].ToArray (), "#3");
+			Assert.AreEqual (4, dic.Count, "#4");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void GroupBySelectorError ()
+		{
+			var source = Observable.Range (0, 20).GroupBy<int,int> (i => { throw new MyException (); });
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
+		}
+		
 		[Test] // this test is processing-speed dependent, but (unlike other tests) I think testing this with default (ThreadPool) scheduler should make sense...
 		public void Interval ()
 		{

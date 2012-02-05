@@ -333,8 +333,6 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			// FIXME: this should be SerialDisposable as there should be only one disposable at a time.
-			// ... Though currently that one does not work, need to investigate why.
 			var dis = new SerialDisposable ();
 			StartConcat (sources.GetEnumerator (), sub, dis);
 			return dis;
@@ -932,28 +930,18 @@ namespace System.Reactive.Linq
 			// ----
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
 			return source.Subscribe ((s) => {
-				try {
-					var k = keySelector (s);
-					GroupedSubject<TKey, TElement> g;
-					if (!dic.TryGetValue (k, out g)) {
-						g = new GroupedSubject<TKey, TElement> (k);
-						dic.Add (k, g);
-						sub.OnNext (g);
-					}
-					g.OnNext (elementSelector (s));
-				} catch (Exception ex) {
-					sub.OnError (ex);
-					// FIXME: should we handle OnError() in groups too?
+				var k = keySelector (s);
+				GroupedSubject<TKey, TElement> g;
+				if (!dic.TryGetValue (k, out g)) {
+					g = new GroupedSubject<TKey, TElement> (k);
+					dic.Add (k, g);
+					sub.OnNext (g);
 				}
+				g.OnNext (elementSelector (s));
 			}, () => {
-				try {
-					foreach (var g in dic.Values)
-						g.OnCompleted ();
-					sub.OnCompleted ();
-				} catch (Exception ex) {
-					sub.OnError (ex);
-					// FIXME: should we handle OnError() in groups too?
-				}
+				foreach (var g in dic.Values)
+					g.OnCompleted ();
+				sub.OnCompleted ();
 			});
 			// ----
 			}, DefaultColdScheduler);

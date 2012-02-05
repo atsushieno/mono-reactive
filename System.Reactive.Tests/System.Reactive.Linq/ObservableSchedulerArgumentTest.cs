@@ -14,27 +14,6 @@ namespace System.Reactive.Linq.Tests
 	[TestFixture]
 	public class ObservableSchedulerArgumentTest
 	{
-		class MyException : Exception
-		{
-		}
-		
-		class ErrorScheduler : IScheduler
-		{
-			public DateTimeOffset Now { get { return DateTimeOffset.Now; } }
-			public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new MyException ();
-			}
-			public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new MyException ();
-			}
-			public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-			{
-				throw new MyException ();
-			}
-		}
-		
 		[Test]
 		[ExpectedException (typeof (MyException))]
 		public void BufferScheduler ()

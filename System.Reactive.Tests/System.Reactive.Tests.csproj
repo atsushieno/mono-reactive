@@ -49,6 +49,8 @@
     <Folder Include="System.Reactive.Subjects\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\MyException.cs" />
+    <Compile Include="System\ErrorScheduler.cs" />
     <Compile Include="System\ObservableExtensionTest.cs" />
     <Compile Include="System.Reactive\NotificationTest.cs" />
     <Compile Include="System.Reactive.Concurrency\CurrentThreadSchedulerTest.cs" />
