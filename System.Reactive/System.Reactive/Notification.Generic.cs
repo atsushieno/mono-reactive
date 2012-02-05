@@ -107,6 +107,11 @@ namespace System.Reactive
 			{
 				return other is OnCompleted;
 			}
+
+			public override string ToString ()
+			{
+				return "OnCompleted()";
+			}
 		}
 
 		// It is public in Microsoft.Phone.Reactive
@@ -154,6 +159,11 @@ namespace System.Reactive
 				var e = other as OnError;
 				return (object) e != null && error.Equals (e.error);
 			}
+
+			public override string ToString ()
+			{
+				return "OnError(" + error + ")";
+			}
 		}
 
 		// It is public in Microsoft.Phone.Reactive
@@ -200,6 +210,11 @@ namespace System.Reactive
 			{
 				var n = other as OnNext;
 				return (object) n != null && value.Equals (n.value);
+			}
+
+			public override string ToString ()
+			{
+				return "OnNext(" + value + ")";
 			}
 		}
 	}
