@@ -379,6 +379,14 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void RangeErrorScheduler ()
+		{
+			var source = Observable.Range (0, 3, new ErrorScheduler ());
+			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
+		}
+		
+		[Test]
 		public void Retry ()
 		{
 			var source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new Exception ("failure"))).Retry (2);
