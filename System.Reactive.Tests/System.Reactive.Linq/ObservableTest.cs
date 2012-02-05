@@ -64,12 +64,12 @@ namespace System.Reactive.Linq.Tests
 		{
 			public IDisposable Subscribe (IObserver<T> observer)
 			{
-				throw new NotImplementedException ();
+				throw new MyException ();
 			}
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotImplementedException))]
+		[ExpectedException (typeof (MyException))]
 		public void ErrorFlow ()
 		{
 			// throw error on main
@@ -222,11 +222,11 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (SpinWait.SpinUntil (() => j != 0, 1000), "#1");
 			Assert.AreEqual (46, i, "#2");
 
-			source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new NotImplementedException ("failure")));
+			source = Observable.Range (0, 4).Concat (Observable.Throw<int> (new MyException ()));
 			try {
 				source.ToEnumerable ().All (v => true);
 				Assert.Fail ("should not complete");
-			} catch (NotImplementedException) {
+			} catch (MyException) {
 			}
 		}
 		
@@ -444,9 +444,9 @@ namespace System.Reactive.Linq.Tests
 		{
 			bool next = false;
 			try {
-				Observable.Start (() => { Thread.Sleep (200); throw new NotImplementedException (); }); // run it in another thread.
+				Observable.Start (() => { Thread.Sleep (200); throw new MyException (); }); // run it in another thread.
 				next = true;
-			} catch (NotImplementedException) {
+			} catch (MyException) {
 				Assert.IsTrue (next, "#1");
 			}
 		}
