@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.Tests", "Sy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.Android", "System.Reactive\System.Reactive.Android.csproj", "{C3403D3D-408A-4FD8-8C34-A8CD818D489A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Reactive.Testing", "Mono.Reactive.Testing\Mono.Reactive.Testing.csproj", "{9FE08AE0-EF24-4498-A50F-6D314F51F18C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,12 @@ Global
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Android|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Android|Any CPU.Build.0 = Debug|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Android|Any CPU.ActiveCfg = Android|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Android|Any CPU.Build.0 = Android|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
