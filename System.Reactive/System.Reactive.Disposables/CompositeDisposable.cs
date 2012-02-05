@@ -36,6 +36,12 @@ namespace System.Reactive.Disposables
 			get { return items.Count (); }
 		}
 		
+		bool disposed;
+		
+		public bool IsDisposed {
+			get { return disposed; }
+		}
+		
 		public bool IsReadOnly {
 			get { throw new NotImplementedException (); }
 		}
@@ -70,8 +76,6 @@ namespace System.Reactive.Disposables
 		{
 			items.CopyTo (array, arrayIndex);
 		}
-		
-		bool disposed;
 		
 		public void Dispose ()
 		{
