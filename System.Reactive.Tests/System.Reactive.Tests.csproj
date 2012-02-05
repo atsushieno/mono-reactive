@@ -54,6 +54,7 @@
     <Compile Include="System\ObservableExtensionTest.cs" />
     <Compile Include="System.Reactive\NotificationTest.cs" />
     <Compile Include="System.Reactive.Concurrency\CurrentThreadSchedulerTest.cs" />
+    <Compile Include="System.Reactive.Concurrency\EventLoopSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\HistoricalSchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\SchedulerTest.cs" />
     <Compile Include="System.Reactive.Concurrency\ThreadPoolSchedulerTest.cs" />
