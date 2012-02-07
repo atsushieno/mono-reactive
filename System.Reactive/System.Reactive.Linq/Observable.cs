@@ -1070,48 +1070,34 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-			IObservable<TRightDuration> dright = null;
-			var rddis = new SingleAssignmentDisposable ();
-			ReplaySubject<TRight> rsub = null;
 
-			Action drcleanup = () => {
-				Console.WriteLine ("right duration cleanup"); 
-				rddis.Dispose ();
-				rddis = new SingleAssignmentDisposable ();
-				rsub = null;
-				dright = null;
-				};
-			var rdis = right.Subscribe (v => {
-				Console.WriteLine ("new right value / " + dright);
-				if (dright == null) {
-					Console.WriteLine ("new right duration");
-					rsub = new ReplaySubject<TRight> ();
-					rsub.OnNext (v);
-					dright = rightDurationSelector (v);
-					rddis.Disposable = dright.Subscribe (dv => drcleanup (), ex => { sub.OnError (ex); drcleanup (); }, () => drcleanup ());
+			// FIXME: right observable needs to be per-left observation. Right now the same rsub is shared, but that results in incorrectly long right value submission.
+
+			var dis = new CompositeDisposable ();
+			var lefts = new List<TLeft> ();
+			ISubject<TRight> rsub = new ReplaySubject<TRight> ();
+			IObservable<TRightDuration> rightDuration = null;
+			dis.Add (left.Subscribe (Observer.Create<TLeft> (v => {
+				lefts.Add (v);
+				sub.OnNext (resultSelector (v, rsub));
+				var leftDuration = leftDurationSelector (v);
+				var lddis = new SingleAssignmentDisposable ();
+				dis.Add (lddis);
+				Action disposeLDur = () => { lefts.Remove (v); lddis.Dispose (); dis.Remove (lddis); }; // leftDuration is one-shot observable.
+				lddis.Disposable = leftDuration.Subscribe (dummy => disposeLDur (), disposeLDur);
+			}, () => sub.OnCompleted ())));
+
+			dis.Add (right.Subscribe (Observer.Create<TRight> (v => {
+				if (rightDuration == null) {
+					rightDuration = rightDurationSelector (v);
+					var rddis = new SingleAssignmentDisposable ();
+					dis.Add (rddis);
+					Action disposeRDur = () => { rsub.OnCompleted (); rightDuration = null; rsub = new ReplaySubject<TRight> (); rddis.Dispose (); dis.Remove (rddis); }; // rightDuration is one-shot observable.
+					rddis.Disposable = rightDuration.Subscribe (Observer.Create<TRightDuration> (dummy => disposeRDur (), disposeRDur));
 				}
-				else
-					rsub.OnNext (v);
-				}, ex => sub.OnError (ex), () => {}); // do nothing
-
-			var valid_lefts = new List<TLeft> ();
-
-			var ldis = left.Subscribe (v => {
-				var dleft = leftDurationSelector (v);
-				valid_lefts.Add (v);
-				var dldis = new SingleAssignmentDisposable ();
-				var rightTerminator = new Subject<TRight> ();
-				Action cleanup = () => {
-					Console.WriteLine ("left duration cleanup");
-					rightTerminator.OnCompleted ();
-					dldis.Dispose ();
-					valid_lefts.Remove (v);
-				};
-				dldis.Disposable = dleft.Subscribe (dv => cleanup (), ex => { sub.OnError (ex); cleanup (); }, () => cleanup ());
-				var rightObservablesForThisLeft = rightTerminator.Merge (rsub ?? Observable.Empty<TRight> ());
-				sub.OnNext (resultSelector (v, rightObservablesForThisLeft));
-				}, ex => sub.OnError (ex), () => sub.OnCompleted ());
-			return new CompositeDisposable (rdis, ldis);
+				rsub.OnNext (v);
+			})));
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
