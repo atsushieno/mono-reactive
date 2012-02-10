@@ -8,7 +8,6 @@ namespace System.Reactive.Concurrency
 	public class HistoricalScheduler : HistoricalSchedulerBase
 	{
 		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
-		IComparer<ScheduledItem<DateTimeOffset>> comparer = new ScheduledItem<DateTimeOffset>.Comparer (Comparer<DateTimeOffset>.Default);
 		
 		protected override IScheduledItem<DateTimeOffset> GetNext ()
 		{
@@ -19,8 +18,9 @@ namespace System.Reactive.Concurrency
 		{
 			ScheduledItem<DateTimeOffset> t = null;
 			t = new ScheduledItem<DateTimeOffset> (dueTime, () => { tasks.Remove (t); return action (this, state); });
-			tasks.Add (t);
-			tasks.Sort (comparer);
+			
+			Scheduler.AddTask (tasks, t);
+			
 			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)), t);
 		}
 	}

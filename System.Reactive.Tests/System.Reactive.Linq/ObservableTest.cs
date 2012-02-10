@@ -359,6 +359,68 @@ namespace System.Reactive.Linq.Tests
 			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
 		}
 		
+		[Test]
+		public void GroupJoin ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Interval (TimeSpan.FromMilliseconds (500), scheduler).Take (10),
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				l => Observable.Interval (TimeSpan.FromMilliseconds (1500), scheduler),
+				r => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			bool done = false;
+			bool [,] results = new bool [10, 10];
+			bool [] groupDone = new bool [10];
+			source.Subscribe (
+				v => v.Rights.Subscribe (
+					r => results [v.Left, r] = true,
+					() => groupDone [v.Left] = true),
+				() => done = true);
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+
+			Assert.IsTrue (done, "#1");
+			Assert.AreEqual (-1, Array.IndexOf (groupDone, false), "#2");
+			int [] rstarts = new int [] {0, 0, 0, 0, 0, 0, 1, 1, 2, 3};
+			int [] rends = new int [] {0, 0, 1, 2, 2, 3, 3, 4, 5, 5};
+			for (int l = 0; l < 10; l++)
+				for (int r = 0; r < 10; r++)
+					Assert.AreEqual (rstarts [l] <= r && r <= rends [l], results [l, r], String.Format ("({0}, {1})", l, r));
+		}
+		
+		[Test]
+		public void GroupJoin2 ()
+		{
+			// almost identical to the previous one, but without delay. And I only test some corner case that could result in difference.
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Interval (TimeSpan.FromMilliseconds (500), scheduler).Take (10),
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler),
+				l => Observable.Interval (TimeSpan.FromMilliseconds (1500), scheduler),
+				r => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			
+			bool done = false;
+			bool [,] results = new bool [10, 10];
+			bool [] groupDone = new bool [10];
+			source.Subscribe (
+				v => v.Rights.Subscribe (
+					r => results [v.Left, r] = true,
+					() => groupDone [v.Left] = true),
+				() => done = true);
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+
+			Assert.IsTrue (done, "#1");
+			// this value could be published *IF* unsubscription is
+			// handled *after* 7 is published as a left value.
+			// Rx does not publish this, likely means a right value
+			// at the end moment of rightDuration is *not* published
+			// ... so we do that too.
+			Assert.IsFalse (results [7, 2], "#2");
+		}
+		
 		[Test] // this test is processing-speed dependent, but (unlike other tests) I think testing this with default (ThreadPool) scheduler should make sense...
 		public void Interval ()
 		{

@@ -22,8 +22,7 @@ namespace System.Reactive.Concurrency
 		
 		int busy = 0;
 
-		IComparer<IScheduledItem<DateTimeOffset>> comparer = new ScheduledItem<DateTimeOffset>.Comparer (Comparer<DateTimeOffset>.Default);
-		List<IScheduledItem<DateTimeOffset>> tasks = new List<IScheduledItem<DateTimeOffset>> ();
+		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
@@ -47,8 +46,7 @@ namespace System.Reactive.Concurrency
 		{
 			var task = new ScheduledItem<DateTimeOffset> (dueTime, () => action (this, state));
 			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
-				tasks.Add (task);
-				tasks.Sort (comparer);
+				Scheduler.AddTask (tasks, task);
 				return Disposable.Create (() => tasks.Remove (task));
 			} else {
 				try {
