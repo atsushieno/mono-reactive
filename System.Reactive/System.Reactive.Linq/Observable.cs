@@ -1070,32 +1070,39 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-
-			// FIXME: right observable needs to be per-left observation. Right now the same rsub is shared, but that results in incorrectly long right value submission.
-
+				
+			// FIXME: the right results still seem to produce some excess.
+				
 			var dis = new CompositeDisposable ();
 			var lefts = new List<TLeft> ();
-			ISubject<TRight> rsub = new ReplaySubject<TRight> ();
-			IObservable<TRightDuration> rightDuration = null;
+			var rightSubs = new List<ISubject<TRight>> ();
+			var rightVals = new List<TRight> ();
 			dis.Add (left.Subscribe (Observer.Create<TLeft> (v => {
+				ISubject<TRight> rsub = new ReplaySubject<TRight> ();
+				rightSubs.Add (rsub);
 				lefts.Add (v);
 				sub.OnNext (resultSelector (v, rsub));
+				lock (rightVals)
+					foreach (var r in rightVals)
+						rsub.OnNext (r);
 				var leftDuration = leftDurationSelector (v);
 				var lddis = new SingleAssignmentDisposable ();
 				dis.Add (lddis);
-				Action disposeLDur = () => { lefts.Remove (v); lddis.Dispose (); dis.Remove (lddis); }; // leftDuration is one-shot observable.
+				Action disposeLDur = () => { rsub.OnCompleted (); rightSubs.Remove (rsub); lefts.Remove (v); lddis.Dispose (); dis.Remove (lddis); }; // leftDuration is one-shot observable.
 				lddis.Disposable = leftDuration.Subscribe (dummy => disposeLDur (), disposeLDur);
 			}, () => sub.OnCompleted ())));
 
 			dis.Add (right.Subscribe (Observer.Create<TRight> (v => {
-				if (rightDuration == null) {
-					rightDuration = rightDurationSelector (v);
-					var rddis = new SingleAssignmentDisposable ();
-					dis.Add (rddis);
-					Action disposeRDur = () => { rsub.OnCompleted (); rightDuration = null; rsub = new ReplaySubject<TRight> (); rddis.Dispose (); dis.Remove (rddis); }; // rightDuration is one-shot observable.
-					rddis.Disposable = rightDuration.Subscribe (Observer.Create<TRightDuration> (dummy => disposeRDur (), disposeRDur));
-				}
-				rsub.OnNext (v);
+				rightVals.Add (v);
+				var rightDuration = rightDurationSelector (v);
+				var rddis = new SingleAssignmentDisposable ();
+				dis.Add (rddis);
+				Action disposeRDur = () => { rightVals.Remove (v); rddis.Dispose (); dis.Remove (rddis); }; // rightDuration is one-shot observable.
+				rddis.Disposable = rightDuration.Subscribe (Observer.Create<TRightDuration> (dummy => disposeRDur (), disposeRDur));
+					
+				lock (rightSubs)
+					foreach (var rsub in rightSubs)
+						rsub.OnNext (v);
 			})));
 			return dis;
 			// ----
