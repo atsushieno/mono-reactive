@@ -78,6 +78,7 @@
     <Compile Include="System.Reactive.Linq\ObservableTest.cs" />
     <Compile Include="System.Reactive.Subjects\SubjectSequenceTest.cs" />
     <Compile Include="System.Reactive.Subjects\ReplaySubjectTest.cs" />
+    <Compile Include="System.Reactive.Threading.Tasks\TaskObservableExtensionsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Reactive\System.Reactive.csproj">
