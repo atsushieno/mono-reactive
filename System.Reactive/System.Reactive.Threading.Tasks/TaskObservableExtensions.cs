@@ -21,9 +21,6 @@ namespace System.Reactive.Threading.Tasks
 			{
 				if (task == null)
 					throw new ArgumentNullException ("task");
-				if (task.Status != TaskStatus.Created)
-					throw new ArgumentNullException ("task can be converted to IObservable only when it is at Created state.");
-
 				this.task = task;
 			}
 
