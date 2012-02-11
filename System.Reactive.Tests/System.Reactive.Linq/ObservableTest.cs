@@ -617,5 +617,117 @@ namespace System.Reactive.Linq.Tests
 			dis.Dispose ();
 			Assert.IsTrue (res.Disposed, "#3");
 		}
+
+		[Test]
+		public void WindowCounts ()
+		{
+			string expected = "(0,0)(1,0)(2,0)(3,0)(3,1)(4,0)(4,1)(5,1)(6,1)(6,2)(7,1)(7,2)(8,2)(9,2)(9,3)(10,2)(10,3)(11,3)(12,3)(12,4)(13,3)(13,4)(14,4)(15,4)(15,5)(16,4)(16,5)(17,5)(18,5)(18,6)(19,5)(19,6)done";
+			WindowCounts (5, 3, 7, expected);
+		}
+		
+		[Test]
+		public void WindowCounts2 ()
+		{
+			string expected = "(0,0)(1,0)(2,0)(5,1)(6,1)(7,1)(10,2)(11,2)(12,2)(15,3)(16,3)(17,3)done";
+			WindowCounts (3, 5, 4, expected);
+		}
+		
+		void WindowCounts (int count, int skip, int windowCount, string expected)
+		{
+			var scheduler = new HistoricalScheduler ();
+			var sources = Observable.Range (0, 20).Window (count, skip);
+			int windows = 0;
+			var sw = new StringWriter () { NewLine = "\n" };
+			bool [] windowDone = new bool [windowCount];
+			sources.Subscribe (source => {
+				int w = windows++;
+				source.Subscribe (v => sw.Write ("({0},{1})", v, w), () => windowDone [w] = true);
+			}, () => sw.Write ("done"));
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+			Assert.AreEqual (-1, Array.IndexOf (windowDone, false), "#2");
+		}
+
+		[Test]
+		public void WindowTimeSpans ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var interval = TimeSpan.FromMilliseconds (100);
+			var span = TimeSpan.FromMilliseconds (300);
+			var shift = TimeSpan.FromMilliseconds (500);
+			var total = TimeSpan.FromMilliseconds (1500);
+			
+			var sw = new StringWriter () { NewLine = "\n" };
+			var sources = Observable.Interval (interval, scheduler).Take (15).Window (span, shift, scheduler);
+			int windows = 0;
+			bool [] windowDone = new bool [4];
+			sources.Subscribe (source => {
+				int w = windows++;
+				source.Subscribe (v => sw.WriteLine("{0:ss.fff} {1} [{2}]", scheduler.Now, v, w), () => windowDone [w] = true);
+				}, () => sw.WriteLine ("done"));
+			scheduler.AdvanceBy (total);
+			string expected = @"00.100 0 [0]
+				00.200 1 [0]
+				00.500 4 [1]
+				00.600 5 [1]
+				00.700 6 [1]
+				01.000 9 [2]
+				01.100 10 [2]
+				01.200 11 [2]
+				01.500 14 [3]
+				done
+				".Replace ("\t", "").Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+			Assert.AreEqual (-1, Array.IndexOf (windowDone, false), "#2");
+		}
+
+
+		[Test]
+		public void WindowTimeSpans2 ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var interval = TimeSpan.FromMilliseconds (100);
+			var span = TimeSpan.FromMilliseconds (500);
+			var shift = TimeSpan.FromMilliseconds (300);
+			var total = TimeSpan.FromMilliseconds (1500);
+			
+			var sw = new StringWriter () { NewLine = "\n" };
+			var sources = Observable.Interval (interval, scheduler).Take (15).Window (span, shift, scheduler);
+			int windows = 0;
+			bool [] windowDone = new bool [6];
+			sources.Subscribe (source => {
+				int w = windows++;
+				source.Subscribe (v => sw.WriteLine("{0:ss.fff} {1} [{2}]", scheduler.Now, v, w), () => windowDone [w] = true);
+				}, () => sw.WriteLine ("done"));
+			scheduler.AdvanceBy (total);
+			
+			string expected = @"00.100 0 [0]
+				00.200 1 [0]
+				00.300 2 [0]
+				00.300 2 [1]
+				00.400 3 [0]
+				00.400 3 [1]
+				00.500 4 [1]
+				00.600 5 [1]
+				00.600 5 [2]
+				00.700 6 [1]
+				00.700 6 [2]
+				00.800 7 [2]
+				00.900 8 [2]
+				00.900 8 [3]
+				01.000 9 [2]
+				01.000 9 [3]
+				01.100 10 [3]
+				01.200 11 [3]
+				01.200 11 [4]
+				01.300 12 [3]
+				01.300 12 [4]
+				01.400 13 [4]
+				01.500 14 [4]
+				01.500 14 [5]
+				done
+				".Replace ("\t", "").Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+			Assert.AreEqual (-1, Array.IndexOf (windowDone, false), "#2");
+		}
 	}
 }
