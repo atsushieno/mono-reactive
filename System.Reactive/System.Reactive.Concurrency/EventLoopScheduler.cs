@@ -21,10 +21,11 @@ namespace System.Reactive.Concurrency
 		}
 		
 		Func<ThreadStart, Thread> thread_factory;
+		CompositeDisposable disposables = new CompositeDisposable ();
 		
 		public void Dispose ()
 		{
-			throw new NotImplementedException ();
+			disposables.Dispose ();
 		}
 		
 		public DateTimeOffset Now {
@@ -47,7 +48,9 @@ namespace System.Reactive.Concurrency
 				});
 			th.Start ();
 			// The thread is not aborted even if it's at work (ThreadAbortException is not caught inside the action).
-			return Disposable.Create (() => { cancel = true; dis.Dispose (); });
+			var ret = Disposable.Create (() => { cancel = true; dis.Dispose (); disposables.Remove (dis); });
+			disposables.Add (ret);
+			return ret;
 		}
 		
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
