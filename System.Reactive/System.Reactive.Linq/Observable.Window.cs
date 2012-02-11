@@ -142,7 +142,7 @@ namespace System.Reactive.Linq
 			}, scheduler);
 		}
 		
-		class SubjectTimeShiftContext<TSource>
+		struct SubjectTimeShiftContext<TSource>
 		{
 			public SubjectTimeShiftContext (DateTimeOffset start, ISubject<TSource> sub)
 			{

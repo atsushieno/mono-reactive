@@ -42,9 +42,8 @@ namespace System.Reactive.Disposables
 			get { return disposed; }
 		}
 		
-		public bool IsReadOnly {
-			get { throw new NotImplementedException (); }
-		}
+		// FIXME: find out where this should be used as true.
+		public bool IsReadOnly { get; internal set; }
 		
 		IEnumerator IEnumerable.GetEnumerator ()
 		{
