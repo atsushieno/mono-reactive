@@ -316,8 +316,87 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (expected, l.ToArray (), "#1");
 			Assert.IsTrue (done, "#2");
 		}
+
+		IEnumerable<IObservable<long>> IntervalSelectTakeDoEnumerable (HistoricalScheduler scheduler, List<string> l, TextWriter sw)
+		{
+			DateTimeOffset start = scheduler.Now;
+			for (int i = 0; i < 5; i++) {
+				int x = i;
+				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (150));
+				yield return Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+#if false
+					.Select (v => x * 10 + v).Take (5)
+#else
+					// FIXME: this select should work, but it does not give expected "i" or "x" values, likely due to some mcs bug regarding local variable volatility...
+					// ... So I used out-of-scope value comparison here.
+					.Select (v => (long) ((scheduler.Now - start).TotalMilliseconds / 20) + v).Take (5)
+#endif
+					.Do (v => l.Add (String.Format ("{0:ss.fff}: {1} {2}", scheduler.Now, i, v)), () => sw.WriteLine ());
+				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (50));
+			}
+		}
+
+		[Test] // some practical test
+		public void IntervalSelectTakeDo ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var l = new List<string> ();
+			var sw = new StringWriter () { NewLine = "\n" };
+			foreach (var o in IntervalSelectTakeDoEnumerable (scheduler, l, TextWriter.Null))
+				o.Subscribe (v => {}); // dummy
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (3));
+			l.Sort ();
+			foreach (var s in l)
+				sw.WriteLine (s);
+
+			string expected = @"00.250: 1 12
+				00.350: 1 18
+				00.450: 2 22
+				00.450: 2 24
+				00.550: 2 28
+				00.550: 2 30
+				00.650: 3 32
+				00.650: 3 34
+				00.650: 3 36
+				00.750: 3 38
+				00.750: 3 40
+				00.850: 4 42
+				00.850: 4 44
+				00.850: 4 46
+				00.950: 4 48
+				00.950: 4 50
+				01.050: 5 52
+				01.050: 5 54
+				01.050: 5 56
+				01.150: 5 58
+				01.150: 5 60
+				01.250: 5 64
+				01.250: 5 66
+				01.350: 5 70
+				01.450: 5 76
+				".Replace ("\r", "").Replace ("\t", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
 		
-		
+		[Test]
+		public void Concat4 ()
+		{
+			var scheduler = new HistoricalScheduler ();
+
+			var sw = new StringWriter () { NewLine = "\n" };
+			var source = IntervalSelectTakeDoEnumerable (scheduler, new List<string> (), sw).ToObservable ().Concat ();
+			source.Subscribe (v => sw.Write ("{0} ", v), () => sw.WriteLine ());
+			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (3000));
+			var expected = @"12 18 24 30 36 
+				37 43 49 55 61 
+				62 68 74 80 86 
+				87 93 99 105 111 
+				112 118 124 130 136 
+				
+				".Replace ("\r", "").Replace ("\t", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
+
 		[Test]
 		public void Delay ()
 		{

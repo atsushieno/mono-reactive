@@ -334,43 +334,40 @@ namespace System.Reactive.Linq
 			if (sources == null)
 				throw new ArgumentNullException ("sources");
 
-			// FIXME: don't use ToEnumerable
-			return Concat (sources.ToEnumerable ());
-
-			/* -- untested --
-			
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			var dis = new CompositeDisposable ();
-			var sdis = new SerialDisposable ();
-			dis.Add (sdis);
-			var l = new List<IObservable<TSource>> ();
+			// FIXME: I want to switch to SerialDisposable if it is safe to use.
+			// Looks like OnCompleted() is not processed before the subscription is being disposed.
+			//var sdis = new SerialDisposable ();
+			//dis.Add (sdis);
+			var l = new Queue<IObservable<TSource>> ();
 			bool busy = false;
 			bool quit = false;
 			dis.Add (sources.Subscribe (source => {
 				if (quit)
 					return;
 				if (busy)
-					l.Add (source);
+					l.Enqueue (source);
 				else {
 					busy = true;
 					IObserver<TSource> o = null;
 					o = Observer.Create<TSource> (v => sub.OnNext (v), ex => { quit = true; throw ex; }, () => {
 						if (l.Count > 0) {
-							var next = l [0];
-							l.RemoveAt (0);
-							sdis.Disposable = next.Subscribe (o);
-						}
-						else
+							var next = l.Dequeue ();
+							dis.Add (next.Subscribe (o));
+						} else {
 							busy = false;
+							if (quit)
+								sub.OnCompleted ();
+						}
 					});
-					sdis.Disposable = source.Subscribe (o);
+					dis.Add (source.Subscribe (o));
 				}
-			}, () => sub.OnCompleted ()));
+			}, () => { quit = true; if (!busy) sub.OnCompleted (); }));
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
-			*/
 		}
 		
 		public static IObservable<TSource> Concat<TSource> (params IObservable<TSource> [] sources)
