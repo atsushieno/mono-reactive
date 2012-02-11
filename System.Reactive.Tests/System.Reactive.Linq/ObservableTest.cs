@@ -189,6 +189,63 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void BufferCountAndSkip ()
+		{
+			var sw = new StringWriter () { NewLine = "\n" };
+			var source = Observable.Range (0, 20).Buffer (3, 5);
+			source.Subscribe (v => sw.WriteLine (String.Concat (v)), () => sw.Write ("done"));
+			string expected = "012\n567\n101112\n151617\ndone".Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
+		
+		[Test]
+		public void BufferCountAndSkip2 ()
+		{
+			// It has to work for overlapped range
+			var sw = new StringWriter () { NewLine = "\n" };
+			var source = Observable.Range (0, 10).Buffer (5, 3);
+			source.Subscribe (v => sw.WriteLine (String.Concat (v)), () => sw.Write ("done"));
+			var expected = "01234\n34567\n6789\n9\ndone".Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
+
+		[Test]
+		public void BufferTimeSpans ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var interval = TimeSpan.FromMilliseconds (100);
+			var span = TimeSpan.FromMilliseconds (300);
+			var shift = TimeSpan.FromMilliseconds (500);
+			// This makes notable corner case ... FromMilliseconds (3100) passes the test, while FromSeconds (3) does not. It is because the source is cut at that state.
+			var total = TimeSpan.FromSeconds (3);
+			
+			var sw = new StringWriter () { NewLine = "\n" };
+			var source = Observable.Interval (interval, scheduler).Take (30).Buffer (span, shift, scheduler);
+			source.Subscribe (v => sw.WriteLine (String.Concat (v)), () => sw.Write ("done"));
+			scheduler.AdvanceBy (total);
+			var expected = "01\n456\n91011\n141516\n192021\n242526\n29\ndone".Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
+
+		[Test]
+		public void BufferTimeSpans2 ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var interval = TimeSpan.FromMilliseconds (100);
+			var span = TimeSpan.FromMilliseconds (500);
+			var shift = TimeSpan.FromMilliseconds (300);
+			var total = TimeSpan.FromSeconds (2);
+			
+			var sw = new StringWriter () { NewLine = "\n" };
+			var source = Observable.Interval (interval, scheduler).Take (10).Buffer (span, shift, scheduler);
+			source.Subscribe (v => sw.WriteLine (String.Concat (v)), () => sw.Write ("done"));
+			scheduler.AdvanceBy (total);
+			// this overlaps the list
+			var expected = "0123\n23456\n56789\n89\ndone".Replace ("\r", "");
+			Assert.AreEqual (expected, sw.ToString (), "#1");
+		}
+		
+		[Test]
 		public void BufferTimeAndCount ()
 		{
 			// This emites events as: 0 <0ms> 1 <100ms> 2 ... 5 <500ms>

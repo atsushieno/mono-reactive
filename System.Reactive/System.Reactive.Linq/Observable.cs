@@ -1051,28 +1051,10 @@ namespace System.Reactive.Linq
 			- On the other hand, right completion does not result in OnCompleted on the result.
 			  - The result keeps receiving OnNext with *empty* right observables whenever left value arrives.
 			
-			
-			example:
-
-            var ldur = new ReplaySubject<DateTime>();
-            //ldur.OnError(new Exception ("hzaaar"));
-            //ldur.OnNext(DateTime.Now);
-            ldur.OnCompleted();
-            var g = Observable.GroupJoin<long,int,DateTime,DateTime,KeyValuePair<long,IObservable<int>>> (
-                Observable.Interval (TimeSpan.FromMilliseconds(3000)),
-                Observable.Interval(TimeSpan.FromMilliseconds(1000)).Select(l => (int)l).Take(20),
-                i => ldur.Delay (TimeSpan.FromSeconds (5)).Do (v => Console.WriteLine ("leftDuration")),//Observable.Interval(TimeSpan.FromSeconds(1)).Select(l => DateTime.Now),
-                i => ldur.Delay(TimeSpan.FromSeconds(2)),//Observable.Interval(TimeSpan.FromSeconds(1)).Select(l => DateTime.Now),
-                (i, dur) => new KeyValuePair<long,IObservable<int>> (i, dur));
-            g.Subscribe(p => { Console.WriteLine("RESULT"); p.Value.Subscribe(v => Console.WriteLine("{0} - {1} / {2}", p.Key, v, DateTime.Now), () => Console.WriteLine ("windowed right completed")); }, () => Console.WriteLine("done"));
-
 			*/
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-				
-			// FIXME: the right results still seem to produce some excess.
-				
 			var dis = new CompositeDisposable ();
 			var lefts = new List<TLeft> ();
 			var rightSubs = new List<ISubject<TRight>> ();
@@ -2170,9 +2152,9 @@ namespace System.Reactive.Linq
 			return source.Subscribe (
 				v => {
 					if (!done) {
-						if (idx++ < count)
+						if (idx < count)
 							sub.OnNext (v);
-						else
+						if (++idx == count)
 							sub.OnCompleted ();
 					}
 				},
