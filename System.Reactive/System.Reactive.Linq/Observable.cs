@@ -1428,10 +1428,8 @@ namespace System.Reactive.Linq
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			// FIXME: need to make it non-subscribing
-			var sub = new SchedulerBoundSubject<TSource> (scheduler);
-			var dis = source.Subscribe (sub);
-			return new WrappedSubject<TSource> (sub, dis);
+			return new ColdObservableEach<TSource> (sub => source.Subscribe (sub), DefaultColdScheduler, () => new SchedulerBoundSubject<TSource> (scheduler));
+
 		}
 		
 		public static IObservable<TSource> ObserveOn<TSource> (
@@ -2129,10 +2127,7 @@ namespace System.Reactive.Linq
 			if (gate == null)
 				throw new ArgumentNullException ("gate");
 
-			var sub = new SynchronizedSubject<TSource> (gate);
-			// FIXME: make it non-subscribing
-			var dis = source.Subscribe (sub);
-			return new WrappedSubject<TSource> (sub, dis);
+			return new ColdObservableEach<TSource> (sub => source.Subscribe (sub), DefaultColdScheduler, () => new SynchronizedSubject<TSource> (gate));
 		}
 		
 		public static IObservable<TSource> Take<TSource> (

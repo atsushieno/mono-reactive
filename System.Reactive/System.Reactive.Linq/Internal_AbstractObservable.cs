@@ -9,41 +9,6 @@ using System.Threading;
 
 namespace System.Reactive.Linq
 {
-	internal class HotObservable<T> : IObservable<T>
-	{
-		IDisposable scheduler_disposable;
-		ReplaySubject<T> subject;
-
-		public ReplaySubject<T> Subject {
-			get { return subject; }
-		}
-		
-		public HotObservable (Action<ReplaySubject<T>> work, IScheduler scheduler)
-		{
-			subject = new ReplaySubject<T> (scheduler);
-			scheduler_disposable = scheduler.Schedule (() => work (subject));
-		}
-		
-		bool disposed;
-		
-		public void Dispose ()
-		{
-			if (disposed)
-				return;
-			disposed = true;
-			if (scheduler_disposable != null)
-				scheduler_disposable.Dispose ();
-			var dis = Subject as IDisposable;
-			if (dis != null)
-				dis.Dispose ();
-		}
-
-		public IDisposable Subscribe (IObserver<T> observer)
-		{
-			return Subject.Subscribe (observer);
-		}
-	}
-	
 	internal class ColdObservableEach<T> : IObservable<T>
 	{
 		IScheduler scheduler;
