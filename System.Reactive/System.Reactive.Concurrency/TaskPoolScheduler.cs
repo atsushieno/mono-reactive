@@ -29,13 +29,13 @@ namespace System.Reactive.Concurrency
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			var cancel = new CancellationTokenSource ();
-			var dis = new CompositeDisposable ();
-			dis.Add (Disposable.Create (() => cancel.Cancel ()));
+			var dis = new MultipleAssignmentDisposable ();
+			dis.Disposable = new CancellationDisposable (cancel);
 			Task task = null;
 			task = factory.StartNew<Unit> (() => {
 				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
 				if (!task.IsCanceled)
-					dis.Add (action (this, state));
+					dis.Disposable = action (this, state);
 				return Unit.Default;
 				}, cancel.Token);
 			return dis;

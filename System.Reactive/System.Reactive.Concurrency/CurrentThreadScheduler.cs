@@ -44,6 +44,7 @@ namespace System.Reactive.Concurrency
 		*/
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
+			// FIXME: this sort of needs to handle correct cancellation. (Though there's not likely many chances to "cancel" it...)
 			var task = new ScheduledItem<DateTimeOffset> (dueTime, () => action (this, state));
 			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
 				Scheduler.AddTask (tasks, task);
