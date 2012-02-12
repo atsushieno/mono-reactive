@@ -18,7 +18,6 @@ namespace System.Reactive.Linq
 			Func<ISubject<TSource, TIntermediate>> subject_creator;
 			Func<IObservable<TIntermediate>, IObservable<TResult>> result_selector;
 			
-			// FIXME: is it safe to leave created subject not disposed? (though also note that Multicast() does not *create* returned subject; it's just passing the argument)
 			public ConnectableObservable (IObservable<TSource> source, Func<ISubject<TSource, TIntermediate>> subjectCreator, Func<IObservable<TIntermediate>, IObservable<TResult>> resultSelector)
 			{
 				this.source = source;

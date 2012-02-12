@@ -15,6 +15,28 @@ namespace System.Reactive.Linq
 {
 	public static partial class Observable
 	{
+		class HybridWait
+		{
+			ManualResetEvent wait;
+			bool done;
+			
+			public void Set ()
+			{
+				done = true;
+				if (wait != null)
+					wait.Set ();
+			}
+			
+			public void WaitOne ()
+			{
+				if (!SpinWait.SpinUntil (() => done, 50)) {
+					wait = new ManualResetEvent (false);
+					if (!done)
+						wait.WaitOne ();
+				}
+			}
+		}
+
 		public static TSource First<TSource> (this IObservable<TSource> source)
 		{
 			return First<TSource> (source, (s) => true);
@@ -43,8 +65,7 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 			
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
+			var wait = new HybridWait ();
 			TSource ret = default (TSource);
 			bool got = false;
 			var dis = source.Subscribe (
@@ -103,8 +124,7 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 			
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
+			var wait = new HybridWait ();
 			TSource ret = default (TSource);
 			bool got = false;
 			var dis = source.Subscribe (
@@ -146,21 +166,20 @@ namespace System.Reactive.Linq
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
 			
-			// FIXME: should we use SpinWait or create some hybrid one?
-			var wait = new ManualResetEvent (false);
+			var wait = new HybridWait ();
 			TSource ret = default (TSource);
 			bool got = false, error = false;
 			IDisposable dis = null;
 			dis = source.Subscribe (
 				// the first "if (!got) check is required because the source may send next values before unsubscribing this action by dis.Dispose().
-				(s) => { if (predicate (s)) {
+				s => { if (predicate (s)) {
 					if (got)
 						error = true;
 					got = true;
 					ret = s;
 					}
 				},
-				() => { wait.Set (); }
+				() => wait.Set ()
 				);
 			wait.WaitOne ();
 			dis.Dispose ();
