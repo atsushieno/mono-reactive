@@ -36,7 +36,7 @@ namespace System.Reactive.Concurrency
 			var dis = new SingleAssignmentDisposable ();
 			context.Post (stat => {
 				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
-				dis.Disposable = action (this, (TState) stat);
+				dis.Disposable = new ContextDisposable (context, action (this, (TState) stat));
 				}, default (TState));
 			return dis;
 		}
