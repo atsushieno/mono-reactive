@@ -2,13 +2,15 @@ mono-reactive aims to provide Reactive Extension (Rx) [*1] features to the
 Mono world.
 
 Right now it is almost about System.Reactive.dll implementation, but I'm
-looking forward to seeing it running ReativeUI [*2] for MonoTouch as well as
+looking forward to seeing it running ReativeUI [*2] for iOS as well as
 Mono for Android support.
 
-A few things are still not implemented, and there are couple of things that
-are known to fail. Also since I'm still newbie in Rx land, there are likely
-stupid implementation and nasty hacks. Patches are welcome.
+System.Reactive.dll is feature complete, but there is a couple of things that
+are known to fail. Also I'm still newbie in Rx land, there are likely
+stupid implementation and nasty hacks. 
+Patches, bug reports and/or any feedback are welcome.
 
 [*1] http://msdn.microsoft.com/en-us/library/hh242985.aspx
 [*2] http://www.reactiveui.net/
 
+Atsushi Eno (@atsushi_eno / @atsushieno)
