@@ -750,7 +750,7 @@ namespace System.Reactive.Linq
 			return source.Do (v => {}, ex => finallyAction (), () => finallyAction ());
 		}
 		
-		public static Func<IObservable<Unit>> FromAsyncPattern(
+		public static Func<IObservable<Unit>> FromAsyncPattern (
 			Func<AsyncCallback, Object, IAsyncResult> begin,
 			Action<IAsyncResult> end)
 		{
@@ -759,7 +759,6 @@ namespace System.Reactive.Linq
 			if (end == null)
 				throw new ArgumentNullException ("end");
 
-			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<Unit> ();
 			return () => { begin ((res) => {
 				end (res);
@@ -779,7 +778,6 @@ namespace System.Reactive.Linq
 			if (end == null)
 				throw new ArgumentNullException ("end");
 
-			// FIXME: need to examine how the returned observable works (e.g. cold vs. hot)
 			var sub = new Subject<TResult> ();
 			return () => { begin ((res) => {
 				var result = end (res);
@@ -984,7 +982,8 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<IGroupedObservable<TKey, TElement>> (sub => {
 			// ----
 			var dic = new Dictionary<TKey, GroupedSubject<TKey, TElement>> (comparer);
-			return source.Subscribe (Observer.Create<TSource> ((TSource s) => {
+			var dis = new CompositeDisposable ();
+			dis.Add (source.Subscribe (Observer.Create<TSource> ((TSource s) => {
 				var k = keySelector (s);
 				GroupedSubject<TKey, TElement> g;
 				if (!dic.TryGetValue (k, out g)) {
@@ -993,8 +992,8 @@ namespace System.Reactive.Linq
 					var ddis = new SingleAssignmentDisposable ();
 					// after the duration, it removes the GroupedSubject from the dictionary by key.
 					Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
-					// FIXME: it is possible that this disposable is never disposed if dur submits events infinitely. Should we unsubscribe (dispose) it when the parent subscription (i.e. return value of this method) is disposed?
 					ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
+					dis.Add (ddis); // dispoe this by parent (in case dur submits events infinitely and ddis itself is never disposed by the cycle above...)
 					dic.Add (k, g);
 					sub.OnNext (g);
 				}
@@ -1004,7 +1003,8 @@ namespace System.Reactive.Linq
 				foreach (var g in dic.Values)
 					g.OnCompleted ();
 				sub.OnCompleted ();
-			}));
+			})));
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
