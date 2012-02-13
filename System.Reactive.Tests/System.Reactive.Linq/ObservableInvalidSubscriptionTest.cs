@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -26,7 +27,7 @@ namespace System.Reactive.Linq.Tests
 		{
 			var ret = action (new ExceptionalObservable<TSource> ());
 			try {
-				ret.Subscribe (Console.WriteLine);
+				ret.Subscribe (v => Console.WriteLine (v));
 				if (wait != null)
 					wait ();
 				Assert.Fail ("expected to throw ExceptionalObservableException");
