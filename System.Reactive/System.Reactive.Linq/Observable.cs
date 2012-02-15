@@ -513,9 +513,19 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			var dis = new CompositeDisposable ();
-			dis.Add (scheduler.Schedule (dueTime, () => { if (!dis.IsDisposed) dis.Add (source.Subscribe (sub)); }));
-			return dis;
+			int count = 0;
+			bool done = false;
+			return source.Subscribe (v => {
+				count++;
+				var d = new SingleAssignmentDisposable ();
+				d.Disposable = scheduler.Schedule (Scheduler.Normalize (dueTime), () => {
+					if (!d.IsDisposed)
+						sub.OnNext (v);
+					d.Dispose ();
+					if (done && --count == 0)
+						sub.OnCompleted ();
+				});
+			}, () => { done = true; if (count == 0) sub.OnCompleted (); });
 			// ----
 			}, scheduler);
 		}

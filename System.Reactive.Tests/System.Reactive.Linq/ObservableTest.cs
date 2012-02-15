@@ -157,9 +157,11 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Amb ()
 		{
-			var s1 = Observable.Range (1, 3).Delay (TimeSpan.FromMilliseconds (500));
+			var scheduler = new HistoricalScheduler ();
+			var s1 = Observable.Range (1, 3).Delay (TimeSpan.FromMilliseconds (500), scheduler);
 			var s2 = Observable.Range (4, 3);
 			var e = s1.Amb (s2).ToEnumerable ().ToArray ();
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
 			Assert.AreEqual (new int [] {4, 5, 6}, e, "#1");
 		}
 		
@@ -308,11 +310,12 @@ namespace System.Reactive.Linq.Tests
 				NotificationKind.OnNext,
 				NotificationKind.OnNext,
 				NotificationKind.OnCompleted };
-			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread));
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Range (1, 3).Concat (Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), scheduler));
 			bool done = false;
 			var l = new List<NotificationKind> ();
 			source.Materialize ().Subscribe (v => l.Add (v.Kind), () => done = true);
-			SpinWait.SpinUntil (() => done, 1000);
+			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (50));
 			Assert.AreEqual (expected, l.ToArray (), "#1");
 			Assert.IsTrue (done, "#2");
 		}
@@ -400,11 +403,12 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void Delay ()
 		{
-			var source = Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), Scheduler.CurrentThread).Materialize ();
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Return (2).Delay (TimeSpan.FromMilliseconds (50), scheduler).Materialize ();
 			var l = new List<NotificationKind> ();
 			bool done = false;
 			source.Subscribe (v => l.Add (v.Kind), () => done = true);
-			Assert.IsTrue (SpinWait.SpinUntil (() => done, 1000), "#1");
+			scheduler.AdvanceBy (TimeSpan.FromMilliseconds (50));
 			Assert.IsTrue (done, "#2");
 			Assert.AreEqual (new NotificationKind [] {
 				NotificationKind.OnNext,
@@ -632,6 +636,7 @@ namespace System.Reactive.Linq.Tests
 			o.Subscribe (v => l2.Add (v), () => done = true);
 			for (int i = 0; i < 50; i++)
 				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (300));
+			//scheduler.AdvanceBy (TimeSpan.FromMilliseconds (15000));
 			Assert.AreEqual (43, l.Count, "#1");
 			Assert.AreEqual (new long [] {2, 5, 8, 12, 15, 18, 22, 25}, l2.ToArray (), "#2");
 			Assert.IsFalse (done, "#3"); // while sampler finishes, sample observable never does.
