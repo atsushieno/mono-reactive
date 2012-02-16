@@ -643,6 +643,21 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void SelectManyObservable ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			Func<int,IObservable<int>> f = x => Observable.Return (x).Delay (TimeSpan.FromSeconds (1), scheduler);
+			var source = Observable.Range (0, 5).SelectMany (n => f (n));
+			var l = new List<int> ();
+			bool done = false;
+			var dis = source.Subscribe (v => l.Add (v), () => done = true);
+			Assert.IsFalse (done ,"#1");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			Assert.AreEqual (new int [] {0, 1, 2, 3, 4}, l.ToArray (), "#2");
+			Assert.IsTrue (done, "#3");
+		}
+		
+		[Test]
 		public void Start ()
 		{
 			bool next = false;

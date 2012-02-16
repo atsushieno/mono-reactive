@@ -525,7 +525,14 @@ namespace System.Reactive.Linq
 					if (done && --count == 0)
 						sub.OnCompleted ();
 				});
-			}, () => { done = true; if (count == 0) sub.OnCompleted (); });
+			}, () => {
+				var d = new SingleAssignmentDisposable ();
+				d.Disposable = scheduler.Schedule (Scheduler.Normalize (dueTime), () => {
+					done = true;
+					if (count == 0)
+						sub.OnCompleted ();
+				});
+			});
 			// ----
 			}, scheduler);
 		}
@@ -1727,10 +1734,10 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-			return source.Subscribe ((v) => {
+			return source.Subscribe (v => {
 				foreach (var r in selector (v))
 					sub.OnNext (r);
-				}, (ex) => sub.OnError (ex), () => sub.OnCompleted ());
+			}, ex => sub.OnError (ex), () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -1746,10 +1753,23 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-			return source.Subscribe (
-				(v) => { var o = selector (v); o.Subscribe (vv => sub.OnNext (vv)); },
-				(ex) => sub.OnError (ex),
-				() => sub.OnCompleted ());
+			int count = 0;
+			bool done = false;
+			var dis = new CompositeDisposable ();
+			dis.Add (source.Subscribe (v => {
+				count++;
+				var o = selector (v);
+				dis.Add (o.Subscribe (vv => { if (!dis.IsDisposed) sub.OnNext (vv); }, () => {
+					count--;
+					if (done && count == 0)
+						sub.OnCompleted ();
+				}));
+			}, ex => sub.OnError (ex), () => {
+				done = true;
+				if (count == 0)
+					sub.OnCompleted ();
+			}));
+			return dis;
 			// ----
 			}, DefaultColdScheduler);
 		}
