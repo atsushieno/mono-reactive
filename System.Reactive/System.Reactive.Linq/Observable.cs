@@ -522,6 +522,7 @@ namespace System.Reactive.Linq
 					if (!d.IsDisposed)
 						sub.OnNext (v);
 					d.Dispose ();
+					// FIXME: this is likely in race condition, giving inconsistent results.
 					if (done && --count == 0)
 						sub.OnCompleted ();
 				});
@@ -1761,6 +1762,7 @@ namespace System.Reactive.Linq
 				var o = selector (v);
 				dis.Add (o.Subscribe (vv => { if (!dis.IsDisposed) sub.OnNext (vv); }, () => {
 					count--;
+					// FIXME: this is likely in race condition, giving inconsistent results.
 					if (done && count == 0)
 						sub.OnCompleted ();
 				}));

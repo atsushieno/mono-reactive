@@ -416,6 +416,21 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void Delay2 ()
+		{
+			// github issue #12
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Interval (TimeSpan.FromSeconds (1), scheduler).Take (5).Timestamp ();
+			var delayed = source.Delay (TimeSpan.FromSeconds (4), scheduler).Timestamp ();
+			bool done = false;
+			delayed.Subscribe (item => Assert.IsTrue (item.Value.Timestamp < item.Timestamp, "not delayed"), () => done = true);
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (3));
+			Assert.IsFalse (done, "#1");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (10));
+			Assert.IsTrue (done, "#2");
+		}
+		
+		[Test]
 		public void DistinctUntilChanged ()
 		{
 			var l = new List<int> ();
