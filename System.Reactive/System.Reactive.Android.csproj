@@ -110,7 +110,6 @@
     <Compile Include="System.Reactive.Linq\Observable.Numeric.cs" />
     <Compile Include="System.Reactive.Linq\Observable.Window.cs" />
     <Compile Include="System.Reactive.Linq\System.Reactive.Linq.generated.cs" />
-    <Compile Include="System.Reactive.Linq\gen\gen-code.cs" />
     <Compile Include="System.Reactive.Subjects\AsyncSubject.cs" />
     <Compile Include="System.Reactive.Subjects\BehaviorSubject.cs" />
     <Compile Include="System.Reactive.Subjects\IConnectableObservable.cs" />
@@ -127,5 +126,6 @@
     <None Include="System.Reactive.Joins\gen\gen-code.exe.mdb" />
     <None Include="System.Reactive.Linq\gen\gen-code.exe" />
     <None Include="System.Reactive.Linq\gen\gen-code.exe.mdb" />
+    <None Include="System.Reactive.Linq\gen\gen-code.cs" />
   </ItemGroup>
 </Project>
