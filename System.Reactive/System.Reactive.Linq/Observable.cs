@@ -521,10 +521,9 @@ namespace System.Reactive.Linq
 				d.Disposable = scheduler.Schedule (Scheduler.Normalize (dueTime), () => {
 					if (!d.IsDisposed)
 						sub.OnNext (v);
-					d.Dispose ();
-					// FIXME: this is likely in race condition, giving inconsistent results.
-					if (done && --count == 0)
+					if (--count == 0 && done)
 						sub.OnCompleted ();
+					d.Dispose ();
 				});
 			}, () => {
 				var d = new SingleAssignmentDisposable ();
@@ -532,6 +531,7 @@ namespace System.Reactive.Linq
 					done = true;
 					if (count == 0)
 						sub.OnCompleted ();
+					d.Dispose ();
 				});
 			});
 			// ----
@@ -1761,9 +1761,7 @@ namespace System.Reactive.Linq
 				count++;
 				var o = selector (v);
 				dis.Add (o.Subscribe (vv => { if (!dis.IsDisposed) sub.OnNext (vv); }, () => {
-					count--;
-					// FIXME: this is likely in race condition, giving inconsistent results.
-					if (done && count == 0)
+					if (--count == 0 && done)
 						sub.OnCompleted ();
 				}));
 			}, ex => sub.OnError (ex), () => {
