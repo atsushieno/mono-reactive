@@ -778,10 +778,15 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("end");
 
 			var sub = new Subject<Unit> ();
-			return () => { begin ((res) => {
-				end (res);
-				sub.OnNext (Unit.Default);
-				sub.OnCompleted ();
+			return () => {
+				begin ((res) => {
+					try {
+						end (res);
+						sub.OnNext (Unit.Default);
+						sub.OnCompleted ();
+					} catch (Exception ex) {
+						sub.OnError (ex);
+					}
 				}, sub);
 				return sub;
 			};
@@ -797,10 +802,15 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("end");
 
 			var sub = new Subject<TResult> ();
-			return () => { begin ((res) => {
-				var result = end (res);
-				sub.OnNext (result);
-				sub.OnCompleted ();
+			return () => {
+				begin ((res) => {
+					try {
+						var result = end (res);
+						sub.OnNext (result);
+						sub.OnCompleted ();
+					} catch (Exception ex) {
+						sub.OnError (ex);
+					}
 				}, sub);
 				return sub;
 			};
