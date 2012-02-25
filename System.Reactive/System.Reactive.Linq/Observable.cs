@@ -658,7 +658,7 @@ namespace System.Reactive.Linq
 					prev = k;
 					sub.OnNext (s);
 				}
-			}, () => sub.OnCompleted ());
+			}, ex => sub.OnError (ex), () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -954,7 +954,7 @@ namespace System.Reactive.Linq
 					sub.OnNext (g);
 				}
 				g.OnNext (elementSelector (s));
-			}, () => {
+			}, ex => sub.OnError (ex), () => {
 				foreach (var g in dic.Values)
 					g.OnCompleted ();
 				sub.OnCompleted ();
@@ -1020,13 +1020,13 @@ namespace System.Reactive.Linq
 					var ddis = new SingleAssignmentDisposable ();
 					// after the duration, it removes the GroupedSubject from the dictionary by key.
 					Action cleanup = () => { ddis.Dispose (); dic.Remove (k); };
-					ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { g.OnError (ex); cleanup (); }, () => cleanup ()));
+					ddis.Disposable = dur.Subscribe (Observer.Create<TDuration> ((TDuration dummy) => { g.OnCompleted (); cleanup (); }, ex => { sub.OnError (ex); cleanup (); }, () => cleanup ()));
 					dis.Add (ddis); // dispoe this by parent (in case dur submits events infinitely and ddis itself is never disposed by the cycle above...)
 					dic.Add (k, g);
 					sub.OnNext (g);
 				}
 				g.OnNext (elementSelector (s));
-			}, () => {
+			}, ex => sub.OnError (ex), () => {
 				// note that those groups that received expiration from durationSelector are already invoked OnCompleted().
 				foreach (var g in dic.Values)
 					g.OnCompleted ();
@@ -1090,13 +1090,14 @@ namespace System.Reactive.Linq
 				var rddis = new SingleAssignmentDisposable ();
 				dis.Add (rddis);
 				Action disposeRDur = () => { rightVals.Remove (v); rddis.Dispose (); dis.Remove (rddis); }; // rightDuration is one-shot observable.
-				rddis.Disposable = rightDuration.Subscribe (Observer.Create<TRightDuration> (dummy => disposeRDur (), disposeRDur));
+				// LAMESPEC: MS Rx does not dispatch OnError in leftDuration to the returned IObservable, but I believe this is a bug.
+				rddis.Disposable = rightDuration.Subscribe (Observer.Create<TRightDuration> (dummy => disposeRDur (), ex => sub.OnError (ex), disposeRDur));
 				
 				rightVals.Add (v);
 				lock (rightSubs)
 					foreach (var rsub in rightSubs)
 						rsub.OnNext (v);
-			})));
+			}, ex => sub.OnError (ex))));
 
 			var ldis = left.Subscribe (Observer.Create<TLeft> (v => {
 				ISubject<TRight> rsub = new ReplaySubject<TRight> ();
@@ -1110,8 +1111,9 @@ namespace System.Reactive.Linq
 				var lddis = new SingleAssignmentDisposable ();
 				dis.Add (lddis);
 				Action disposeLDur = () => { rightSubs.Remove (rsub); rsub.OnCompleted (); lefts.Remove (v); lddis.Dispose (); dis.Remove (lddis); }; // leftDuration is one-shot observable.
-				lddis.Disposable = leftDuration.Subscribe (dummy => disposeLDur (), disposeLDur);
-			}, () => sub.OnCompleted ()));
+				// LAMESPEC: MS Rx does not dispatch OnError in leftDuration to the returned IObservable, but I believe this is a bug.
+				lddis.Disposable = leftDuration.Subscribe (dummy => disposeLDur (), ex => sub.OnError (ex), disposeLDur);
+			}, ex => sub.OnError (ex), () => sub.OnCompleted ()));
 			dis.Add (ldis);
 
 			return dis;
@@ -1175,7 +1177,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<long> (sub => {
 			// ----
 			long count = 0;
-			return source.Subscribe ((s) => count++, () => { sub.OnNext (count); sub.OnCompleted (); });
+			return source.Subscribe ((s) => count++, ex => sub.OnError (ex), () => { sub.OnNext (count); sub.OnCompleted (); });
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -1210,8 +1212,7 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("source");
 			if (keySelector == null)
 				throw new ArgumentNullException ("keySelector");
-			if (comparer 
-			== null)
+			if (comparer == null)
 				throw new ArgumentNullException ("comparer");
 
 			return new ColdObservableEach<IList<TSource>> (sub => {
@@ -1237,6 +1238,7 @@ namespace System.Reactive.Linq
 						}
 					}
 				},
+				ex => sub.OnError (ex),
 				() => {
 					if (!got)
 						sub.OnError (new InvalidOperationException ());
@@ -1390,6 +1392,7 @@ namespace System.Reactive.Linq
 						}
 					}
 				},
+				ex => sub.OnError (ex),
 				() => {
 					if (!got)
 						sub.OnError (new InvalidOperationException ());
@@ -1729,7 +1732,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
 			int idx = 0;
-			return source.Subscribe ((s) => sub.OnNext (selector (s, idx++)), () => sub.OnCompleted ());
+			return source.Subscribe ((s) => sub.OnNext (selector (s, idx++)), ex => sub.OnError (ex), () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -1971,7 +1974,7 @@ namespace System.Reactive.Linq
 					count--;
 				else
 					sub.OnNext (q.Dequeue ());
-				}, () => {
+				}, ex => sub.OnError (ex), () => {
 				q.Clear ();
 				sub.OnCompleted ();
 				});
@@ -2222,7 +2225,7 @@ namespace System.Reactive.Linq
 					count--;
 				else
 					q.Dequeue ();
-				}, () => {
+				}, ex => sub.OnError (ex), () => {
 				while (q.Count > 0)
 					sub.OnNext (q.Dequeue ());
 				sub.OnCompleted ();
@@ -2447,9 +2450,11 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			var wait = new ManualResetEvent (false);
-			var dis = source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => wait.Set ());
+			var dis = source.Subscribe (s => sub.OnNext (s), ex => sub.OnError (ex), () => { if (wait != null) wait.Set (); });
 			var sdis = scheduler.Schedule (() => {
-				if (wait.WaitOne (Scheduler.Normalize (dueTime)))
+				var w = wait;
+				wait = null;
+				if (w.WaitOne (Scheduler.Normalize (dueTime)))
 					sub.OnCompleted ();
 				else {
 					if (other != null)
@@ -2457,7 +2462,7 @@ namespace System.Reactive.Linq
 					else
 						sub.OnError (new TimeoutException ());
 				}
-				wait.Dispose ();
+				w.Dispose ();
 			});
 			return new CompositeDisposable (dis, sdis);
 			// ----
