@@ -2258,7 +2258,12 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("predicate");
 
 			bool stopped = false;
-			return source.Where ((s, i) => !stopped && (stopped = !predicate (s, i)));
+            return source.Where((s, i) => 
+            {
+                if (stopped) return false;
+                stopped = !predicate(s, i); 
+                return !stopped; 
+            });
 		}
 		
 		public static Plan<TResult> Then<TSource, TResult> (
@@ -2833,7 +2838,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			int idx = 0;
-			return source.Subscribe ((s) => { if (predicate (s, idx++)) sub.OnNext (s); });
+			return source.Subscribe ((s) => { if (predicate (s, idx++)) sub.OnNext (s); },ex => sub.OnError(ex),() => sub.OnCompleted());
 			// ----
 			}, DefaultColdScheduler);
 		}
