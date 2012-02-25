@@ -431,6 +431,24 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void Distinct ()
+		{
+			var source = new int [] {0, 1, 1, 3, 3, 1}.ToObservable ().Distinct ();
+			string s = null;
+			source.Subscribe (i => s += i, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("013done", s, "#1");
+		}
+		
+		[Test]
+		public void DistinctError ()
+		{
+			var source = new int [] {0, 1, 1, 3, 3, 1}.ToObservable ().Concat (Observable.Throw<int> (new SystemException ())).Distinct ();
+			string s = null;
+			source.Subscribe (i => s += i, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("013error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
 		public void DistinctUntilChanged ()
 		{
 			var l = new List<int> ();
@@ -440,6 +458,15 @@ namespace System.Reactive.Linq.Tests
 			SpinWait.SpinUntil (() => done, 1000);
 			Assert.IsTrue (done, "#1");
 			Assert.AreEqual (new int [] {3, 5, 4, 3}, l.ToArray (), "#2");
+		}
+		
+		[Test]
+		public void DistinctUntilChangedErrorSequence ()
+		{
+			string s = null;
+			var source = new int [] {3, 3, 5, 5, 4, 3}.ToObservable ().Concat (Observable.Throw<int> (new SystemException ())).DistinctUntilChanged<int,int> (i => i);
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => Assert.Fail ("Should not reach OnCompleted"));
+			Assert.AreEqual ("3543error:System.SystemException", s, "#1");
 		}
 		
 		[Test]
