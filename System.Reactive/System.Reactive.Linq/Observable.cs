@@ -2838,7 +2838,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			int idx = 0;
-			return source.Subscribe ((s) => { if (predicate (s, idx++)) sub.OnNext (s); }, ex => sub.OnError (ex),() => sub.OnCompleted ());
+			return source.Subscribe ((s) => { if (predicate (s, idx++)) sub.OnNext (s); }, ex => sub.OnError (ex), () => sub.OnCompleted ());
 			// ----
 			}, DefaultColdScheduler);
 		}

@@ -685,6 +685,15 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void TakeWhile ()
+		{
+			var source = Observable.Range (0, 5).TakeWhile (i => i < 3);
+			string s = null;
+			source.Subscribe (i => s += i, () => s += "done");
+			Assert.AreEqual ("012done", s, "#1");
+		}
+		
+		[Test]
 		public void Throttle ()
 		{
 			var scheduler = new HistoricalScheduler ();
@@ -730,6 +739,15 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsFalse (res.Disposed, "#2");
 			dis.Dispose ();
 			Assert.IsTrue (res.Disposed, "#3");
+		}
+		
+		[Test]
+		public void Where ()
+		{
+			var source = Observable.Range (0, 5).Where (i => i < 3);
+			string s = null;
+			source.Subscribe (i => s += i, () => s += "done");
+			Assert.AreEqual ("012done", s, "#1");
 		}
 
 		[Test]
