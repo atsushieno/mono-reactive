@@ -534,6 +534,15 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void GroupBySequenceError ()
+		{
+			var source = new int[] { 0, 1, 1, 3, 3, 1 }.ToObservable ().Concat (Observable.Throw<int> (new SystemException ())).GroupBy (k => k);
+			string s = null;
+			source.Subscribe (i => i.ToEnumerable ().Select (j => s += j), ex=> s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
 		[ExpectedException (typeof (MyException))]
 		public void GroupBySelectorError ()
 		{
@@ -541,6 +550,26 @@ namespace System.Reactive.Linq.Tests
 			source.Subscribe (v => {} , ex => Assert.Fail ("Should not reach OnError"), () => Assert.Fail ("Should not reach OnCompleted"));
 		}
 		
+		[Test]
+		public void GroupByUntilSequenceError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = new int[] { 0, 1, 1, 3, 3, 1 }.ToObservable ().Concat (Observable.Throw<int> (new SystemException ())).GroupByUntil (k => k, x => Observable.Interval (TimeSpan.FromSeconds (1), scheduler).Take (1));
+			string s = null;
+			source.Subscribe (i => i.ToEnumerable ().Select (j => s += j), ex=> s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		public void GroupByUntilDurationSequenceError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = new int[] { 0, 1, 1, 3, 3, 1 }.ToObservable ().GroupByUntil (k => k, x => Observable.Throw<int> (new SystemException ()));
+			string s = null;
+			source.Subscribe (i => i.ToEnumerable ().Select (j => s += j), ex=> s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+
 		[Test]
 		public void GroupJoin ()
 		{
@@ -602,6 +631,76 @@ namespace System.Reactive.Linq.Tests
 			// ... so we do that too.
 			Assert.IsFalse (results [7, 2], "#2");
 		}
+
+		[Test]
+		public void GroupJoinLeftSequenceError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Throw<int> (new SystemException ()),
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				l => Observable.Interval (TimeSpan.FromMilliseconds (1500), scheduler),
+				r => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+
+		[Test]
+		public void GroupJoinRightSequenceError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				Observable.Throw<int> (new SystemException ()),
+				l => Observable.Interval (TimeSpan.FromMilliseconds (1500), scheduler),
+				r => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+
+		[Test]
+		public void GroupJoinLeftDurationError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Interval (TimeSpan.FromMilliseconds (500), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				l => Observable.Throw<int> (new SystemException ()),
+				r => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			string s = null;
+			source.Subscribe (v => {}, ex => s += "error:" + ex.GetType (), () => s += "done");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+			// LAMESPEC: shouldn't this also raise OnError() ? GroupByUntil() does so.
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+
+		[Test]
+		public void GroupJoinRightDurationError ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.GroupJoin (
+				Observable.Interval (TimeSpan.FromMilliseconds (500), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				Observable.Interval (TimeSpan.FromMilliseconds (800), scheduler).Delay (TimeSpan.FromSeconds (1), scheduler),
+				l => Observable.Interval (TimeSpan.FromMilliseconds (1600), scheduler),
+				r => Observable.Throw<int> (new SystemException ()),
+				(l, rob) => new { Left = l, Rights = rob }
+			);
+			string s = null;
+			source.Subscribe (v => {}, ex => s += "error:" + ex.GetType (), () => s += "done");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (15));
+			// LAMESPEC: shouldn't this also raise OnError() ? GroupByUntil() does so.
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
 		
 		[Test] // this test is processing-speed dependent, but (unlike other tests) I think testing this with default (ThreadPool) scheduler should make sense...
 		public void Interval ()
@@ -620,6 +719,51 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (diff > 2, "#3");
 			sub1.Dispose ();
 			sub2.Dispose ();
+		}
+		
+		[Test]
+		public void LongCountErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).LongCount ();
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		public void MaxByErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).MaxBy (v => v);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void MaxByErrorSelector ()
+		{
+			var source = Observable.Range (0, 3).MaxBy<int,int> (v => { throw new MyException (); });
+			string s = null;
+			source.Subscribe (v => s += v, ex => Assert.Fail ("should not reach OnError"), () => Assert.Fail ("should not reach OnCompleted"));
+		}
+		
+		[Test]
+		public void MinByErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).MinBy (v => v);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void MinByErrorSelector ()
+		{
+			var source = Observable.Range (0, 3).MaxBy<int,int> (v => { throw new MyException (); });
+			string s = null;
+			source.Subscribe (v => s += v, ex => Assert.Fail ("should not reach OnError"), () => Assert.Fail ("should not reach OnCompleted"));
 		}
 		
 		[Test]
