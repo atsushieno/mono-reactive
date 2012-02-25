@@ -829,6 +829,24 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void SelectErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).Select (v => v);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("012error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void SelectErrorSelector ()
+		{
+			var source = Observable.Range (0, 3).Select<int,int> (v => { throw new MyException (); });
+			string s = null;
+			source.Subscribe (v => s += v, ex => Assert.Fail ("should not reach OnError"), () => Assert.Fail ("should not reach OnCompleted"));
+		}
+		
+		[Test]
 		public void SelectManyObservable ()
 		{
 			var scheduler = new HistoricalScheduler ();
@@ -844,6 +862,15 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void SkipLastErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).SkipLast (3); // note that this could still result in OnError
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
 		public void Start ()
 		{
 			bool next = false;
@@ -856,12 +883,39 @@ namespace System.Reactive.Linq.Tests
 		}
 		
 		[Test]
+		public void TakeLastErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).TakeLast (3);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
 		public void TakeWhile ()
 		{
 			var source = Observable.Range (0, 5).TakeWhile (i => i < 3);
 			string s = null;
 			source.Subscribe (i => s += i, () => s += "done");
 			Assert.AreEqual ("012done", s, "#1");
+		}
+		
+		[Test]
+		public void TakeWhileErrorSequence ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).TakeWhile (i => i < 3);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("012error:System.SystemException", s, "#1");
+		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void TakeWhileErrorSelector ()
+		{
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).TakeWhile (i => { throw new MyException (); });
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
 		}
 		
 		[Test]
@@ -876,6 +930,37 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (done, "#1");
 			Assert.AreEqual (new int [] {3, 2}, l.ToArray (), "#2");
 			dis.Dispose ();
+		}
+		
+		[Test]
+		public void TimeoutInTime ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Range (0, 3).Timeout (TimeSpan.FromSeconds (1), scheduler);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("012done", s, "#1");
+		}
+		
+		[Test]
+		public void TimeoutOutOfTime ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Interval (TimeSpan.FromSeconds (1), scheduler).Take (2).Timeout (TimeSpan.FromSeconds (1), scheduler);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (5));
+			Assert.AreEqual ("error:System.TimeoutException", s, "#1");
+		}
+		
+		[Test]
+		public void TimeoutErrorSelector ()
+		{
+			var scheduler = new HistoricalScheduler ();
+			var source = Observable.Range (0, 3).Concat (Observable.Throw<int> (new SystemException ())).Timeout (TimeSpan.FromSeconds (1), scheduler);
+			string s = null;
+			source.Subscribe (v => s += v, ex => s += "error:" + ex.GetType (), () => s += "done");
+			Assert.AreEqual ("012error:System.SystemException", s, "#1");
 		}
 		
 		class Resource : IDisposable
