@@ -338,6 +338,14 @@ namespace System.Reactive.Linq.Tests
 				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (50));
 			}
 		}
+		
+		[Test]
+		[ExpectedException (typeof (MyException))]
+		public void FirstOrDefault ()
+		{
+			var source = Observable.Throw<int> (new MyException ());
+			var ret = source.FirstOrDefault ();
+		}
 
 		[Test] // some practical test
 		public void IntervalSelectTakeDo ()

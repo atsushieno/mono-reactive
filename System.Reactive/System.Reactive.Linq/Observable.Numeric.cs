@@ -41,6 +41,7 @@ namespace System.Reactive.Linq
 					} else if (Comparer<T>.Default.Compare (min, s) > 0)
 						min = s;
 				},
+				ex => sub.OnError (ex),
 				() => VerifyCompleted (got, sub, min)
 				);
 			// ----
@@ -77,6 +78,7 @@ namespace System.Reactive.Linq
 					} else if (Comparer<T>.Default.Compare (max, s) < 0)
 						max = s;
 				},
+				ex => sub.OnError (ex),
 				() => VerifyCompleted (got, sub, max)
 				);
 			// ----
@@ -91,7 +93,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<T> (sub => {
 			// ----
 			T max = default (T);
-			return source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, () => VerifyCompleted (true, sub, max));
+			return source.Subscribe ((s) => { if (Comparer<T>.Default.Compare (max, s) < 0) max = s; }, ex => sub.OnError (ex), () => VerifyCompleted (true, sub, max));
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -104,7 +106,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<T> (sub => {
 			// ----
 			T sum = default (T);
-			return source.Subscribe (s => sum = add (sum, s), () => VerifyCompleted (true, sub, sum));
+			return source.Subscribe (s => sum = add (sum, s), ex => sub.OnError (ex), () => VerifyCompleted (true, sub, sum));
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -117,7 +119,7 @@ namespace System.Reactive.Linq
 			return new ColdObservableEach<T> (sub => {
 			// ----
 			T sum = default (T);
-			return source.Subscribe (s => sum = sum != null ? s : add (sum, s), () => VerifyCompleted (true, sub, sum));
+			return source.Subscribe (s => sum = sum != null ? s : add (sum, s), ex => sub.OnError (ex), () => VerifyCompleted (true, sub, sum));
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -131,7 +133,7 @@ namespace System.Reactive.Linq
 			// ----
 			T sum = default (T);
 			int count = 0;
-			return source.Subscribe (s => { count++; sum = add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count)));
+			return source.Subscribe (s => { count++; sum = add (sum, s); }, ex => sub.OnError (ex), () => VerifyCompleted (true, sub, avg (sum, count)));
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -145,7 +147,7 @@ namespace System.Reactive.Linq
 			// ----
 			T sum = default (T);
 			int count = 0;
-			return source.Subscribe (s => { count++; sum = sum != null ? s : add (sum, s); }, () => VerifyCompleted (true, sub, avg (sum, count)));
+			return source.Subscribe (s => { count++; sum = sum != null ? s : add (sum, s); }, ex => sub.OnError (ex), () => VerifyCompleted (true, sub, avg (sum, count)));
 			// ----
 			}, DefaultColdScheduler);
 		}
@@ -280,6 +282,7 @@ namespace System.Reactive.Linq
 					} else if (comparer.Compare (max, s) < 0)
 						max = s;
 				},
+				ex => sub.OnError (ex),
 				() => VerifyCompleted (got, sub, max));
 			// ----
 			}, DefaultColdScheduler);
@@ -363,6 +366,7 @@ namespace System.Reactive.Linq
 					} else if (comparer.Compare (min, s) > 0)
 						min = s;
 				},
+				ex => sub.OnError (ex),
 				() => VerifyCompleted (got, sub, min));
 			// ----
 			}, DefaultColdScheduler);

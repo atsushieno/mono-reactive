@@ -81,7 +81,7 @@ namespace System.Reactive.Linq
 						subjects [x++].Subject.OnNext (v);
 				}
 				current++;
-			}, () => { foreach (var sc in subjects) sc.Subject.OnCompleted (); sub.OnCompleted (); }));
+			}, ex => sub.OnError (ex), () => { foreach (var sc in subjects) sc.Subject.OnCompleted (); sub.OnCompleted (); }));
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
@@ -198,7 +198,7 @@ namespace System.Reactive.Linq
 					// This check makes sense when the event was published *at the same time* the subject ends its life time by timeSpan.
 					if (scheduler.Now - subjects [x].Start < timeSpan)
 						subjects [x].Subject.OnNext (v);
-			}, () => { foreach (var sc in subjects) sc.Subject.OnCompleted (); sub.OnCompleted (); })));
+			}, ex => sub.OnError (ex), () => { foreach (var sc in subjects) sc.Subject.OnCompleted (); sub.OnCompleted (); })));
 			return dis;
 			// ----
 			}, DefaultColdScheduler);
@@ -228,14 +228,13 @@ namespace System.Reactive.Linq
 			var l = new Subject<TSource> ();
 			var dis = new CompositeDisposable ();
 			var disClosings = new CompositeDisposable ();
-			dis.Add (windowOpenings.Subscribe (Observer.Create<TWindowOpening> (
-				s => {
+			dis.Add (windowOpenings.Subscribe (s => {
 					var closing = windowClosingSelector (s);
 					disClosings.Add (closing.Subscribe (c => {
 						sub.OnNext (l);
 						l = new Subject<TSource> ();
 						}));
-				}, () => disClosings.Dispose ())));
+				}, ex => sub.OnError (ex), () => disClosings.Dispose ()));
 
 			dis.Add (source.Subscribe (
 				s => l.OnNext (s), ex => sub.OnError (ex), () => {
