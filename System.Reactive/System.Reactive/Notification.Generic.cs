@@ -49,16 +49,24 @@ namespace System.Reactive
 
 		public IObservable<T> ToObservable ()
 		{
+#if REACTIVE_2_0
+			throw new NotImplementedException ();
+#else
 			var sub = new ReplaySubject<T> ();
 			ApplyToSubject (sub);
 			return sub;
+#endif
 		}
 		
 		public IObservable<T> ToObservable (IScheduler scheduler)
 		{
+#if REACTIVE_2_0
+			throw new NotImplementedException ();
+#else
 			var sub = new ReplaySubject<T> (scheduler);
 			ApplyToSubject (sub);
 			return sub;
+#endif
 		}
 		
 		void ApplyToSubject (ISubject<T> sub)

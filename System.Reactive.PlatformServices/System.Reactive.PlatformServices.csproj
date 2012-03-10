@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AEEBFC85-91B8-410F-BBB7-BD12BBC61BE6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Reactive.PlatformServices</RootNamespace>
+    <AssemblyName>System.Reactive.PlatformServices</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\EventLoopScheduler.cs">
+      <Link>System.Reactive.Concurrency\EventLoopScheduler.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\NewThreadScheduler.cs">
+      <Link>System.Reactive.Concurrency\NewThreadScheduler.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\TaskPoolScheduler.cs">
+      <Link>System.Reactive.Concurrency\TaskPoolScheduler.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ThreadPoolScheduler.cs">
+      <Link>System.Reactive.Concurrency\ThreadPoolScheduler.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\System.Reactive.Interfaces\System.Reactive.Interfaces.csproj">
+      <Project>{755E549E-1BDE-4153-A58B-7C969C902CAD}</Project>
+      <Name>System.Reactive.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Reactive.Core\System.Reactive.Core.csproj">
+      <Project>{AD27C5E8-8A0C-454D-B7AA-76A54793B81F}</Project>
+      <Name>System.Reactive.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

@@ -5,6 +5,9 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
+#if REACTIVE_2_0
+	public
+#endif
 	class ScheduledItem<TAbsolute> : IScheduledItem<TAbsolute>, IDisposable
 	{
 		public class Comparer : IComparer<IScheduledItem<TAbsolute>>

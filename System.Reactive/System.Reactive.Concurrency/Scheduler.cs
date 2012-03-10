@@ -11,9 +11,11 @@ namespace System.Reactive.Concurrency
 		static object lock_obj = new object ();
 		static volatile CurrentThreadScheduler current_thread;
 		static volatile ImmediateScheduler immediate;
+#if !REACTIVE_2_0
 		static volatile NewThreadScheduler new_thread;
 		static volatile TaskPoolScheduler task_pool;
 		static volatile ThreadPoolScheduler thread_pool;
+#endif
 		
 		public static CurrentThreadScheduler CurrentThread {
 			get {
@@ -33,6 +35,17 @@ namespace System.Reactive.Concurrency
 				return immediate;
 			}
 		}
+#if REACTIVE_2_0
+		public static IScheduler NewThread {
+			get { throw new NotImplementedException (); }
+		}
+		public static IScheduler TaskPool {
+			get { throw new NotImplementedException (); }
+		}
+		public static IScheduler ThreadPool {
+			get { throw new NotImplementedException (); }
+		}
+#else
 		public static NewThreadScheduler NewThread {
 			get {
 				if (new_thread == null)
@@ -61,6 +74,7 @@ namespace System.Reactive.Concurrency
 				return thread_pool;
 			}
 		}
+#endif
 
 		public static DateTimeOffset Now {
 			get { return DateTimeOffset.Now; }
@@ -134,8 +148,14 @@ namespace System.Reactive.Concurrency
 			};
 			return scheduler.Schedule<TState> (state, dueTime, f);
 		}
-
-		internal static void AddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
+		
+#if REACTIVE_2_0
+		// FIXME: shouldn't be public.
+		public
+#else
+		internal
+#endif
+		static void AddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
 		{
 			// It is most likely appended in order, so don't use ineffective List.Sort(). Simple comparison makes it faster.
 			// Also, it is important that events are processed *in order* when they are scheduled at the same moment.
