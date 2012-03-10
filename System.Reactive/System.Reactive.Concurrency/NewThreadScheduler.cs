@@ -6,8 +6,22 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
+#if REACTIVE_2_0
+	public sealed class NewThreadScheduler : LocalScheduler, ISchedulerLongRunning
+#else
 	public sealed class NewThreadScheduler : IScheduler
+#endif
 	{
+		static readonly NewThreadScheduler instance = new NewThreadScheduler ();
+#if REACTIVE_2_0
+		public
+#else
+		internal
+#endif
+		static NewThreadScheduler Default {
+			get { return instance; }
+		}
+
 		public NewThreadScheduler ()
 			: this ((t => new Thread (t)))
 		{
@@ -22,21 +36,27 @@ namespace System.Reactive.Concurrency
 		
 		Func<ThreadStart, Thread> thread_factory;
 		
+#if !REACTIVE_2_0
 		public DateTimeOffset Now {
 			get { return Scheduler.Now; }
 		}
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Now, action);
+			return Schedule<TState> (state, TimeSpan.Zero, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			return Schedule (state, dueTime - Now, action);
 		}
+#endif
 		
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#else
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#endif
 		{
 			bool cancel = false;
 			var dis = new CompositeDisposable ();
@@ -48,5 +68,17 @@ namespace System.Reactive.Concurrency
 				}).Start ();
 			return dis;
 		}
+		
+#if REACTIVE_2_0
+		public override IStopwatch StartStopwatch ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public IDisposable ScheduleLongRunning<TState> (TState state, Action<TState, ICancelable> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

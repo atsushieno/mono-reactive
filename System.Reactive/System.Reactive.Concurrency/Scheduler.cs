@@ -9,70 +9,50 @@ namespace System.Reactive.Concurrency
 	public static class Scheduler
 	{
 		static object lock_obj = new object ();
-		static volatile CurrentThreadScheduler current_thread;
-		static volatile ImmediateScheduler immediate;
-#if !REACTIVE_2_0
-		static volatile NewThreadScheduler new_thread;
-		static volatile TaskPoolScheduler task_pool;
-		static volatile ThreadPoolScheduler thread_pool;
+#if REACTIVE_2_0
+		static volatile IScheduler new_thread;
+		static volatile IScheduler task_pool;
+		static volatile IScheduler thread_pool;
 #endif
 		
 		public static CurrentThreadScheduler CurrentThread {
-			get {
-				if (current_thread == null)
-					lock (lock_obj)
-						if (current_thread == null)
-							 current_thread = new CurrentThreadScheduler ();
-				return current_thread;
-			}
+			get { return CurrentThreadScheduler.Instance; }
 		}
 		public static ImmediateScheduler Immediate {
-			get {
-				if (immediate == null)
-					lock (lock_obj)
-						if (immediate == null)
-							 immediate = new ImmediateScheduler ();
-				return immediate;
-			}
+			get { return ImmediateScheduler.Instance; }
 		}
 #if REACTIVE_2_0
 		public static IScheduler NewThread {
-			get { throw new NotImplementedException (); }
-		}
-		public static IScheduler TaskPool {
-			get { throw new NotImplementedException (); }
-		}
-		public static IScheduler ThreadPool {
-			get { throw new NotImplementedException (); }
-		}
-#else
-		public static NewThreadScheduler NewThread {
 			get {
 				if (new_thread == null)
-					lock (lock_obj)
-						if (new_thread == null)
-							 new_thread = new NewThreadScheduler ();
+					new_thread = (IScheduler) Type.GetType ("System.Reactive.Concurrency.NewThreadScheduler, System.Reactive.PlatformServices").GetProperty ("Default").GetValue (null, null);
 				return new_thread;
 			}
 		}
-		public static TaskPoolScheduler TaskPool {
+		public static IScheduler TaskPool {
 			get {
 				if (task_pool == null)
-					lock (lock_obj)
-						if (task_pool == null)
-							task_pool = new TaskPoolScheduler (new TaskFactory ());
+					task_pool = (IScheduler) Type.GetType ("System.Reactive.Concurrency.TaskPoolScheduler, System.Reactive.PlatformServices").GetProperty ("Default").GetValue (null, null);
 				return task_pool;
 			}
 		}
-		
-		public static ThreadPoolScheduler ThreadPool {
+		public static IScheduler ThreadPool {
 			get {
 				if (thread_pool == null)
-					lock (lock_obj)
-						if (thread_pool == null)
-							thread_pool = new ThreadPoolScheduler ();
+					thread_pool = (IScheduler) Type.GetType ("System.Reactive.Concurrency.ThreadPoolScheduler, System.Reactive.PlatformServices").GetProperty ("Instance").GetValue (null, null);
 				return thread_pool;
 			}
+		}
+#else
+		public static NewThreadScheduler NewThread {
+			get { return NewThreadScheduler.Default; }
+		}
+		public static TaskPoolScheduler TaskPool {
+			get { return TaskPoolScheduler.Default; }
+		}
+		
+		public static ThreadPoolScheduler ThreadPool {
+			get { return ThreadPoolScheduler.Instance; }
 		}
 #endif
 

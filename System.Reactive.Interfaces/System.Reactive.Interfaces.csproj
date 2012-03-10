@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Reactive.Interfaces</RootNamespace>
     <AssemblyName>System.Reactive.Interfaces</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +30,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
@@ -58,6 +58,15 @@
     <Compile Include="..\System.Reactive\System.Reactive.Subjects\ISubject.cs">
       <Link>System.Reactive.Subjects\ISubject.cs</Link>
     </Compile>
+    <Compile Include="System.Reactive\IEventPattern.cs" />
+    <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
+    <Compile Include="System.Reactive.Linq\IQbservable.cs" />
+    <Compile Include="System.Reactive.Linq\IQbservableProvider.cs" />
+    <Compile Include="System.Reactive.Linq\IQbservable.Generic.cs" />
+    <Compile Include="System.Reactive\IObserver.Generic.cs" />
+    <Compile Include="System.Reactive.Concurrency\ISchedulerLongRunning.cs" />
+    <Compile Include="System.Reactive.Concurrency\IStopwatchProvider.cs" />
+    <Compile Include="System.Reactive.Concurrency\IStopwatch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

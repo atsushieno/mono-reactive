@@ -5,19 +5,29 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
+#if REACTIVE_2_0
+	public sealed class ThreadPoolScheduler : LocalScheduler, ISchedulerLongRunning
+#else
 	public sealed class ThreadPoolScheduler : IScheduler
+#endif
 	{
+		static readonly ThreadPoolScheduler instance = new ThreadPoolScheduler ();
+#if REACTIVE_2_0
+		public
+#else
+		internal
+#endif
+		static ThreadPoolScheduler Instance {
+			get { return instance; }
+		}
+
 		internal ThreadPoolScheduler ()
 		{
 		}
 		
+#if !REACTIVE_2_0
 		public DateTimeOffset Now {
 			get { return Scheduler.Now; }
-		}
-		
-		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
-		{
-			return Schedule (state, Scheduler.Now, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
@@ -32,10 +42,38 @@ namespace System.Reactive.Concurrency
 			});
 			return dis;
 		}
-		
+
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			return Schedule<TState> (state, Now + Scheduler.Normalize (dueTime), action);
 		}
+#else
+		// FIXME: rewrite these methods to use this.
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
+		
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
+#else
+		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
+#endif
+		{
+			return Schedule (state, TimeSpan.Zero, action);
+		}
+		
+#if REACTIVE_2_0
+		public override IStopwatch StartStopwatch ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public IDisposable ScheduleLongRunning<TState> (TState state, Action<TState, ICancelable> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

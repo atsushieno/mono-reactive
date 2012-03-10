@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Reactive.Core</RootNamespace>
     <AssemblyName>System.Reactive.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -104,6 +103,9 @@
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\Internal_ScheduledItem.cs">
       <Link>Internal_ScheduledItem.cs</Link>
     </Compile>
+    <Compile Include="System.Reactive.Concurrency\LocalScheduler.cs" />
+    <Compile Include="System.Reactive.Concurrency\DefaultScheduler.cs" />
+    <Compile Include="System.Reactive\IPlatformEnlightenmentProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

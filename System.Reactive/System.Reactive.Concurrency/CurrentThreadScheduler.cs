@@ -6,8 +6,22 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
+#if REACTIVE_2_0
+	public sealed class CurrentThreadScheduler : LocalScheduler
+#else
 	public sealed class CurrentThreadScheduler : IScheduler
+#endif
 	{
+		static readonly CurrentThreadScheduler instance = new CurrentThreadScheduler ();
+#if REACTIVE_2_0
+		public
+#else
+		internal
+#endif
+		static CurrentThreadScheduler Instance {
+			get { return instance; }
+		}
+		
 		internal CurrentThreadScheduler ()
 		{
 		}
@@ -16,14 +30,16 @@ namespace System.Reactive.Concurrency
 			get { return busy > 0; }
 		}
 		
-		public DateTimeOffset Now {
-			get { return Scheduler.Now; }
-		}
-		
 		int busy = 0;
 
 		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
 		
+#if !REACTIVE_2_0
+		public DateTimeOffset Now {
+			get { return Scheduler.Now; }
+		}
+		
+		// FIXME: this needs to be rewritten to rather use TimeSpan-based impl.
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
 			return Schedule<TState> (state, Now, action);
@@ -70,10 +86,16 @@ namespace System.Reactive.Concurrency
 				return Disposable.Empty;
 			}
 		}
-		
+
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			return Schedule (state, Now + dueTime, action);
 		}
+#else
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

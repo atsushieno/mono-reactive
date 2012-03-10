@@ -6,7 +6,11 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
+#if REACTIVE_2_0
+	public sealed class EventLoopScheduler : LocalScheduler, IDisposable
+#else
 	public sealed class EventLoopScheduler : IScheduler, IDisposable
+#endif
 	{
 		public EventLoopScheduler ()
 			: this ((ts) => new Thread (ts) { IsBackground = true })
@@ -28,13 +32,14 @@ namespace System.Reactive.Concurrency
 			disposables.Dispose ();
 		}
 		
+#if !REACTIVE_2_0
 		public DateTimeOffset Now {
 			get { return Scheduler.Now; }
 		}
 		
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule (state, Now, action);
+			return Schedule<TState> (state, TimeSpan.Zero, action);
 		}
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
@@ -57,5 +62,18 @@ namespace System.Reactive.Concurrency
 		{
 			return Schedule (state, Now + dueTime, action);
 		}
+#else
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
+		
+#if REACTIVE_2_0
+		public override IStopwatch StartStopwatch ()
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }
