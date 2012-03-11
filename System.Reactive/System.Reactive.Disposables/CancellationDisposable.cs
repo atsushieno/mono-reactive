@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive.Disposables
 {
-	public sealed class CancellationDisposable : IDisposable
+	public sealed class CancellationDisposable : IDisposable, ICancelable
 	{
 		CancellationTokenSource cts;
 		

@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive.Disposables
 {
-	public sealed class BooleanDisposable : IDisposable
+	public sealed class BooleanDisposable : IDisposable, ICancelable
 	{
 		public void Dispose ()
 		{

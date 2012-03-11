@@ -148,5 +148,6 @@
     <Compile Include="System.Reactive\ObservableBase.cs" />
     <Compile Include="System.Reactive\AnonymousObservable.cs" />
     <Compile Include="System.Reactive\AnonymousObserver.cs" />
+    <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive.Disposables
 {
-	public class SerialDisposable : IDisposable
+	public class SerialDisposable : IDisposable, ICancelable
 	{
 		public void Dispose ()
 		{

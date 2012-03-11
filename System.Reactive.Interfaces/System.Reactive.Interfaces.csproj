@@ -59,7 +59,6 @@
       <Link>System.Reactive.Subjects\ISubject.cs</Link>
     </Compile>
     <Compile Include="System.Reactive\IEventPattern.cs" />
-    <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
     <Compile Include="System.Reactive.Linq\IQbservable.cs" />
     <Compile Include="System.Reactive.Linq\IQbservableProvider.cs" />
     <Compile Include="System.Reactive.Linq\IQbservable.Generic.cs" />
@@ -67,6 +66,12 @@
     <Compile Include="System.Reactive.Concurrency\ISchedulerLongRunning.cs" />
     <Compile Include="System.Reactive.Concurrency\IStopwatchProvider.cs" />
     <Compile Include="System.Reactive.Concurrency\IStopwatch.cs" />
+    <Compile Include="..\System.Reactive\System.Reactive.Disposables\ICancelable.cs">
+      <Link>System.Reactive.Disposables\ICancelable.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="System.Reactive.Disposables\" />
+  </ItemGroup>
 </Project>

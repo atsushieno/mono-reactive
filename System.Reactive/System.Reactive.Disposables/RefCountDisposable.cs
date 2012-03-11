@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive.Disposables
 {
-	public sealed class RefCountDisposable : IDisposable
+	public sealed class RefCountDisposable : IDisposable, ICancelable
 	{
 		IDisposable disposable;
 		

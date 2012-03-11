@@ -6,7 +6,7 @@ using System.Reactive.Concurrency;
 
 namespace System.Reactive.Disposables
 {
-	public sealed class ScheduledDisposable : IDisposable
+	public sealed class ScheduledDisposable : IDisposable, ICancelable
 	{
 		public ScheduledDisposable (IScheduler scheduler, IDisposable disposable)
 		{
