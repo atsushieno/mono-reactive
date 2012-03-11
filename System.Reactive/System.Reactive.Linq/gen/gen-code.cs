@@ -23,6 +23,20 @@ namespace System.Reactive.Linq
 			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
 			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			Console.WriteLine (@"
+		public static Func<{0}, IObservable<Unit>> FromAsyncPattern<{0}> (Func<{0}, AsyncCallback, object, IAsyncResult> begin, Action<IAsyncResult> end)
+		{{
+			var sub = new Subject<Unit> ();
+			return ({1}) => {{ begin ({1}, (res) => {{
+				try {{
+					end (res);
+					sub.OnNext (Unit.Default);
+					sub.OnCompleted ();
+				}} catch (Exception ex) {{
+					sub.OnError (ex);
+				}}
+				}}, sub); return sub; }};
+		}}
+		
 		public static Func<{0}, IObservable<TResult>> FromAsyncPattern<{0}, TResult> (Func<{0}, AsyncCallback, Object, IAsyncResult> begin, Func<IAsyncResult, TResult> end)
 		{{
 			var sub = new Subject<TResult> ();
@@ -35,7 +49,6 @@ namespace System.Reactive.Linq
 					sub.OnError (ex);
 				}}
 				}}, sub); return sub; }};
-
 		}}
 		", s, s2);
 		}
@@ -43,13 +56,24 @@ namespace System.Reactive.Linq
 		for (int i = 2; i <= 16; i++) {
 			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
 			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
+			
 			Console.WriteLine (@"
-		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (Func<{0}, TResult> function)
+		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> function)
 		{{
 			return ({1}) => Start (() => function ({1}));
 		}}
 		
-		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (Func<{0}, TResult> function, IScheduler scheduler)
+		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> function, IScheduler scheduler)
+		{{
+			return ({1}) => Start (() => function ({1}), scheduler);
+		}}
+		
+		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (this Func<{0}, TResult> function)
+		{{
+			return ({1}) => Start (() => function ({1}));
+		}}
+		
+		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (this Func<{0}, TResult> function, IScheduler scheduler)
 		{{
 			return ({1}) => Start (() => function ({1}), scheduler);
 		}}

@@ -18,6 +18,7 @@ System.Reactive.Tests/bin/
 System.Reactive.Tests/obj/
 System.Reactive.Tests/test-results/
 System.Reactive/System.Reactive.Android.pidb
+System.Reactive/System.Reactive.Linq/gen/gen-code.exe
 System.Reactive/System.Reactive.pidb
 System.Reactive/bin/
 System.Reactive/obj/
