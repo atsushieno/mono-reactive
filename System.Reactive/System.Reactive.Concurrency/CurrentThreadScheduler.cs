@@ -32,52 +32,48 @@ namespace System.Reactive.Concurrency
 		
 		int busy = 0;
 
-		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
+		List<ScheduledItem<TimeSpan>> tasks = new List<ScheduledItem<TimeSpan>> ();
 		
 #if !REACTIVE_2_0
 		public DateTimeOffset Now {
 			get { return Scheduler.Now; }
 		}
 		
-		// FIXME: this needs to be rewritten to rather use TimeSpan-based impl.
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule<TState> (state, Now, action);
+			return Schedule<TState> (state, TimeSpan.Zero, action);
 		}
 		
-		/* verified with:
-
-			var dis = Scheduler.CurrentThread.Schedule<int>(0, TimeSpan.FromSeconds (3), (sch, i) => {
-				Console.WriteLine("start outer");
-				Thread.Sleep(2000);
-				Scheduler.CurrentThread.Schedule(() => Console.WriteLine("inner action"));
-				Console.WriteLine("OK");
-				return Disposable.Empty;
-			});
-			Console.WriteLine("Started");
-			Console.WriteLine("done all");
-
-		*/
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
+			return Schedule<TState> (state, dueTime - Now, Action);
+		}
+#endif
+		
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#else
+		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#endif
+		{
 			// FIXME: this sort of needs to handle correct cancellation. (Though there's not likely many chances to "cancel" it...)
-			var task = new ScheduledItem<DateTimeOffset> (dueTime, () => action (this, state));
+			var task = new ScheduledItem<TimeSpan> (dueTime, () => action (this, state));
 			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
-				Scheduler.AddTask (tasks, task);
+				AddTask (tasks, task);
 				return Disposable.Create (() => tasks.Remove (task));
 			} else {
 				try {
-					Thread.Sleep (Scheduler.Normalize (task.DueTime - Now));
+					Thread.Sleep (Scheduler.Normalize (task.DueTime));
 					task.Invoke ();
 					while (true) {
-						ScheduledItem<DateTimeOffset> t;
+						ScheduledItem<TimeSpan> t;
 						lock (tasks) {
-							t = (ScheduledItem<DateTimeOffset>) tasks.FirstOrDefault ();
+							t = (ScheduledItem<TimeSpan>) tasks.FirstOrDefault ();
 							if (t == null)
 								break;
 							tasks.Remove (t);
 						}
-						Thread.Sleep (Scheduler.Normalize (t.DueTime - Now));
+						Thread.Sleep (Scheduler.Normalize (t.DueTime));
 						t.Invoke ();
 					}
 				} finally {
@@ -86,16 +82,21 @@ namespace System.Reactive.Concurrency
 				return Disposable.Empty;
 			}
 		}
-
-		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+		static void AddTask (IList<ScheduledItem<TimeSpan>> tasks, ScheduledItem<TimeSpan> task)
 		{
-			return Schedule (state, Now + dueTime, action);
+			// It is most likely appended in order, so don't use ineffective List.Sort(). Simple comparison makes it faster.
+			// Also, it is important that events are processed *in order* when they are scheduled at the same moment.
+			int pos = -1;
+			TimeSpan dueTime = task.DueTime;
+			for (int i = tasks.Count - 1; i >= 0; i--) {
+				if (dueTime >= tasks [i].DueTime) {
+					tasks.Insert (i + 1, task);
+					pos = i;
+					break;
+				}
+			}
+			if (pos < 0)
+				tasks.Insert (0, task);
 		}
-#else
-		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			throw new NotImplementedException ();
-		}
-#endif
 	}
 }

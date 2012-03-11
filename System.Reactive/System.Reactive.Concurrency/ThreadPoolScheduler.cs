@@ -32,28 +32,31 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			bool cancel = false;
-			var dis = new CompositeDisposable ();
-			dis.Add (Disposable.Create (() => cancel = true));
-			ThreadPool.QueueUserWorkItem (s => {
-				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
-				if (!cancel)
-					dis.Add (action (this, state));
-			});
-			return dis;
+			return Schedule<TState> (TState state, dueTime - Now, Action);
 		}
 
 		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			return Schedule<TState> (state, Now + Scheduler.Normalize (dueTime), action);
 		}
-#else
-		// FIXME: rewrite these methods to use this.
-		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			throw new NotImplementedException ();
-		}
 #endif
+
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#else
+		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#endif
+		{
+			bool cancel = false;
+			var dis = new CompositeDisposable ();
+			dis.Add (Disposable.Create (() => cancel = true));
+			ThreadPool.QueueUserWorkItem (s => {
+				Thread.Sleep (Scheduler.Normalize (dueTime));
+				if (!cancel)
+					dis.Add (action (this, state));
+			});
+			return dis;
+		}
 		
 #if REACTIVE_2_0
 		public override IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
@@ -61,7 +64,7 @@ namespace System.Reactive.Concurrency
 		public IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)
 #endif
 		{
-			return Schedule (state, TimeSpan.Zero, action);
+			return Schedule<TState> (state, TimeSpan.Zero, action);
 		}
 		
 #if REACTIVE_2_0

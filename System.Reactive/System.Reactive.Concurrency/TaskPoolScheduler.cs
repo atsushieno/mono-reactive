@@ -38,29 +38,28 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
+			return Schedule (state, dueTime - Now, action);
+		}
+#endif
+
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#else
+		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#endif
+		{
 			var cancel = new CancellationTokenSource ();
 			var dis = new MultipleAssignmentDisposable ();
 			dis.Disposable = new CancellationDisposable (cancel);
 			Task task = null;
 			task = factory.StartNew<Unit> (() => {
-				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
+				Thread.Sleep (Scheduler.Normalize (dueTime));
 				if (!task.IsCanceled)
 					dis.Disposable = action (this, state);
 				return Unit.Default;
 				}, cancel.Token);
 			return dis;
 		}
-		
-		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			return Schedule (state, Now + Scheduler.Normalize (dueTime), action);
-		}
-#else
-		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			throw new NotImplementedException ();
-		}
-#endif
 		
 #if REACTIVE_2_0
 		public override IDisposable Schedule<TState> (TState state, Func<IScheduler, TState, IDisposable> action)

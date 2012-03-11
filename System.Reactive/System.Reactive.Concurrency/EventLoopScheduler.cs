@@ -44,10 +44,20 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
+			return Schedule<TState> (TState state, dueTime - Now, Action);
+		}
+#endif
+		
+#if REACTIVE_2_0
+		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#else
+		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
+#endif
+		{
 			var dis = new SingleAssignmentDisposable ();
 			bool cancel = false;
 			var th = thread_factory (() => {
-				Thread.Sleep (Scheduler.Normalize (dueTime - Now));
+				Thread.Sleep (Scheduler.Normalize (dueTime));
 				if (!cancel)
 					dis.Disposable = action (this, state);
 				});
@@ -57,17 +67,6 @@ namespace System.Reactive.Concurrency
 			disposables.Add (ret);
 			return ret;
 		}
-		
-		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			return Schedule (state, Now + dueTime, action);
-		}
-#else
-		public override IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			throw new NotImplementedException ();
-		}
-#endif
 		
 #if REACTIVE_2_0
 		public override IStopwatch StartStopwatch ()
