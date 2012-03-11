@@ -13,12 +13,10 @@ namespace System.Reactive.Disposables
 		// FIXME: not sure if simple stupid List is applicable...
 		List<IDisposable> items;
 		
-#if REACTIVE_2_0
 		public CompositeDisposable ()
 		{
 			items = new List<IDisposable> ();
 		}
-#endif
 		
 		public CompositeDisposable (IEnumerable<IDisposable> disposables)
 		{

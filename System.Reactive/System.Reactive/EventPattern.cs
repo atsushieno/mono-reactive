@@ -18,7 +18,7 @@ namespace System.Reactive
 	
 	public class EventPattern<TSender,TEventArgs> : IEventPattern<TSender, TEventArgs>, IEquatable<EventPattern<TSender,TEventArgs>>
 #else
-	public class EventPattern<TEventArgs>
+	public class EventPattern<TEventArgs> : IEquatable<EventPattern<TEventArgs>>
 		where TEventArgs : EventArgs
 #endif
 	{

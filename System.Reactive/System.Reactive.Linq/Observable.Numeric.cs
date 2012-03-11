@@ -164,14 +164,14 @@ namespace System.Reactive.Linq
 			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
-		public static IObservable<int> Average (this IObservable<int> source)
+		public static IObservable<double> Average (this IObservable<int> source)
 		{
-			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+			return source.Select (i => (double) i).NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
-		public static IObservable<long> Average (this IObservable<long> source)
+		public static IObservable<double> Average (this IObservable<long> source)
 		{
-			return source.NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
+			return source.Select (i => (double) i).NonNullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
 		public static IObservable<float> Average (this IObservable<float> source)
@@ -189,14 +189,14 @@ namespace System.Reactive.Linq
 			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
-		public static IObservable<int?> Average (this IObservable<int?> source)
+		public static IObservable<double?> Average (this IObservable<int?> source)
 		{
-			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+			return source.Select (i => (double?) i).NullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
-		public static IObservable<long?> Average (this IObservable<long?> source)
+		public static IObservable<double?> Average (this IObservable<long?> source)
 		{
-			return source.NullableAverage ((x, y) => x + y, (x, y) => x / y);
+			return source.Select (i => (double?) i).NullableAverage ((x, y) => x + y, (x, y) => x / y);
 		}
 		
 		public static IObservable<float?> Average (this IObservable<float?> source)

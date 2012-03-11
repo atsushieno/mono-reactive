@@ -13,4 +13,11 @@ Patches, bug reports and/or any feedback are welcome.
 [*1] http://msdn.microsoft.com/en-us/library/hh242985.aspx
 [*2] http://www.reactiveui.net/
 
+** Rx2 support
+
+All the existing 1.0-based API (in System.Reactive.dll) is mapped to new Rx2
+assemblies (System.Reactive.*.dll). Some of them were however, turned into
+NotImplemented state as they depended on types that are now "external" from
+the implementing assembly.
+
 Atsushi Eno (@atsushi_eno / @atsushieno)
