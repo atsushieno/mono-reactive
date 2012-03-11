@@ -100,12 +100,12 @@
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ImmediateScheduler.cs">
       <Link>System.Reactive.Concurrency\ImmediateScheduler.cs</Link>
     </Compile>
-    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\Internal_ScheduledItem.cs">
-      <Link>Internal_ScheduledItem.cs</Link>
-    </Compile>
     <Compile Include="System.Reactive.Concurrency\LocalScheduler.cs" />
     <Compile Include="System.Reactive.Concurrency\DefaultScheduler.cs" />
     <Compile Include="System.Reactive\IPlatformEnlightenmentProvider.cs" />
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItem.cs">
+      <Link>System.Reactive.Concurrency\System.Reactive.Concurrency\ScheduledItem.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

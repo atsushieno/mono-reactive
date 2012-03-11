@@ -32,12 +32,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule<TState> (TState state, dueTime - Now, Action);
-		}
-
-		public IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
-		{
-			return Schedule<TState> (state, Now + Scheduler.Normalize (dueTime), action);
+			return Schedule<TState> (state, dueTime - Now, action);
 		}
 #endif
 

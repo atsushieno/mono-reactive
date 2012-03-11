@@ -93,7 +93,6 @@
     <Compile Include="System.Reactive.Concurrency\HistoricalScheduler.cs" />
     <Compile Include="System.Reactive.Concurrency\HistoricalSchedulerBase.cs" />
     <Compile Include="System.Reactive.Concurrency\ImmediateScheduler.cs" />
-    <Compile Include="System.Reactive.Concurrency\Internal_ScheduledItem.cs" />
     <Compile Include="System.Reactive.Concurrency\IScheduledItem.cs" />
     <Compile Include="System.Reactive.Concurrency\IScheduler.cs" />
     <Compile Include="System.Reactive.Concurrency\NewThreadScheduler.cs" />
@@ -144,5 +143,6 @@
     <Compile Include="System.Reactive.Subjects\Subject.Generic.cs" />
     <Compile Include="System.Reactive.Subjects\Subject.Static.cs" />
     <Compile Include="System.Reactive.Threading.Tasks\TaskObservableExtensions.cs" />
+    <Compile Include="System.Reactive.Concurrency\ScheduledItem.cs" />
   </ItemGroup>
 </Project>

@@ -46,7 +46,7 @@ namespace System.Reactive.Concurrency
 		
 		public IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			return Schedule<TState> (state, dueTime - Now, Action);
+			return Schedule<TState> (state, dueTime - Now, action);
 		}
 #endif
 		
