@@ -104,7 +104,19 @@
     <Compile Include="System.Reactive.Concurrency\DefaultScheduler.cs" />
     <Compile Include="System.Reactive\IPlatformEnlightenmentProvider.cs" />
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItem.cs">
-      <Link>System.Reactive.Concurrency\System.Reactive.Concurrency\ScheduledItem.cs</Link>
+      <Link>System.Reactive.Concurrency\ScheduledItem.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive\ObserverBase.cs">
+      <Link>System.Reactive\ObserverBase.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive\ObservableBase.cs">
+      <Link>System.Reactive\ObservableBase.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive\AnonymousObservable.cs">
+      <Link>System.Reactive\AbstractObservable.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive\AnonymousObserver.cs">
+      <Link>System.Reactive\AnonymousObserver.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -113,5 +125,8 @@
       <Project>{755E549E-1BDE-4153-A58B-7C969C902CAD}</Project>
       <Name>System.Reactive.Interfaces</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="System.Reactive.Concurrency\System.Reactive.Concurrency\" />
   </ItemGroup>
 </Project>

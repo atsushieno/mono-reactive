@@ -144,5 +144,9 @@
     <Compile Include="System.Reactive.Subjects\Subject.Static.cs" />
     <Compile Include="System.Reactive.Threading.Tasks\TaskObservableExtensions.cs" />
     <Compile Include="System.Reactive.Concurrency\ScheduledItem.cs" />
+    <Compile Include="System.Reactive\ObserverBase.cs" />
+    <Compile Include="System.Reactive\ObservableBase.cs" />
+    <Compile Include="System.Reactive\AnonymousObservable.cs" />
+    <Compile Include="System.Reactive\AnonymousObserver.cs" />
   </ItemGroup>
 </Project>
