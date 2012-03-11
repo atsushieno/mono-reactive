@@ -2,7 +2,10 @@ using System;
 
 namespace System.Reactive.Disposables
 {
-	public interface ICancelable : IDisposable
+#if REACTIVE_2_0
+	public
+#endif
+	interface ICancelable : IDisposable
 	{
 		bool IsDisposed { get; }
 	}
