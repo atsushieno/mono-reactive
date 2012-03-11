@@ -79,7 +79,7 @@ namespace System.Reactive
 		}
 
 		// It is public in Microsoft.Phone.Reactive
-		public class OnCompleted : Notification<T>
+		internal class OnCompleted : Notification<T>
 		{
 			public override Exception Exception {
 				get { return null; }
@@ -123,7 +123,7 @@ namespace System.Reactive
 		}
 
 		// It is public in Microsoft.Phone.Reactive
-		public class OnError : Notification<T>
+		internal class OnError : Notification<T>
 		{
 			Exception error;
 			
@@ -175,7 +175,7 @@ namespace System.Reactive
 		}
 
 		// It is public in Microsoft.Phone.Reactive
-		public class OnNext : Notification<T>
+		internal class OnNext : Notification<T>
 		{
 			T value;
 			
