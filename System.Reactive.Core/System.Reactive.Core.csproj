@@ -118,6 +118,9 @@
     <Compile Include="..\System.Reactive\System.Reactive\AnonymousObserver.cs">
       <Link>System.Reactive\AnonymousObserver.cs</Link>
     </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItemImpl.cs">
+      <Link>System.Reactive.Concurrency\ScheduledItemImpl.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -125,8 +128,5 @@
       <Project>{755E549E-1BDE-4153-A58B-7C969C902CAD}</Project>
       <Name>System.Reactive.Interfaces</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="System.Reactive.Concurrency\System.Reactive.Concurrency\" />
   </ItemGroup>
 </Project>

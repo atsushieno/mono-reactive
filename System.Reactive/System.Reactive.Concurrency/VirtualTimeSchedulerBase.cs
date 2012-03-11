@@ -5,6 +5,7 @@ namespace System.Reactive.Concurrency
 {
 	public abstract class VirtualTimeSchedulerBase<TAbsolute, TRelative>
 		: IScheduler
+		where TAbsolute : IComparable<TAbsolute> // strictly to say, this is not in Rx1, but it must be anyways.
 	{
 		protected VirtualTimeSchedulerBase ()
 			: this (default (TAbsolute), Comparer<TAbsolute>.Default)

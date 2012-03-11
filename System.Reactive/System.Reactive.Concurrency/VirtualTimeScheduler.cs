@@ -7,6 +7,7 @@ namespace System.Reactive.Concurrency
 {
 	public abstract class VirtualTimeScheduler<TAbsolute, TRelative>
 		: VirtualTimeSchedulerBase<TAbsolute, TRelative>
+		where TAbsolute : IComparable<TAbsolute> // strictly to say, this is not in Rx1, but it must be anyways.
 	{
 		IComparer<TAbsolute> comparer = Comparer<TAbsolute>.Default;
 
@@ -30,8 +31,8 @@ namespace System.Reactive.Concurrency
 		
 		public override IDisposable ScheduleAbsolute<TState> (TState state, TAbsolute dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			ScheduledItem<TAbsolute> t = null;
-			t = new ScheduledItem<TAbsolute> (dueTime, () => { tasks.Remove (t); return action (this, state); });
+			ScheduledItemImpl<TAbsolute> t = null;
+			t = new ScheduledItemImpl<TAbsolute> (dueTime, () => { tasks.Remove (t); return action (this, state); });
 			AddTask (tasks, t);
 			return Disposable.Create (() => { tasks.Remove (t); t.Dispose (); });
 		}

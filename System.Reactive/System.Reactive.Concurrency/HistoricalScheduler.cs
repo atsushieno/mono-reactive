@@ -16,8 +16,8 @@ namespace System.Reactive.Concurrency
 		
 		public override IDisposable ScheduleAbsolute<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			ScheduledItem<DateTimeOffset> t = null;
-			t = new ScheduledItem<DateTimeOffset> (dueTime, () => { tasks.Remove (t); return action (this, state); });
+			ScheduledItemImpl<DateTimeOffset> t = null;
+			t = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => { tasks.Remove (t); return action (this, state); });
 			
 			Scheduler.AddTask (tasks, t);
 			

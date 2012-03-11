@@ -135,6 +135,9 @@
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\VirtualTimeSchedulerBase.cs">
       <Link>System.Reactive.Concurrency\VirtualTimeSchedulerBase.cs</Link>
     </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItemImpl.cs">
+      <Link>System.Reactive.Concurrency\ScheduledItemImpl.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

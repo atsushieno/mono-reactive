@@ -57,7 +57,7 @@ namespace System.Reactive.Concurrency
 #endif
 		{
 			// FIXME: this sort of needs to handle correct cancellation. (Though there's not likely many chances to "cancel" it...)
-			var task = new ScheduledItem<TimeSpan> (dueTime, () => action (this, state));
+			var task = new ScheduledItemImpl<TimeSpan> (dueTime, () => action (this, state));
 			if (Interlocked.CompareExchange (ref busy, busy, busy + 1) > 0) {
 				AddTask (tasks, task);
 				return Disposable.Create (() => tasks.Remove (task));

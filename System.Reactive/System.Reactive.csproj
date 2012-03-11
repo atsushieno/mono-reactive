@@ -149,5 +149,6 @@
     <Compile Include="System.Reactive\AnonymousObservable.cs" />
     <Compile Include="System.Reactive\AnonymousObserver.cs" />
     <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
+    <Compile Include="System.Reactive.Concurrency\ScheduledItemImpl.cs" />
   </ItemGroup>
 </Project>
