@@ -965,6 +965,7 @@ THR: 400 at 02.500 timer:02.500
 THR: 900 at 03.400 timer:03.400
 THR: 500 at 03.900 timer:03.900
 THR: 100 at 04.800 timer:04.800
+THR: 600 at 04.900 timer:04.900
 THR: completed: 04.900
 ".Replace ("\r\n", "\n");
 			Assert.AreEqual (expected, sw.ToString ().Replace ("\r\n", "\n"), "#1");

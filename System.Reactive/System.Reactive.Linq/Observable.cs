@@ -2303,13 +2303,17 @@ namespace System.Reactive.Linq
 			var current = new SerialDisposable ();
 			TSource value = default (TSource);
 			return source.Subscribe (Observer.Create<TSource> (v => {
-				current.Disposable = scheduler.Schedule (dueTime, () => { sub.OnNext (v); value = v; });
+				value = v;
+				current.Disposable = scheduler.Schedule (dueTime, () => { sub.OnNext (v); current.Disposable = null; });
 			}, ex => {
 				sub.OnError (ex); current.Dispose ();
 			}, () => {
+				if (current.Disposable != null) {
+					// submit the last value *now*
+					current.Dispose ();
+					sub.OnNext (value);
+				}
 				sub.OnCompleted ();
-				// The reason for this delay is, the ongoing value should be successfully submitted, instead of being discarded.
-				scheduler.Schedule (current.Disposable == null ? TimeSpan.Zero : dueTime, () => current.Dispose ());
 			}));
 			// ----
 			}, scheduler);
