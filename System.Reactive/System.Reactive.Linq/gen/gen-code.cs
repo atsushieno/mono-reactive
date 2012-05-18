@@ -25,8 +25,9 @@ namespace System.Reactive.Linq
 			Console.WriteLine (@"
 		public static Func<{0}, IObservable<Unit>> FromAsyncPattern<{0}> (Func<{0}, AsyncCallback, object, IAsyncResult> begin, Action<IAsyncResult> end)
 		{{
-			var sub = new Subject<Unit> ();
-			return ({1}) => {{ begin ({1}, (res) => {{
+			return ({1}) => {{
+				var sub = new Subject<Unit> ();
+				begin ({1}, (res) => {{
 				try {{
 					end (res);
 					sub.OnNext (Unit.Default);
@@ -39,8 +40,9 @@ namespace System.Reactive.Linq
 		
 		public static Func<{0}, IObservable<TResult>> FromAsyncPattern<{0}, TResult> (Func<{0}, AsyncCallback, Object, IAsyncResult> begin, Func<IAsyncResult, TResult> end)
 		{{
-			var sub = new Subject<TResult> ();
-			return ({1}) => {{ begin ({1}, (res) => {{
+			return ({1}) => {{
+				var sub = new Subject<TResult> ();
+				begin ({1}, (res) => {{
 				try {{
 					var result = end (res);
 					sub.OnNext (result);

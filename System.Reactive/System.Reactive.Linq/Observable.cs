@@ -801,8 +801,8 @@ namespace System.Reactive.Linq
 			if (end == null)
 				throw new ArgumentNullException ("end");
 
-			var sub = new Subject<TResult> ();
 			return () => {
+				var sub = new Subject<TResult> ();
 				begin ((res) => {
 					try {
 						var result = end (res);
