@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using NUnit.Framework;
 
@@ -938,6 +939,35 @@ namespace System.Reactive.Linq.Tests
 			Assert.IsTrue (done, "#1");
 			Assert.AreEqual (new int [] {3, 2}, l.ToArray (), "#2");
 			dis.Dispose ();
+		}
+		
+		[Test]
+		public void Throttle2 ()
+		{
+			var subject = new Subject<string> ();
+			var scheduler = new HistoricalScheduler ();
+			var input = (from text in subject select text).Throttle (TimeSpan.FromSeconds (0.5), scheduler).Timestamp (scheduler);
+			var sw = new StringWriter ();
+			input.Subscribe (
+				v => sw.WriteLine ("THR: {0} at {1:ss.fff} timer:{2:ss.fff}", v.Value, v.Timestamp, scheduler.Now),
+				() => sw.WriteLine ("THR: completed: {0:ss.fff}", scheduler.Now));
+
+			int [] vals = {100, 600, 300, 600, 400, 900, 500, 800};
+			for (int i = 0; i < 10; i++) {
+				var val = vals [i % vals.Length];
+				scheduler.AdvanceBy (TimeSpan.FromMilliseconds (val));
+				subject.OnNext (val.ToString ());
+			}
+			subject.OnCompleted ();
+			string expected = @"THR: 100 at 00.600 timer:00.600
+THR: 300 at 01.500 timer:01.500
+THR: 400 at 02.500 timer:02.500
+THR: 900 at 03.400 timer:03.400
+THR: 500 at 03.900 timer:03.900
+THR: 100 at 04.800 timer:04.800
+THR: completed: 04.900
+".Replace ("\r\n", "\n");
+			Assert.AreEqual (expected, sw.ToString ().Replace ("\r\n", "\n"), "#1");
 		}
 		
 		[Test]

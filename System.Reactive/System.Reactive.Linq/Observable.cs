@@ -2300,23 +2300,17 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
-			DateTimeOffset last = scheduler.Now;
-			bool fire = false;
-			TSource value;
+			var current = new SerialDisposable ();
+			TSource value = default (TSource);
 			return source.Subscribe (Observer.Create<TSource> (v => {
-				if (scheduler.Now - last >= dueTime) {
-					last = scheduler.Now;
-					sub.OnNext (v);
-				} else {
-					value = v;
-					if (!fire) {
-						fire = true;
-						var slotDueTime = dueTime - (scheduler.Now - last);
-						var ddis = new SingleAssignmentDisposable ();
-						ddis.Disposable = scheduler.Schedule (slotDueTime, () => { last = scheduler.Now; sub.OnNext (value); fire = false; value = default (TSource); ddis.Dispose ();});
-					}
-				}
-			}, ex => sub.OnError (ex), () => sub.OnCompleted ()));
+				current.Disposable = scheduler.Schedule (dueTime, () => { sub.OnNext (v); value = v; });
+			}, ex => {
+				sub.OnError (ex); current.Dispose ();
+			}, () => {
+				sub.OnCompleted ();
+				// The reason for this delay is, the ongoing value should be successfully submitted, instead of being discarded.
+				scheduler.Schedule (current.Disposable == null ? TimeSpan.Zero : dueTime, () => current.Dispose ());
+			}));
 			// ----
 			}, scheduler);
 		}
