@@ -2170,7 +2170,7 @@ namespace System.Reactive.Linq
 			if (gate == null)
 				throw new ArgumentNullException ("gate");
 
-			return new ColdObservableEach<TSource> (sub => source.Subscribe (sub), DefaultColdScheduler, () => new SynchronizedSubject<TSource> (gate));
+			return Synchronization.Synchronize (source, gate);
 		}
 		
 		public static IObservable<TSource> Take<TSource> (

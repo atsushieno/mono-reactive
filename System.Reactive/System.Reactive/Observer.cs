@@ -46,13 +46,7 @@ namespace System.Reactive
 		
 		public static IObserver<T> Synchronize<T> (IObserver<T> observer, object gate)
 		{
-#if REACTIVE_2_0
-			throw new NotImplementedException ();
-#else
-			var ret = new SynchronizedSubject<T> (gate);
-			ret.Subscribe (observer);
-			return ret;
-#endif
+			return new SynchronizedObserver<T> (observer, gate);
 		}
 		
 		public static Action<Notification<T>> ToNotifier<T> (this IObserver<T> observer)
