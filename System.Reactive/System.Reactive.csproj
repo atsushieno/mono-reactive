@@ -150,5 +150,7 @@
     <Compile Include="System.Reactive\AnonymousObserver.cs" />
     <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
     <Compile Include="System.Reactive.Concurrency\ScheduledItemImpl.cs" />
+    <Compile Include="System.Reactive\Internal_SynchronizedObservable.cs" />
+    <Compile Include="System.Reactive.Concurrency\Synchronization.cs" />
   </ItemGroup>
 </Project>

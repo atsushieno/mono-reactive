@@ -122,6 +122,12 @@
       <Link>System.Reactive.Concurrency\ScheduledItemImpl.cs</Link>
     </Compile>
     <Compile Include="System.Reactive\PlatformEnlightenmentProvider.cs" />
+    <Compile Include="..\System.Reactive\System.Reactive\Internal_SynchronizedObservable.cs">
+      <Link>System.Reactive\Internal_SynchronizedObservable.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\Synchronization.cs">
+      <Link>System.Reactive.Concurrency\Synchronization.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
