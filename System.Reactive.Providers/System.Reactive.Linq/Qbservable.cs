@@ -1,5 +1,3 @@
-// FIXME: I almost just copied Observable.cs and replaced IObservable with IQbservable. Turned out that many things are different from Observable.
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
