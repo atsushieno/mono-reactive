@@ -122,6 +122,8 @@
     <Compile Include="System.Reactive.Concurrency\ScheduledItem.cs" />
     <Compile Include="System.Reactive.Concurrency\ScheduledItemImpl.cs" />
     <Compile Include="System.Reactive.Disposables\ICancelable.cs" />
+    <Compile Include="System.Reactive\Internal_SynchronizedObservable.cs" />
+    <Compile Include="System.Reactive.Concurrency\Synchronization.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="System.Reactive.Joins\gen\gen-code.exe" />
