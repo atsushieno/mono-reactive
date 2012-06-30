@@ -151,5 +151,48 @@ namespace System.Reactive.Concurrency
 			if (pos < 0)
 				tasks.Insert (0, task);
 		}
+		
+#if REACTIVE_2_0
+		public static IScheduler Catch<TException> (this IScheduler scheduler, Func<TException,bool> handler)
+			where TException : Exception
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IScheduler DisableOptimizations (this IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IScheduler DisableOptimizations (this IScheduler scheduler, params Type [] optimizationInterfaces)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IDisposable ScheduleLongRunning (this ISchedulerLongRunning scheduler, Action<ICancelable> action)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IDisposable SchedulePeriodic (this IScheduler scheduler, TimeSpan period, Action action)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IDisposable SchedulePeriodic<TState> (this IScheduler scheduler, TState state, TimeSpan period, Action<TState> action)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IDisposable SchedulePeriodic<TState> (this IScheduler scheduler, TState state, TimeSpan period, Func<TState,TState> action)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IStopwatch StartStopwatch (this IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

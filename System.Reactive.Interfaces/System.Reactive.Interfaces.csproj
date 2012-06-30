@@ -69,6 +69,7 @@
     <Compile Include="..\System.Reactive\System.Reactive.Disposables\ICancelable.cs">
       <Link>System.Reactive.Disposables\ICancelable.cs</Link>
     </Compile>
+    <Compile Include="System.Reactive.Concurrency\ISchedulerPeriodic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

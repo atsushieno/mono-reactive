@@ -43,4 +43,27 @@ namespace System.Reactive.Concurrency
 		
 		protected abstract IDisposable InvokeCore ();
 	}
+	
+#if REACTIVE_2_0
+	public
+#endif
+	sealed class ScheduledItem<TAbsolute,TValue> : ScheduledItem<TAbsolute>
+		where TAbsolute : IComparable<TAbsolute>
+	{
+		public ScheduledItem (IScheduler scheduler, TValue state, Func<IScheduler,TValue,IDisposable> action, TAbsolute dueTime)
+			: this (scheduler, state, action, dueTime, Comparer<TAbsolute>.Default)
+		{
+		}
+		
+		public ScheduledItem (IScheduler scheduler, TValue state, Func<IScheduler,TValue,IDisposable> action, TAbsolute dueTime, IComparer<TAbsolute> comparer)
+			: base (dueTime, comparer)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		protected override IDisposable InvokeCore ()
+		{
+			throw new NotImplementedException ();
+		}
+	}
 }

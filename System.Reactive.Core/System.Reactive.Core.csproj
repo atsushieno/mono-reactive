@@ -113,7 +113,7 @@
       <Link>System.Reactive\ObservableBase.cs</Link>
     </Compile>
     <Compile Include="..\System.Reactive\System.Reactive\AnonymousObservable.cs">
-      <Link>System.Reactive\AbstractObservable.cs</Link>
+      <Link>System.Reactive\AnonymousObservable.cs</Link>
     </Compile>
     <Compile Include="..\System.Reactive\System.Reactive\AnonymousObserver.cs">
       <Link>System.Reactive\AnonymousObserver.cs</Link>
@@ -128,6 +128,8 @@
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\Synchronization.cs">
       <Link>System.Reactive.Concurrency\Synchronization.cs</Link>
     </Compile>
+    <Compile Include="System.Reactive.Concurrency\AsyncLock.cs" />
+    <Compile Include="System.Reactive.Concurrency\SchedulerQueue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

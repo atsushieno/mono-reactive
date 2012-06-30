@@ -36,5 +36,12 @@ namespace System
 				throw new ArgumentNullException ("source");
 			return source.Subscribe (Observer.Create (onNext, onError, onCompleted));
 		}
+		
+#if REACTIVE_2_0
+		public static IDisposable SubscribeSafe<T> (this IObservable<T> source, IObserver<T> observer)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }
