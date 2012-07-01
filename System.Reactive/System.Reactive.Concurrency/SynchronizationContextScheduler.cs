@@ -13,13 +13,23 @@ namespace System.Reactive.Concurrency
 #endif
 	{
 		public SynchronizationContextScheduler (SynchronizationContext context)
+			: this (context, true)
+		{
+		}
+		
+#if REACTIVE_2_0
+		public
+#endif
+		SynchronizationContextScheduler (SynchronizationContext context, bool alwaysPost)
 		{
 			if (context == null)
 				throw new ArgumentNullException ("context");
 			this.context = context;
+			always_post = alwaysPost;
 		}
 		
 		SynchronizationContext context;
+		bool always_post;
 		
 #if !REACTIVE_2_0
 		public DateTimeOffset Now {
@@ -39,10 +49,15 @@ namespace System.Reactive.Concurrency
 #endif
 		{
 			var dis = new SingleAssignmentDisposable ();
-			context.Post (stat => {
-				Thread.Sleep ((int) Scheduler.Normalize (dueTime).TotalMilliseconds);
-				dis.Disposable = new ContextDisposable (context, action (this, (TState) stat));
-				}, default (TState));
+			int dueTimeMillis = (int) Scheduler.Normalize (dueTime).TotalMilliseconds;
+			if (!always_post && dueTimeMillis == 0 && Object.ReferenceEquals (SynchronizationContext.Current, context))
+				dis.Disposable = action (this, state);
+			else {
+				context.Post (stat => {
+					Thread.Sleep (dueTimeMillis);
+					dis.Disposable = new ContextDisposable (context, action (this, state));
+					}, state);
+			}
 			return dis;
 		}
 

@@ -22,6 +22,10 @@ namespace System.Reactive.Concurrency
 			get { return ImmediateScheduler.Instance; }
 		}
 #if REACTIVE_2_0
+
+		// Those properties are [Obsolete] only in non-portable build...
+
+		[Obsolete ("This property is no longer supported. Use System.Reactive.Concurrency.NewThreadScheduler in System.Reactive.PlatformServices.dll")]
 		public static IScheduler NewThread {
 			get {
 				if (new_thread == null)
@@ -29,6 +33,7 @@ namespace System.Reactive.Concurrency
 				return new_thread;
 			}
 		}
+		[Obsolete ("This property is no longer supported. Use System.Reactive.Concurrency.TaskPoolScheduler in System.Reactive.PlatformServices.dll")]
 		public static IScheduler TaskPool {
 			get {
 				if (task_pool == null)
@@ -36,6 +41,7 @@ namespace System.Reactive.Concurrency
 				return task_pool;
 			}
 		}
+		[Obsolete ("This property is no longer supported. Use System.Reactive.Concurrency.ThreadPoolScheduler in System.Reactive.PlatformServices.dll")]
 		public static IScheduler ThreadPool {
 			get {
 				if (thread_pool == null)
