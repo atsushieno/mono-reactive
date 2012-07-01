@@ -63,7 +63,7 @@ namespace System.Reactive.Concurrency
 #endif
 
 		public static DateTimeOffset Now {
-			get { return DateTimeOffset.Now; }
+			get { return DateTimeOffset.UtcNow; }
 		}
 		
 		// returns non-negative TimeSpan.
