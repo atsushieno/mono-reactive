@@ -93,7 +93,15 @@ namespace System.Reactive.Concurrency
 		{
 			// what is this method for?
 		}
-		
+
+#if REACTIVE_2_0
+		public IStopwatch StartStopwatch ()
+		{
+			// what is this method for?
+			throw new NotImplementedException ();
+		}
+#endif
+				
 		protected abstract DateTimeOffset ToDateTimeOffset (TAbsolute absolute);
 		
 		protected abstract TRelative ToRelative (TimeSpan timeSpan);

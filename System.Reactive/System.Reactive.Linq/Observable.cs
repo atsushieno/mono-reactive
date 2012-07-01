@@ -2871,5 +2871,77 @@ namespace System.Reactive.Linq
 			
 			return When (first.And (second).Then (resultSelector));
 		}
+		
+#if REACTIVE_2_0
+		public static IObservable<TResult> Case<TValue, TResult> (System.Func<TValue> selector, IDictionary<TValue,IObservable<TResult>> sources)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> Case<TValue, TResult> (System.Func<TValue> selector, IDictionary<TValue,IObservable<TResult>> sources, IObservable<TResult> defaultSource)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> Case<TValue, TResult> (System.Func<TValue> selector, IDictionary<TValue,IObservable<TResult>> sources, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IEnumerable<IList<TSource>> Chunkify<TSource> (this IObservable<TSource> source)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IEnumerable<TResult> Collect<TSource, TResult> (this IObservable<TSource> source, Func<TResult> getInitialCollector, Func<TResult,TSource,TResult> merge, Func<TResult,TResult> getNewCollector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IEnumerable<TResult> Collect<TSource, TResult> (this IObservable<TSource> source, Func<TResult> newCollector, Func<TResult,TSource,TResult> merge)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> DelaySubscription<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> DelaySubscription<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> DelaySubscription<TSource> (this IObservable<TSource> source, TimeSpan dueTime, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> DelaySubscription<TSource> (this IObservable<TSource> source, TimeSpan dueTime)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> Let<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,IObservable<TResult>> selector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> ManySelect<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,TResult> selector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TResult> ManySelect<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,TResult> selector, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static ListObservable<TSource> ToListObservable<TSource> (this IObservable<TSource> source)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

@@ -9,8 +9,6 @@ namespace System.Reactive.Concurrency
 		: VirtualTimeSchedulerBase<TAbsolute, TRelative>
 		where TAbsolute : IComparable<TAbsolute> // strictly to say, this is not in Rx1, but it must be anyways.
 	{
-		IComparer<TAbsolute> comparer = Comparer<TAbsolute>.Default;
-
 		protected VirtualTimeScheduler ()
 		{
 			tasks = new List<ScheduledItem<TAbsolute>> ();
@@ -44,7 +42,7 @@ namespace System.Reactive.Concurrency
 			int pos = -1;
 			TAbsolute dueTime = task.DueTime;
 			for (int i = tasks.Count - 1; i >= 0; i--) {
-				if (comparer.Compare (dueTime, tasks [i].DueTime) >= 0) {
+				if (Comparer.Compare (dueTime, tasks [i].DueTime) >= 0) {
 					tasks.Insert (i + 1, task);
 					pos = i;
 					break;

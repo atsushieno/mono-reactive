@@ -7,6 +7,22 @@ namespace System.Reactive.Concurrency
 {
 	public class HistoricalScheduler : HistoricalSchedulerBase
 	{
+#if REACTIVE_2_0
+		public HistoricalScheduler ()
+		{
+		}
+
+		public HistoricalScheduler (DateTimeOffset initialClock)
+			: base (initialClock, Comparer<DateTimeOffset>.Default)
+		{
+		}
+
+		public HistoricalScheduler (DateTimeOffset initialClock, IComparer<DateTimeOffset> comparer)
+			: base (initialClock, comparer)
+		{
+		}
+#endif
+		
 		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
 		
 		protected override IScheduledItem<DateTimeOffset> GetNext ()
