@@ -537,7 +537,7 @@ namespace System.Reactive.Linq
 			// ----
 			}, scheduler);
 		}
-		
+				
 		public static IObservable<TSource> Dematerialize<TSource> (this IObservable<Notification<TSource>> source)
 		{
 			if (source == null)
@@ -2902,6 +2902,16 @@ namespace System.Reactive.Linq
 		{
 			throw new NotImplementedException ();
 		}
+				
+		public static IObservable<TSource> Delay<TSource, TDelay> (this IObservable<TSource> source, Func<TSource,IObservable<TDelay>> delayDurationSelector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Delay<TSource, TDelay> (this IObservable<TSource> source, IObservable<TDelay> subscriptionDelay, Func<TSource,IObservable<TDelay>> delayDurationSelector)
+		{
+			throw new NotImplementedException ();
+		}
 		
 		public static IObservable<TSource> DelaySubscription<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime, IScheduler scheduler)
 		{
@@ -2934,6 +2944,31 @@ namespace System.Reactive.Linq
 		}
 		
 		public static IObservable<TResult> ManySelect<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,TResult> selector, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Throttle<TSource, TThrottle> (this IObservable<TSource> source, Func<TSource,IObservable<TThrottle>> throttleDurationSelector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Timeout<TSource, TTimeout> (this IObservable<TSource> source, IObservable<TTimeout> firstTimeout, Func<TSource,IObservable<TTimeout>> timeoutDurationSelector, IObservable<TSource> other)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Timeout<TSource, TTimeout> (this IObservable<TSource> source, IObservable<TTimeout> firstTimeout, Func<TSource,IObservable<TTimeout>> timeoutDurationSelector)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Timeout<TSource, TTimeout> (this IObservable<TSource> source, Func<TSource,IObservable<TTimeout>> timeoutDurationSelector, IObservable<TSource> other)
+		{
+			throw new NotImplementedException ();
+		}
+		
+		public static IObservable<TSource> Timeout<TSource, TTimeout> (this IObservable<TSource> source, Func<TSource,IObservable<TTimeout>> timeoutDurationSelector)
 		{
 			throw new NotImplementedException ();
 		}

@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.PlatformSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.Providers2", "System.Reactive.Providers2\System.Reactive.Providers2.csproj", "{9652D18A-CF8D-40D7-BC1D-2090E58EC1FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.Tests2", "System.Reactive.Tests2\System.Reactive.Tests2.csproj", "{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Reactive.Testing2", "Mono.Reactive.Testing2\Mono.Reactive.Testing2.csproj", "{25A4B33D-EE55-4F25-98A5-3148A5875247}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +22,18 @@ Global
 		Android|Any CPU = Android|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Android|Any CPU.ActiveCfg = Debug|Any CPU
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Android|Any CPU.Build.0 = Debug|Any CPU
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25A4B33D-EE55-4F25-98A5-3148A5875247}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Android|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Android|Any CPU.Build.0 = Debug|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{755E549E-1BDE-4153-A58B-7C969C902CAD}.Android|Any CPU.ActiveCfg = Debug|Any CPU
 		{755E549E-1BDE-4153-A58B-7C969C902CAD}.Android|Any CPU.Build.0 = Debug|Any CPU
 		{755E549E-1BDE-4153-A58B-7C969C902CAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
