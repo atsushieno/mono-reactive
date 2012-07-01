@@ -26,7 +26,7 @@ namespace System.Reactive.Subjects
 				throw new ObjectDisposedException ("subject");
 		}
 		
-		ConcurrentQueue<Notification<T>> notifications = new ConcurrentQueue<Notification<T>> ();
+		Queue<Notification<T>> notifications = new Queue<Notification<T>> ();
 		
 		public void OnCompleted ()
 		{
@@ -38,9 +38,8 @@ namespace System.Reactive.Subjects
 						s.OnCompleted ();
 				done = true;
 			} else {
-				var n = Notification.CreateOnCompleted<T> ();
-				if (!notifications.Contains (n))
-					notifications.Enqueue (n);
+				if (!notifications.Any (n => n.Kind == NotificationKind.OnCompleted))
+					notifications.Enqueue (Notification.CreateOnCompleted<T> ());
 			}
 		}
 		
@@ -54,9 +53,8 @@ namespace System.Reactive.Subjects
 						s.OnError (error);
 				done = true;
 			} else {
-				var n = Notification.CreateOnError<T> (error);
-				if (!notifications.Contains (n))
-					notifications.Enqueue (n);
+				if (!notifications.Any (n => n.Kind == NotificationKind.OnError))
+					notifications.Enqueue (Notification.CreateOnError<T> (error));
 			}
 		}
 		
@@ -70,8 +68,7 @@ namespace System.Reactive.Subjects
 						s.OnNext (value);
 			} else {
 				var n = Notification.CreateOnNext<T> (value);
-				if (!notifications.Contains (n))
-					notifications.Enqueue (n);
+				notifications.Enqueue (n);
 			}
 		}
 		
@@ -82,13 +79,11 @@ namespace System.Reactive.Subjects
 		{
 			CheckDisposed ();
 
-			// If there was registered events (OnCompleted/OnError/OnNext), they are dequeued and handled here.
-			while (notifications.Count > 0) {
-				Notification<T> n;
-				if (notifications.TryDequeue (out n))
-					n.Accept (observer);
-			}
-
+			// If there were registered events (OnCompleted/OnError/OnNext), they are dequeued and handled here.
+			if (notifications.Count > 0)
+				lock (notifications)
+					while (notifications.Count > 0)
+						notifications.Dequeue ().Accept (observer);
 			subscribed.Add (observer);
 			return Disposable.Create (() => subscribed.Remove (observer));
 		}
