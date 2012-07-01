@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9652D18A-CF8D-40D7-BC1D-2090E58EC1FF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Reactive</RootNamespace>
+    <AssemblyName>System.Reactive.Providers</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="System.Reactive.Joins\" />
+    <Folder Include="System.Reactive.Linq\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\System.Reactive.Providers\System.Reactive.Joins\QueryablePattern.cs">
+      <Link>System.Reactive.Joins\QueryablePattern.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive.Providers\System.Reactive.Joins\QueryablePlan.cs">
+      <Link>System.Reactive.Joins\QueryablePlan.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive.Providers\System.Reactive.Joins\System.Reactive.Joins.generated.cs">
+      <Link>System.Reactive.Joins\System.Reactive.Joins.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive.Providers\System.Reactive.Linq\Qbservable.cs">
+      <Link>System.Reactive.Linq\Qbservable.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive.Providers\System.Reactive.Linq\System.Reactive.Linq.generated.cs">
+      <Link>System.Reactive.Linq\System.Reactive.Linq.generated.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Reactive.Interfaces\System.Reactive.Interfaces.csproj">
+      <Project>{755E549E-1BDE-4153-A58B-7C969C902CAD}</Project>
+      <Name>System.Reactive.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Reactive.Core\System.Reactive.Core.csproj">
+      <Project>{AD27C5E8-8A0C-454D-B7AA-76A54793B81F}</Project>
+      <Name>System.Reactive.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Reactive.Linq\System.Reactive.Linq.csproj">
+      <Project>{F0395470-330B-4DBF-B1A5-D873E597DD05}</Project>
+      <Name>System.Reactive.Linq</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
