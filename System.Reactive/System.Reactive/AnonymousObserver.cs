@@ -40,17 +40,17 @@ namespace System.Reactive
 		}
 
 		#region implemented abstract members of System.Reactive.ObserverBase[T]
-		protected override void Completed ()
+		protected override void OnCompletedCore ()
 		{
 			onCompleted ();
 		}
 
-		protected override void Error (Exception error)
+		protected override void OnErrorCore (Exception error)
 		{
 			onError (error);
 		}
 
-		protected override void Next (T value)
+		protected override void OnNextCore (T value)
 		{
 			onNext (value);
 		}

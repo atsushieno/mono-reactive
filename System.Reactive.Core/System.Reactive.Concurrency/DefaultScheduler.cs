@@ -23,6 +23,13 @@ namespace System.Reactive.Concurrency
 		{
 			throw new NotImplementedException ();
 		}
+
+#if REACTIVE_2_0
+		public IDisposable SchedulePeriodic<TState> (TState state, TimeSpan period, Func<TState, TState> action)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }
 

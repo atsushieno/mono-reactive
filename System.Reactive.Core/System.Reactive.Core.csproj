@@ -11,22 +11,22 @@
     <AssemblyName>System.Reactive.Core</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG;REACTIVE_2_0</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <ConsolePause>False</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <ConsolePause>False</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -102,7 +102,6 @@
     </Compile>
     <Compile Include="System.Reactive.Concurrency\LocalScheduler.cs" />
     <Compile Include="System.Reactive.Concurrency\DefaultScheduler.cs" />
-    <Compile Include="System.Reactive\IPlatformEnlightenmentProvider.cs" />
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItem.cs">
       <Link>System.Reactive.Concurrency\ScheduledItem.cs</Link>
     </Compile>
@@ -121,7 +120,6 @@
     <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ScheduledItemImpl.cs">
       <Link>System.Reactive.Concurrency\ScheduledItemImpl.cs</Link>
     </Compile>
-    <Compile Include="System.Reactive\PlatformEnlightenmentProvider.cs" />
     <Compile Include="..\System.Reactive\System.Reactive\Internal_SynchronizedObservable.cs">
       <Link>System.Reactive\Internal_SynchronizedObservable.cs</Link>
     </Compile>
@@ -130,6 +128,20 @@
     </Compile>
     <Compile Include="System.Reactive.Concurrency\AsyncLock.cs" />
     <Compile Include="System.Reactive.Concurrency\SchedulerQueue.cs" />
+    <Compile Include="System.Reactive.PlatformServices\IExceptionServices.cs" />
+    <Compile Include="System.Reactive.PlatformServices\IHostLifecycleNotifications.cs" />
+    <Compile Include="System.Reactive.PlatformServices\IPlatformEnlightenmentProvider.cs" />
+    <Compile Include="System.Reactive.PlatformServices\ISystemClock.cs" />
+    <Compile Include="System.Reactive.PlatformServices\INotifySystemClockChanged.cs" />
+    <Compile Include="System.Reactive.Concurrency\IConcurrencyAbstractionLayer.cs" />
+    <Compile Include="System.Reactive.PlatformServices\DefaultSystemClock.cs" />
+    <Compile Include="System.Reactive.PlatformServices\HostLifecycleService.cs" />
+    <Compile Include="System.Reactive.PlatformServices\HostResumingEventArgs.cs" />
+    <Compile Include="System.Reactive.PlatformServices\HostSuspendingEventArgs.cs" />
+    <Compile Include="System.Reactive.PlatformServices\PeriodicTimerSystemClockMonitor.cs" />
+    <Compile Include="System.Reactive.PlatformServices\PlatformEnlightenmentProvider.cs" />
+    <Compile Include="System.Reactive.PlatformServices\SystemClock.cs" />
+    <Compile Include="System.Reactive.PlatformServices\SystemClockChangedEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

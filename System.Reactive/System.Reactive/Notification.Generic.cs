@@ -78,6 +78,13 @@ namespace System.Reactive
 			}
 		}
 
+#if REACTIVE_2_0
+		public TResult Accept<TResult> (IObserver<T, TResult> observer)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
+
 		// It is public in Microsoft.Phone.Reactive
 		internal class OnCompleted : Notification<T>
 		{

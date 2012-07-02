@@ -23,6 +23,11 @@ namespace System.Reactive.Concurrency
 		}
 #if REACTIVE_2_0
 
+		// FIXME: find out correct return type and instance
+		public static IScheduler Default {
+			get { return NewThread; }
+		}
+
 		// Those properties are [Obsolete] only in non-portable build...
 
 		[Obsolete ("This property is no longer supported. Use System.Reactive.Concurrency.NewThreadScheduler in System.Reactive.PlatformServices.dll")]

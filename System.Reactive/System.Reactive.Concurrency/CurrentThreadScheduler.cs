@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Reactive.Disposables;
@@ -26,8 +27,15 @@ namespace System.Reactive.Concurrency
 		{
 		}
 		
-		public bool ScheduleRequired {
+		[EditorBrowsable (EditorBrowsableState.Advanced)]
+		public bool IsScheduleRequired {
 			get { return busy > 0; }
+		}
+
+		[EditorBrowsable (EditorBrowsableState.Advanced)]
+		[Obsolete ("Use IsScheduleRequired")]
+		public bool ScheduleRequired {
+			get { return IsScheduleRequired; }
 		}
 		
 		int busy = 0;

@@ -11,18 +11,23 @@ namespace System.Reactive
 		{
 		}
 		
-		public virtual void Dispose ()
+		public void Dispose ()
+		{
+			Dispose (true);
+		}
+		
+		protected virtual void Dispose (bool disposing)
 		{
 		}
 
 		public void OnCompleted ()
 		{
-			Completed ();
+			OnCompletedCore ();
 		}
 
 		public void OnError (Exception error)
 		{
-			Error (error);
+			OnErrorCore (error);
 		}
 
 		public void OnNext (T value)
@@ -30,11 +35,11 @@ namespace System.Reactive
 			OnNext (value);
 		}
 
-		protected abstract void Completed ();
+		protected abstract void OnCompletedCore ();
 
-		protected abstract void Error (Exception error);
+		protected abstract void OnErrorCore (Exception error);
 
-		protected abstract void Next (T value);
+		protected abstract void OnNextCore (T value);
 	}
 }
 

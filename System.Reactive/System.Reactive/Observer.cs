@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
+using System.Threading;
 
 namespace System.Reactive
 {
@@ -100,5 +101,17 @@ namespace System.Reactive
 				handler (Notification.CreateOnNext <T> (value));
 			}
 		}
+
+#if REACTIVE_2_0
+		public static IObserver<T> NotifyOn<T> (this IObserver<T> observer, IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public static IObserver<T> NotifyOn<T> (this IObserver<T> observer, SynchronizationContext context)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

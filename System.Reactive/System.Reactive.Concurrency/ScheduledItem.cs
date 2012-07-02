@@ -13,7 +13,7 @@ namespace System.Reactive.Concurrency
 	{
 		IComparer<TAbsolute> comparer;
 		
-		public ScheduledItem (TAbsolute dueTime, IComparer<TAbsolute> comparer)
+		protected ScheduledItem (TAbsolute dueTime, IComparer<TAbsolute> comparer)
 		{
 			DueTime = dueTime;
 			this.comparer = comparer;
@@ -28,20 +28,66 @@ namespace System.Reactive.Concurrency
 		
 		public TAbsolute DueTime { get; private set; }
 		
-		public bool IsCancelled { get; private set; }
+		public bool IsCanceled { get; private set; }
 		
 		public void Cancel ()
 		{
-			IsCancelled = true;
+			IsCanceled = true;
 		}
 
 		public void Invoke ()
 		{
-			if (!IsCancelled)
+			if (!IsCanceled)
 				InvokeCore ();
 		}
 		
 		protected abstract IDisposable InvokeCore ();
+		
+		public override bool Equals (object obj)
+		{
+			var other = obj as ScheduledItem<TAbsolute>;
+			return Equals (other);
+		}
+
+		bool Equals (ScheduledItem<TAbsolute> other)
+		{
+			return other != null && CompareTo (other) == 0;
+		}
+
+		public override int GetHashCode ()
+		{
+			return DueTime.GetHashCode ();
+		}
+
+		public static bool operator == (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (left, null) ? object.ReferenceEquals (right, null) : left.Equals (right);
+		}
+
+		public static bool operator != (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (left, null) ? !object.ReferenceEquals (right, null) : !left.Equals (right);
+		}
+
+		public static bool operator > (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (left, null) ? false : left.CompareTo (right) > 0;
+		}
+		
+		public static bool operator >= (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (left, null) ? object.ReferenceEquals (right, null) : left.CompareTo (right) >= 0;
+		}
+
+		public static bool operator < (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (right, null) ? false : right.CompareTo (left) > 0;
+		}
+		
+		public static bool operator <= (ScheduledItem<TAbsolute> left, ScheduledItem<TAbsolute> right)
+		{
+			return object.ReferenceEquals (right, null) ? object.ReferenceEquals (left, null) : right.CompareTo (left) >= 0;
+		}
 	}
 	
 #if REACTIVE_2_0

@@ -3,6 +3,9 @@ using System;
 namespace System.Reactive.Concurrency
 {
 	public abstract class LocalScheduler : IScheduler, IStopwatchProvider
+#if REACTIVE_2_0
+		, IServiceProvider
+#endif
 	{
 		protected LocalScheduler ()
 		{
@@ -28,6 +31,13 @@ namespace System.Reactive.Concurrency
 		{
 			throw new NotImplementedException ();
 		}
+
+#if REACTIVE_2_0
+		object IServiceProvider.GetService (Type serviceType)
+		{
+			throw new System.NotImplementedException ();
+		}
+#endif
 	}
 }
 

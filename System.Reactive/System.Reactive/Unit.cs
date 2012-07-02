@@ -34,5 +34,11 @@ namespace System.Reactive
 		{
 			return 0;
 		}
+
+		public override string ToString ()
+		{
+			// FIXME: return the actual value
+			return string.Format ("[Unit]");
+		}
 	}
 }

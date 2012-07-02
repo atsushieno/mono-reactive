@@ -2,7 +2,7 @@ using System;
 
 namespace System.Reactive.Concurrency
 {
-	public sealed class AsyncLock
+	public sealed class AsyncLock : IDisposable
 	{
 		public AsyncLock ()
 		{

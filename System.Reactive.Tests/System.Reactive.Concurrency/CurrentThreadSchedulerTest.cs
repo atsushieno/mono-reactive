@@ -28,7 +28,7 @@ namespace System.Reactive.Concurrency.Tests
 			DateTime start = DateTime.Now;
 			TimeSpan span = TimeSpan.FromMilliseconds (100);
 			var dis = Scheduler.CurrentThread.Schedule<object> (null, span, (sch, stat) => {});
-			Assert.IsFalse (Scheduler.CurrentThread.ScheduleRequired, "#0"); // premise
+			Assert.IsFalse (Scheduler.CurrentThread.IsScheduleRequired, "#0"); // premise
 			Assert.IsTrue (DateTime.Now - start >= span, "#1");
 			dis.Dispose ();
 		}
