@@ -11,6 +11,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Joins;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Reactive.Linq
 {
@@ -278,10 +279,10 @@ namespace System.Reactive.Linq
 			return Catch (new IObservable<TSource> [] {first, second});
 		}
 		
-		public static IObservable<TResult> CombineLatest<TFirst, TSecond, TResult> (
-			this IObservable<TFirst> first,
-			IObservable<TSecond> second,
-			Func<TFirst, TSecond, TResult> resultSelector)
+		public static IObservable<TResult> CombineLatest<TSource1, TSource2, TResult> (
+			this IObservable<TSource1> first,
+			IObservable<TSource2> second,
+			Func<TSource1, TSource2, TResult> resultSelector)
 		{
 			if (first == null)
 				throw new ArgumentNullException ("first");
@@ -290,8 +291,8 @@ namespace System.Reactive.Linq
 
 			return new ColdObservableEach<TResult> (sub => {
 			// ----
-			TFirst fv = default (TFirst);
-			TSecond sv = default (TSecond);
+			TSource1 fv = default (TSource1);
+			TSource2 sv = default (TSource2);
 			bool first_started = false, second_started = false, first_completed = false, second_completed = false;
 			var dis1 = first.Subscribe (
 				f => { fv = f; first_started = true; if (second_started) sub.OnNext (resultSelector (fv, sv)); },
@@ -421,18 +422,18 @@ namespace System.Reactive.Linq
 			}, DefaultColdScheduler);
 		}
 		
-		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, Action> subscribe)
+		public static IObservable<TResult> Create<TResult> (Func<IObserver<TResult>, Action> subscribe)
 		{
-			return Create<TSource> (observer => Disposable.Create (subscribe (observer)));
+			return Create<TResult> (observer => Disposable.Create (subscribe (observer)));
 		}
 		
-		public static IObservable<TSource> Create<TSource> (Func<IObserver<TSource>, IDisposable> subscribe)
+		public static IObservable<TResult> Create<TResult> (Func<IObserver<TResult>, IDisposable> subscribe)
 		{
 			if (subscribe == null)
 				throw new ArgumentNullException ("subscribe");
 
 
-			return new SimpleDisposableObservable<TSource> (subscribe);
+			return new SimpleDisposableObservable<TResult> (subscribe);
 		}
 		
 		public static IObservable<TSource> DefaultIfEmpty<TSource> (this IObservable<TSource> source)
@@ -470,12 +471,12 @@ namespace System.Reactive.Linq
 			}
 		}
 		
-		public static IObservable<TValue> Defer<TValue> (Func<IObservable<TValue>> observableFactory)
+		public static IObservable<TResult> Defer<TResult> (Func<IObservable<TResult>> observableFactory)
 		{
 			if (observableFactory == null)
 				throw new ArgumentNullException ("observableFactory");
 
-			return new DeferredObservable<TValue> (observableFactory);
+			return new DeferredObservable<TResult> (observableFactory);
 		}
 		
 		public static IObservable<TSource> Delay<TSource> (this IObservable<TSource> source, DateTimeOffset dueTime)
@@ -2041,19 +2042,19 @@ namespace System.Reactive.Linq
 			return Start<Unit> (() => { action (); return Unit.Default; }, scheduler);
 		}
 		
-		public static IObservable<TSource> Start<TSource> (Func<TSource> function)
+		public static IObservable<TResult> Start<TResult> (Func<TResult> function)
 		{
 			return Start (function, Scheduler.ThreadPool);
 		}
 		
-		public static IObservable<TSource> Start<TSource> (Func<TSource> function, IScheduler scheduler)
+		public static IObservable<TResult> Start<TResult> (Func<TResult> function, IScheduler scheduler)
 		{
 			if (function == null)
 				throw new ArgumentNullException ("function");
 			if (scheduler == null)
 				throw new ArgumentNullException ("scheduler");
 
-			return new HotObservable<TSource> ((sub) => {
+			return new HotObservable<TResult> ((sub) => {
 				var ret = function ();
 				sub.OnNext (ret);
 				sub.OnCompleted ();
@@ -2593,7 +2594,7 @@ namespace System.Reactive.Linq
 			return () => Start (action, scheduler);
 		}
 		
-		public static Func<TSource, IObservable<Unit>> ToAsync<TSource> (this Action<TSource> action)
+		public static Func<TArg1, IObservable<Unit>> ToAsync<TArg1> (this Action<TArg1> action)
 		{
 			return action.ToAsync (Scheduler.ThreadPool);
 		}
@@ -2603,7 +2604,7 @@ namespace System.Reactive.Linq
 			return function.ToAsync (Scheduler.ThreadPool);
 		}
 		
-		public static Func<TSource, IObservable<Unit>> ToAsync<TSource> (this Action<TSource> action, IScheduler scheduler)
+		public static Func<TArg1, IObservable<Unit>> ToAsync<TArg1> (this Action<TArg1> action, IScheduler scheduler)
 		{
 			return (s) => Start (() => action (s), scheduler);
 		}
@@ -2613,12 +2614,12 @@ namespace System.Reactive.Linq
 			return () => Start (function, scheduler);
 		}
 		
-		public static Func<T, IObservable<TResult>> ToAsync<T, TResult> (this Func<T, TResult> function)
+		public static Func<TArg1, IObservable<TResult>> ToAsync<TArg1, TResult> (this Func<TArg1, TResult> function)
 		{
 			return function.ToAsync (Scheduler.ThreadPool);
 		}
 		
-		public static Func<T, IObservable<TResult>> ToAsync<T, TResult> (this Func<T, TResult> function, IScheduler scheduler)
+		public static Func<TArg1, IObservable<TResult>> ToAsync<TArg1, TResult> (this Func<TArg1, TResult> function, IScheduler scheduler)
 		{
 			return (t) => Start (() => function (t), scheduler);
 		}
@@ -2785,9 +2786,9 @@ namespace System.Reactive.Linq
 			}, scheduler);
 		}
 		
-		public static IObservable<TSource> Using<TSource, TResource> (
+		public static IObservable<TResult> Using<TResult, TResource> (
 			Func<TResource> resourceFactory,
-			Func<TResource, IObservable<TSource>> observableFactory)
+			Func<TResource, IObservable<TResult>> observableFactory)
 			where TResource : IDisposable
 		{
 			if (resourceFactory == null)
@@ -2795,7 +2796,7 @@ namespace System.Reactive.Linq
 			if (observableFactory == null)
 				throw new ArgumentNullException ("observableFactory");
 
-			return new ColdObservableEach<TSource> (sub => {
+			return new ColdObservableEach<TResult> (sub => {
 			// ----
 			var dis = new CompositeDisposable ();
 			var rdis = resourceFactory ();
@@ -2846,10 +2847,10 @@ namespace System.Reactive.Linq
 			}, DefaultColdScheduler);
 		}
 		
-		public static IObservable<TResult> Zip<TFirst, TSecond, TResult> (
-			this IObservable<TFirst> first,
-			IEnumerable<TSecond> second,
-			Func<TFirst, TSecond, TResult> resultSelector)
+		public static IObservable<TResult> Zip<TSource1, TSource2, TResult> (
+			this IObservable<TSource1> first,
+			IEnumerable<TSource2> second,
+			Func<TSource1, TSource2, TResult> resultSelector)
 		{
 			if (second == null)
 				throw new ArgumentNullException ("second");
@@ -2857,10 +2858,10 @@ namespace System.Reactive.Linq
 			return Zip (first, second.ToObservable (), resultSelector);
 		}
 		
-		public static IObservable<TResult> Zip<TFirst, TSecond, TResult>(
-			this IObservable<TFirst> first,
-			IObservable<TSecond> second,
-			Func<TFirst, TSecond, TResult> resultSelector)
+		public static IObservable<TResult> Zip<TSource1, TSource2, TResult>(
+			this IObservable<TSource1> first,
+			IObservable<TSource2> second,
+			Func<TSource1, TSource2, TResult> resultSelector)
 		{
 			if (first == null)
 				throw new ArgumentNullException ("first");
@@ -2932,22 +2933,24 @@ namespace System.Reactive.Linq
 		{
 			throw new NotImplementedException ();
 		}
-		
+
+		/*
 		public static IObservable<TResult> Let<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,IObservable<TResult>> selector)
 		{
 			throw new NotImplementedException ();
 		}
+		*/
 		
-		public static IObservable<TResult> ManySelect<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,TResult> selector)
+		public static IObservable<TResult> SelectMany<TSource, TResult> (this IObservable<TSource> source, Func<TSource,Task<TResult>> selector)
 		{
 			throw new NotImplementedException ();
 		}
 		
-		public static IObservable<TResult> ManySelect<TSource, TResult> (this IObservable<TSource> source, Func<IObservable<TSource>,TResult> selector, IScheduler scheduler)
+		public static IObservable<TResult> SelectMany<TSource, TResult> (this IObservable<TSource> source, Func<TSource,CancellationToken,Task<TResult>> selector)
 		{
 			throw new NotImplementedException ();
 		}
-		
+
 		public static IObservable<TSource> Throttle<TSource, TThrottle> (this IObservable<TSource> source, Func<TSource,IObservable<TThrottle>> throttleDurationSelector)
 		{
 			throw new NotImplementedException ();
