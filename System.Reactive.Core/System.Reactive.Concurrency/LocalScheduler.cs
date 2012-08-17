@@ -33,7 +33,7 @@ namespace System.Reactive.Concurrency
 		}
 
 #if REACTIVE_2_0
-		object IServiceProvider.GetService (Type serviceType)
+		public object GetService (Type serviceType)
 		{
 			throw new System.NotImplementedException ();
 		}

@@ -7,7 +7,7 @@ namespace System.Reactive
 	[SerializableAttribute]
 	public abstract class Notification<T> : IEquatable<Notification<T>>
 	{
-		internal Notification ()
+		protected Notification ()
 		{
 		}
 
@@ -36,15 +36,6 @@ namespace System.Reactive
 		public static bool operator != (Notification<T> left, Notification<T> right)
 		{
 			return (object) left == null ? (object) right != null : !left.Equals (right);
-		}
-
-		// These were added against the documentation (they lack but they should exist)
-		public override int GetHashCode ()
-		{
-			return
-				(int) Kind +
-				((Exception != null ? Exception.GetHashCode () : 0) << 9) +
-				(HasValue ? Value.GetHashCode () : 0);
 		}
 
 		public IObservable<T> ToObservable ()
@@ -85,8 +76,20 @@ namespace System.Reactive
 		}
 #endif
 
+		internal abstract class InternalNotification<T> : Notification<T>
+		{
+			// These were added against the documentation (they lack but they should exist)
+			public override int GetHashCode ()
+			{
+				return
+					(int) Kind +
+						((Exception != null ? Exception.GetHashCode () : 0) << 9) +
+						(HasValue ? Value.GetHashCode () : 0);
+			}
+		}
+
 		// It is public in Microsoft.Phone.Reactive
-		internal class OnCompleted : Notification<T>
+		internal class OnCompleted : InternalNotification<T>
 		{
 			public override Exception Exception {
 				get { return null; }
@@ -130,7 +133,7 @@ namespace System.Reactive
 		}
 
 		// It is public in Microsoft.Phone.Reactive
-		internal class OnError : Notification<T>
+		internal class OnError : InternalNotification<T>
 		{
 			Exception error;
 			
@@ -182,7 +185,7 @@ namespace System.Reactive
 		}
 
 		// It is public in Microsoft.Phone.Reactive
-		internal class OnNext : Notification<T>
+		internal class OnNext : InternalNotification<T>
 		{
 			T value;
 			

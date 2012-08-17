@@ -14,6 +14,11 @@ namespace System.Reactive
 			return new WrappedObserver<T> (observer);
 		}
 		
+		public static IObserver<T> Checked<T> (this IObserver<T> observer)
+		{
+			throw new NotImplementedException ();
+		}
+
 		public static IObserver<T> Create<T> (Action<T> onNext)
 		{
 			return Create (onNext, () => {});
@@ -42,6 +47,13 @@ namespace System.Reactive
 		
 		public static IObserver<T> Synchronize<T> (IObserver<T> observer)
 		{
+			return Synchronize (observer, false);
+		}
+
+		public static IObserver<T> Synchronize<T> (IObserver<T> observer, bool preventReentrancy)
+		{
+			if (preventReentrancy)
+				throw new NotImplementedException ();
 			return Synchronize (observer, new object ());
 		}
 		
@@ -50,6 +62,11 @@ namespace System.Reactive
 			return new SynchronizedObserver<T> (observer, gate);
 		}
 		
+		public static IObserver<T> Synchronize<T> (IObserver<T> observer, AsyncLock gate)
+		{
+			throw new NotImplementedException ();
+		}
+
 		public static Action<Notification<T>> ToNotifier<T> (this IObserver<T> observer)
 		{
 			if (observer == null)

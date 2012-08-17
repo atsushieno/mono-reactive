@@ -146,7 +146,7 @@ namespace System.Reactive.Concurrency
 #else
 		internal
 #endif
-		static void AddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
+		static void InternalAddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
 		{
 			// It is most likely appended in order, so don't use ineffective List.Sort(). Simple comparison makes it faster.
 			// Also, it is important that events are processed *in order* when they are scheduled at the same moment.
@@ -164,6 +164,21 @@ namespace System.Reactive.Concurrency
 		}
 		
 #if REACTIVE_2_0
+		public static ISchedulerLongRunning AsLongRunning (this IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public static ISchedulerPeriodic AsPeriodic (this IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public static IStopwatchProvider AsStopwatchProvider (this IScheduler scheduler)
+		{
+			throw new NotImplementedException ();
+		}
+		
 		public static IScheduler Catch<TException> (this IScheduler scheduler, Func<TException,bool> handler)
 			where TException : Exception
 		{

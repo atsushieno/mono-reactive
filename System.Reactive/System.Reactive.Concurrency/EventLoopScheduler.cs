@@ -7,7 +7,7 @@ using System.Reactive.Disposables;
 namespace System.Reactive.Concurrency
 {
 #if REACTIVE_2_0
-	public sealed class EventLoopScheduler : LocalScheduler, IDisposable
+	public sealed class EventLoopScheduler : LocalScheduler, IDisposable, ISchedulerPeriodic
 #else
 	public sealed class EventLoopScheduler : IScheduler, IDisposable
 #endif
@@ -69,6 +69,12 @@ namespace System.Reactive.Concurrency
 		}
 		
 #if REACTIVE_2_0
+
+		public IDisposable SchedulePeriodic<TState> (TState state, TimeSpan period, Func<TState, TState> action)
+		{
+			throw new NotImplementedException ();
+		}
+
 		public override IStopwatch StartStopwatch ()
 		{
 			throw new NotImplementedException ();

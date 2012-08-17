@@ -20,12 +20,12 @@ namespace System.Reactive.Joins
 {");
 
 		for (int i = 2; i <= 16; i++) {
-			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
-			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "IObservable<T" + t + "> t" + t).ToArray ());
+			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "TSource" + t).ToArray ());
+			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "IObservable<TSource" + t + "> t" + t).ToArray ());
 			string s3 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
-			string s4 = String.Join ("\t\t", (from t in Enumerable.Range (1, i) select "IObservable<T" + t + "> t" + t + ";\n").ToArray ());
+			string s4 = String.Join ("\t\t", (from t in Enumerable.Range (1, i) select "IObservable<TSource" + t + "> t" + t + ";\n").ToArray ());
 			string s5 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "this.t" + t + " = t" + t + ";").ToArray ());
-			string s6 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "var q" + t + " = new Queue<T" + t + "> ();").ToArray ());
+			string s6 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "var q" + t + " = new Queue<TSource" + t + "> ();").ToArray ());
 
 			string s7 = null;
 			foreach (var t in Enumerable.Range (1, i)) {
@@ -33,7 +33,7 @@ namespace System.Reactive.Joins
 				string s9 = String.Join (", ", (from t2 in Enumerable.Range (1, i) select "q" + t2 + ".Dequeue ()").ToArray ());
 
 				s7 += String.Format (@"
-			t{0}.Subscribe (Observer.Create<T{0}> (t => {{
+			t{0}.Subscribe (Observer.Create<TSource{0}> (t => {{
 				q{0}.Enqueue (t);
 				if ({1})
 					sub.OnNext (selector ({2}));
@@ -56,9 +56,9 @@ namespace System.Reactive.Joins
 		{4}
 
 		{6}
-		public Pattern<{0}, T{1}> And<T{1}> (IObservable<T{1}> other)
+		public Pattern<{0}, TSource{1}> And<TSource{1}> (IObservable<TSource{1}> other)
 		{{
-			return new Pattern<{0}, T{1}> ({3}, other);
+			return new Pattern<{0}, TSource{1}> ({3}, other);
 		}}
 		{7}
 

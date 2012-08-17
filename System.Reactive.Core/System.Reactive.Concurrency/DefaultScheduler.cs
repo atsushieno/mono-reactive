@@ -2,7 +2,7 @@ using System;
 
 namespace System.Reactive.Concurrency
 {
-	public sealed class DefaultScheduler : LocalScheduler
+	public sealed class DefaultScheduler : LocalScheduler, ISchedulerPeriodic
 	{
 		static readonly DefaultScheduler instance = new DefaultScheduler ();
 
@@ -26,6 +26,11 @@ namespace System.Reactive.Concurrency
 
 #if REACTIVE_2_0
 		public IDisposable SchedulePeriodic<TState> (TState state, TimeSpan period, Func<TState, TState> action)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public object GetService (Type serviceType)
 		{
 			throw new NotImplementedException ();
 		}

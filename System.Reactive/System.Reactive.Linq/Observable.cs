@@ -2972,11 +2972,13 @@ namespace System.Reactive.Linq
 		{
 			throw new NotImplementedException ();
 		}
-		
+
+		/*
 		public static ListObservable<TSource> ToListObservable<TSource> (this IObservable<TSource> source)
 		{
 			throw new NotImplementedException ();
 		}
+		*/
 #endif
 	}
 }

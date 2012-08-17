@@ -6,7 +6,12 @@ namespace System.Reactive.PlatformServices
 	[EditorBrowsable (EditorBrowsableState.Advanced)]
 	public class SystemClockChangedEventArgs : EventArgs
 	{
-		internal SystemClockChangedEventArgs (DateTimeOffset oldTime, DateTimeOffset newTime)
+		public SystemClockChangedEventArgs ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public SystemClockChangedEventArgs (DateTimeOffset oldTime, DateTimeOffset newTime)
 		{
 			OldTime = oldTime;
 			NewTime = newTime;

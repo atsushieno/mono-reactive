@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace System.Reactive.Linq
 {
+	/*
 	public class ListObservable<T> : IList<T>, IObservable<T>
 	{
 		public ListObservable ()
@@ -86,5 +87,6 @@ namespace System.Reactive.Linq
 			throw new System.NotImplementedException ();
 		}
 	}
+	*/
 }
 

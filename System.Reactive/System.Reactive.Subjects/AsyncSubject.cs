@@ -71,5 +71,16 @@ namespace System.Reactive.Subjects
 
 			return Disposable.Create (() => observers.Remove (observer));
 		}
+
+#if REACTIVE_2_0
+		public T GetResult ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public bool IsCompleted {
+			get { throw new NotImplementedException (); }
+		}
+#endif
 	}
 }

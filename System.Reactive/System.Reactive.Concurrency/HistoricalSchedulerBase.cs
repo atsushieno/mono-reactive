@@ -35,5 +35,12 @@ namespace System.Reactive.Concurrency
 		{
 			return timeSpan;
 		}
+
+#if REACTIVE_2_0
+		object IServiceProvider.GetService (Type serviceType)
+		{
+			throw new NotImplementedException ();
+		}
+#endif
 	}
 }

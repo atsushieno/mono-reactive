@@ -6,7 +6,7 @@ using System.Reactive.Disposables;
 namespace System.Reactive.Concurrency
 {
 #if REACTIVE_2_0
-	public sealed class ThreadPoolScheduler : LocalScheduler, ISchedulerLongRunning
+	public sealed class ThreadPoolScheduler : LocalScheduler, ISchedulerLongRunning, ISchedulerPeriodic
 #else
 	public sealed class ThreadPoolScheduler : IScheduler
 #endif
@@ -69,6 +69,11 @@ namespace System.Reactive.Concurrency
 		}
 
 		public IDisposable ScheduleLongRunning<TState> (TState state, Action<TState, ICancelable> action)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public IDisposable SchedulePeriodic<TState> (TState state, TimeSpan period, Func<TState, TState> action)
 		{
 			throw new NotImplementedException ();
 		}

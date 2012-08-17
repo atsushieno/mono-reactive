@@ -20,7 +20,7 @@ namespace System.Reactive.Linq
 		");
 
 		for (int i = 1; i <= 14; i++) {
-			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
+			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "TArg" + t).ToArray ());
 			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			Console.WriteLine (@"
 		public static Func<{0}, IObservable<Unit>> FromAsyncPattern<{0}> (Func<{0}, AsyncCallback, object, IAsyncResult> begin, Action<IAsyncResult> end)
@@ -56,7 +56,7 @@ namespace System.Reactive.Linq
 		}
 
 		for (int i = 2; i <= 16; i++) {
-			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "T" + t).ToArray ());
+			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "TArg" + t).ToArray ());
 			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			
 			Console.WriteLine (@"

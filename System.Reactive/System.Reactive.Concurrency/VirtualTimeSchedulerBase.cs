@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace System.Reactive.Concurrency
 {
 	public abstract class VirtualTimeSchedulerBase<TAbsolute, TRelative>
-		: IScheduler
+		: IScheduler, IServiceProvider, IStopwatchProvider
 		where TAbsolute : IComparable<TAbsolute> // strictly to say, this is not in Rx1, but it must be anyways.
 	{
 		protected VirtualTimeSchedulerBase ()
@@ -95,9 +95,19 @@ namespace System.Reactive.Concurrency
 		}
 
 #if REACTIVE_2_0
-		public IStopwatch StartStopwatch ()
+		public object GetService (Type serviceType)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public virtual IStopwatch StartStopwatch ()
 		{
 			// what is this method for?
+			throw new NotImplementedException ();
+		}
+
+		public virtual void Sleep (TRelative time)
+		{
 			throw new NotImplementedException ();
 		}
 #endif

@@ -12,18 +12,23 @@ namespace System.Reactive.Joins
 		}
 	}
 	
-	internal class Pattern<T> : Pattern
+	public class Pattern<TSource1> : Pattern
 	{
-		internal Pattern (IObservable<T> t)
+		internal Pattern (IObservable<TSource1> t)
 		{
 			this.t = t;
 		}
 		
-		IObservable<T> t;
+		IObservable<TSource1> t;
 
-		public IObservable<TResult> AsObservable<TResult> (Func<T, TResult> selector)
+		internal IObservable<TResult> AsObservable<TResult> (Func<TSource1, TResult> selector)
 		{
 			return t.Select (selector);
+		}
+
+		public Plan<TResult> Then<TResult> (Func<TSource1,TResult> selector)
+		{
+			throw new NotImplementedException ();
 		}
 	}
 }

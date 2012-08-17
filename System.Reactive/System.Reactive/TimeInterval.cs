@@ -4,7 +4,7 @@ using System.Reactive.Concurrency;
 namespace System.Reactive
 {
 	[SerializableAttribute]
-	public struct TimeInterval<T>
+	public struct TimeInterval<T> : IEquatable<TimeInterval<T>>
 	{
 		T value;
 		TimeSpan interval;
@@ -24,7 +24,7 @@ namespace System.Reactive
 			return obj is TimeInterval<T> ? Equals ((TimeInterval<T>) obj) : false;
 		}
 		
-		bool Equals (TimeInterval<T> other)
+		public bool Equals (TimeInterval<T> other)
 		{
 			return interval == other.interval && value.Equals (other.value);
 		}

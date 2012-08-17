@@ -5,7 +5,7 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
-	public class HistoricalScheduler : HistoricalSchedulerBase
+	public class HistoricalScheduler : HistoricalSchedulerBase, IServiceProvider, IStopwatchProvider
 	{
 #if REACTIVE_2_0
 		public HistoricalScheduler ()
@@ -29,13 +29,13 @@ namespace System.Reactive.Concurrency
 		{
 			return tasks.FirstOrDefault ();
 		}
-		
+
 		public override IDisposable ScheduleAbsolute<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
 			ScheduledItemImpl<DateTimeOffset> t = null;
 			t = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => { tasks.Remove (t); return action (this, state); });
 			
-			Scheduler.AddTask (tasks, t);
+			Scheduler.InternalAddTask (tasks, t);
 			
 			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)), t);
 		}

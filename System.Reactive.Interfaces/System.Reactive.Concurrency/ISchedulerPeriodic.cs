@@ -1,6 +1,6 @@
 using System;
 
-namespace System.Reactive.Interfaces
+namespace System.Reactive.Concurrency
 {
 	public interface ISchedulerPeriodic
 	{

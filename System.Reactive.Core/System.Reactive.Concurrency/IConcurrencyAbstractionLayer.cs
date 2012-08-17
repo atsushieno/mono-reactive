@@ -12,6 +12,9 @@ namespace System.Reactive.Concurrency
 		IDisposable StartTimer (Action<object> action, object state, TimeSpan dueTime);
 		IStopwatch StartStopwatch ();
 		void Sleep (TimeSpan timeout);
+		void StartThread (Action<object> observer, object gate);
+
+		bool SupportsLongRunning { get; }
 	}
 }
 
