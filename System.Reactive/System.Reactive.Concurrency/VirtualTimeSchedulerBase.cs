@@ -95,18 +95,23 @@ namespace System.Reactive.Concurrency
 		}
 
 #if REACTIVE_2_0
-		public object GetService (Type serviceType)
+		protected virtual object GetService (Type serviceType)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public virtual IStopwatch StartStopwatch ()
+		object IServiceProvider.GetService (Type serviceType)
+		{
+			return GetService (serviceType);
+		}
+
+		public IStopwatch StartStopwatch ()
 		{
 			// what is this method for?
 			throw new NotImplementedException ();
 		}
 
-		public virtual void Sleep (TRelative time)
+		public void Sleep (TRelative time)
 		{
 			throw new NotImplementedException ();
 		}

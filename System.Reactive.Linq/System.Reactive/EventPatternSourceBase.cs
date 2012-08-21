@@ -2,19 +2,19 @@ using System;
 
 namespace System.Reactive
 {
-	public class EventPatternSourceBase<TSender,TEventArgs>
+	public abstract class EventPatternSourceBase<TSender,TEventArgs> where TEventArgs : EventArgs
 	{
-		public EventPatternSourceBase (IObservable<EventPattern<TSender,TEventArgs>> source, Action<Action<TSender,TEventArgs>, EventPattern<TSender,TEventArgs>> action)
+		protected EventPatternSourceBase (IObservable<EventPattern<TSender,TEventArgs>> source, Action<Action<TSender,TEventArgs>, EventPattern<TSender,TEventArgs>> invokeHandler)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public void Add (Delegate handler, Action<TSender,TEventArgs> invoke)
+		protected void Add (Delegate handler, Action<TSender,TEventArgs> invoke)
 		{
 			throw new NotImplementedException ();
 		}
 
-		public void Remove (Delegate handler)
+		protected void Remove (Delegate handler)
 		{
 			throw new NotImplementedException ();
 		}

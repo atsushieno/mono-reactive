@@ -8,7 +8,7 @@ using TSender = System.Object;
 namespace System.Reactive
 {
 #if REACTIVE_2_0
-	public class EventPattern<TEventArgs> : EventPattern<object, TEventArgs>
+	public class EventPattern<TEventArgs> : EventPattern<object, TEventArgs> where TEventArgs : EventArgs
 	{
 		public EventPattern (object sender, TEventArgs e)
 			: base (sender, e)
@@ -16,7 +16,7 @@ namespace System.Reactive
 		}
 	}
 	
-	public class EventPattern<TSender,TEventArgs> : IEventPattern<TSender, TEventArgs>, IEquatable<EventPattern<TSender,TEventArgs>>
+	public class EventPattern<TSender,TEventArgs> : IEventPattern<TSender, TEventArgs>, IEquatable<EventPattern<TSender,TEventArgs>> where TEventArgs : EventArgs
 #else
 	public class EventPattern<TEventArgs> : IEquatable<EventPattern<TEventArgs>>
 		where TEventArgs : EventArgs
