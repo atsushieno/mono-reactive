@@ -445,14 +445,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2> (this Action<TArg1, TArg2> function)
+		public static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2> (this Action<TArg1, TArg2> action)
 		{
-			return (t1, t2) => Start (() => function (t1, t2));
+			return (t1, t2) => Start (() => action (t1, t2));
 		}
 		
-		public static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2> (this Action<TArg1, TArg2> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, IObservable<Unit>> ToAsync<TArg1, TArg2> (this Action<TArg1, TArg2> action, IScheduler scheduler)
 		{
-			return (t1, t2) => Start (() => function (t1, t2), scheduler);
+			return (t1, t2) => Start (() => action (t1, t2), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, IObservable<TResult>> ToAsync<TArg1, TArg2, TResult> (this Func<TArg1, TArg2, TResult> function)
@@ -466,14 +466,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3> (this Action<TArg1, TArg2, TArg3> function)
+		public static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3> (this Action<TArg1, TArg2, TArg3> action)
 		{
-			return (t1, t2, t3) => Start (() => function (t1, t2, t3));
+			return (t1, t2, t3) => Start (() => action (t1, t2, t3));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3> (this Action<TArg1, TArg2, TArg3> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3> (this Action<TArg1, TArg2, TArg3> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3) => Start (() => function (t1, t2, t3), scheduler);
+			return (t1, t2, t3) => Start (() => action (t1, t2, t3), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TResult> (this Func<TArg1, TArg2, TArg3, TResult> function)
@@ -487,14 +487,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4> (this Action<TArg1, TArg2, TArg3, TArg4> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4> (this Action<TArg1, TArg2, TArg3, TArg4> action)
 		{
-			return (t1, t2, t3, t4) => Start (() => function (t1, t2, t3, t4));
+			return (t1, t2, t3, t4) => Start (() => action (t1, t2, t3, t4));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4> (this Action<TArg1, TArg2, TArg3, TArg4> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4> (this Action<TArg1, TArg2, TArg3, TArg4> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4) => Start (() => function (t1, t2, t3, t4), scheduler);
+			return (t1, t2, t3, t4) => Start (() => action (t1, t2, t3, t4), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TResult> function)
@@ -508,14 +508,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5> action)
 		{
-			return (t1, t2, t3, t4, t5) => Start (() => function (t1, t2, t3, t4, t5));
+			return (t1, t2, t3, t4, t5) => Start (() => action (t1, t2, t3, t4, t5));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5) => Start (() => function (t1, t2, t3, t4, t5), scheduler);
+			return (t1, t2, t3, t4, t5) => Start (() => action (t1, t2, t3, t4, t5), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TResult> function)
@@ -529,14 +529,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> action)
 		{
-			return (t1, t2, t3, t4, t5, t6) => Start (() => function (t1, t2, t3, t4, t5, t6));
+			return (t1, t2, t3, t4, t5, t6) => Start (() => action (t1, t2, t3, t4, t5, t6));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6) => Start (() => function (t1, t2, t3, t4, t5, t6), scheduler);
+			return (t1, t2, t3, t4, t5, t6) => Start (() => action (t1, t2, t3, t4, t5, t6), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult> function)
@@ -550,14 +550,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7) => Start (() => function (t1, t2, t3, t4, t5, t6, t7));
+			return (t1, t2, t3, t4, t5, t6, t7) => Start (() => action (t1, t2, t3, t4, t5, t6, t7));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7) => Start (() => function (t1, t2, t3, t4, t5, t6, t7), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7) => Start (() => action (t1, t2, t3, t4, t5, t6, t7), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult> function)
@@ -571,14 +571,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8));
+			return (t1, t2, t3, t4, t5, t6, t7, t8) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult> function)
@@ -592,14 +592,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TResult> function)
@@ -613,14 +613,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TResult> function)
@@ -634,14 +634,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TResult> function)
@@ -655,14 +655,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TResult> function)
@@ -676,14 +676,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TResult> function)
@@ -697,14 +697,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TResult> function)
@@ -718,14 +718,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TResult> function)
@@ -739,14 +739,14 @@ namespace System.Reactive.Linq
 		}
 		
 
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> function)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> action)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16));
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16));
 		}
 		
-		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> function, IScheduler scheduler)
+		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, IObservable<Unit>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> (this Action<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16> action, IScheduler scheduler)
 		{
-			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16), scheduler);
+			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) => Start (() => action (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16), scheduler);
 		}
 		
 		public static Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, IObservable<TResult>> ToAsync<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, TResult> (this Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16, TResult> function)

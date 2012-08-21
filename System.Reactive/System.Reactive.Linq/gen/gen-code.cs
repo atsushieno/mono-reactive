@@ -60,14 +60,14 @@ namespace System.Reactive.Linq
 			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "t" + t).ToArray ());
 			
 			Console.WriteLine (@"
-		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> function)
+		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> action)
 		{{
-			return ({1}) => Start (() => function ({1}));
+			return ({1}) => Start (() => action ({1}));
 		}}
 		
-		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> function, IScheduler scheduler)
+		public static Func<{0}, IObservable<Unit>> ToAsync<{0}> (this Action<{0}> action, IScheduler scheduler)
 		{{
-			return ({1}) => Start (() => function ({1}), scheduler);
+			return ({1}) => Start (() => action ({1}), scheduler);
 		}}
 		
 		public static Func<{0}, IObservable<TResult>> ToAsync<{0}, TResult> (this Func<{0}, TResult> function)
