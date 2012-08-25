@@ -26,50 +26,50 @@ namespace System.Reactive.Subjects
 				throw new ObjectDisposedException ("subject");
 		}
 		
-		Queue<Notification<T>> notifications = new Queue<Notification<T>> ();
+//		Queue<Notification<T>> notifications = new Queue<Notification<T>> ();
 		
 		public void OnCompleted ()
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0) {
+//			if (subscribed.Count > 0) {
 				if (!done)
 					// ToArray is to avoid InvalidOperationException when OnCompleted() unsubscribes item itself from the list.
 					foreach (var s in subscribed.ToArray ())
 						s.OnCompleted ();
 				done = true;
-			} else {
-				if (!notifications.Any (n => n.Kind == NotificationKind.OnCompleted))
-					notifications.Enqueue (Notification.CreateOnCompleted<T> ());
-			}
+//			} else {
+//				if (!notifications.Any (n => n.Kind == NotificationKind.OnCompleted))
+//					notifications.Enqueue (Notification.CreateOnCompleted<T> ());
+//			}
 		}
 		
 		public void OnError (Exception error)
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0) {
+//			if (subscribed.Count > 0) {
 				if (!done)
 					// ToArray is to avoid InvalidOperationException when OnError() unsubscribes item itself from the list.
 					foreach (var s in subscribed.ToArray ())
 						s.OnError (error);
 				done = true;
-			} else {
-				if (!notifications.Any (n => n.Kind == NotificationKind.OnError))
-					notifications.Enqueue (Notification.CreateOnError<T> (error));
-			}
+//			} else {
+//				if (!notifications.Any (n => n.Kind == NotificationKind.OnError))
+//					notifications.Enqueue (Notification.CreateOnError<T> (error));
+//			}
 		}
 		
 		public void OnNext (T value)
 		{
 			CheckDisposed ();
-			if (subscribed.Count > 0) {
+//			if (subscribed.Count > 0) {
 				if (!done)
 					// ToArray is to avoid InvalidOperationException when OnNext() unsubscribes item itself from the list.
 					foreach (var s in subscribed.ToArray ())
 						s.OnNext (value);
-			} else {
-				var n = Notification.CreateOnNext<T> (value);
-				notifications.Enqueue (n);
-			}
+//			} else {
+//				var n = Notification.CreateOnNext<T> (value);
+//				notifications.Enqueue (n);
+//			}
 		}
 		
 		List<IObserver<T>> subscribed = new List<IObserver<T>> ();
@@ -80,10 +80,10 @@ namespace System.Reactive.Subjects
 			CheckDisposed ();
 
 			// If there were registered events (OnCompleted/OnError/OnNext), they are dequeued and handled here.
-			if (notifications.Count > 0)
-				lock (notifications)
-					while (notifications.Count > 0)
-						notifications.Dequeue ().Accept (observer);
+//			if (notifications.Count > 0)
+//				lock (notifications)
+//					while (notifications.Count > 0)
+//						notifications.Dequeue ().Accept (observer);
 			subscribed.Add (observer);
 			return Disposable.Create (() => subscribed.Remove (observer));
 		}

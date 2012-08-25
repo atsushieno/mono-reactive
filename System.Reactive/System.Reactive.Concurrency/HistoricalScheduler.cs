@@ -5,7 +5,12 @@ using System.Reactive.Disposables;
 
 namespace System.Reactive.Concurrency
 {
-	public class HistoricalScheduler : HistoricalSchedulerBase, IServiceProvider, IStopwatchProvider
+	public class HistoricalScheduler
+#if REACTIVE_2_0
+		: HistoricalSchedulerBase, IServiceProvider, IStopwatchProvider
+#else
+		: HistoricalSchedulerBase
+#endif
 	{
 #if REACTIVE_2_0
 		public HistoricalScheduler ()

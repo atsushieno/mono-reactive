@@ -61,11 +61,13 @@ namespace System.Reactive
 		{
 			return new SynchronizedObserver<T> (observer, gate);
 		}
-		
+
+#if REACTIVE_2_0		
 		public static IObserver<T> Synchronize<T> (IObserver<T> observer, AsyncLock gate)
 		{
 			throw new NotImplementedException ();
 		}
+#endif
 
 		public static Action<Notification<T>> ToNotifier<T> (this IObserver<T> observer)
 		{
