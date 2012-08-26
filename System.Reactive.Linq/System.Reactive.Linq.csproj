@@ -142,6 +142,9 @@
     <Compile Include="System.Reactive\ListObservable.cs" />
     <Compile Include="System.Reactive\EventPatternSourceBase.cs" />
     <Compile Include="System.Reactive.Linq\LocalQueryMethodImplementationTypeAttribute.cs" />
+    <Compile Include="..\System.Reactive\System.Reactive.Linq\Observable.SkipTake.cs">
+      <Link>System.Reactive.Linq\Observable.SkipTake.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -970,6 +970,48 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (array, l.ToArray (), "#2");
 		}
 		
+#if REACTIVE_2_0
+		[Test]
+		public void TakeDuration ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+				.Take (TimeSpan.FromMilliseconds (500), scheduler)
+					.Subscribe (v => l.Add (v), () => l.Add (scheduler.Now.Millisecond));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = new long [] {0, 1, 2, 3, 500};
+			Assert.AreEqual (array, l.ToArray (), "#1");
+		}
+		
+		[Test]
+		public void TakeLastDuration ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+				.Take (9)
+					.TakeLast (TimeSpan.FromMilliseconds (500), scheduler)
+					.Subscribe (v => l.Add (v), () => l.Add (scheduler.Now.Millisecond));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = new long [] {4, 5, 6, 7, 8, 900};
+			Assert.AreEqual (array, l.ToArray (), "#1");
+		}
+		
+		[Test]
+		public void TakeUntilDuration ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+				.TakeUntil (scheduler.Now.AddMilliseconds (500), scheduler)
+					.Subscribe (v => l.Add (v), () => l.Add (scheduler.Now.Millisecond));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = new long [] {0, 1, 2, 3, 500};
+			Assert.AreEqual (array, l.ToArray (), "#1");
+		}
+#endif
+		
 		[Test]
 		public void TakeWhileErrorSequence ()
 		{
