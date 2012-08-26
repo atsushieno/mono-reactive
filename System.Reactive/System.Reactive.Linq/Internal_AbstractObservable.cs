@@ -16,7 +16,7 @@ namespace System.Reactive.Linq
 		Func<ISubject<T>> subject_creator;
 		
 		public ColdObservableEach (Func<ISubject<T>, IDisposable> work, IScheduler scheduler)
-			: this (work, scheduler, () => new ReplaySubject<T> (scheduler))
+			: this (work, scheduler, () => new Subject<T> ())
 		{
 		}
 		

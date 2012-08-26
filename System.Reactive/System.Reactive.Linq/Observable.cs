@@ -686,7 +686,7 @@ namespace System.Reactive.Linq
 			sub.Subscribe (observer);
 			return dis;
 			// ----
-			}, DefaultColdScheduler);
+			}, DefaultColdScheduler, () => new ReplaySubject<TSource> ());
 		}
 
 		public static IObservable<TSource> Do<TSource> (
