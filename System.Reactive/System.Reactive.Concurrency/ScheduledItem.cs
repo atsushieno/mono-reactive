@@ -43,15 +43,10 @@ namespace System.Reactive.Concurrency
 		
 		protected abstract IDisposable InvokeCore ();
 		
+		// FIXME: this should be examined
 		public override bool Equals (object obj)
 		{
-			var other = obj as ScheduledItem<TAbsolute>;
-			return Equals (other);
-		}
-
-		bool Equals (ScheduledItem<TAbsolute> other)
-		{
-			return other != null && CompareTo (other) == 0;
+			return base.Equals (obj);
 		}
 
 		public override int GetHashCode ()
