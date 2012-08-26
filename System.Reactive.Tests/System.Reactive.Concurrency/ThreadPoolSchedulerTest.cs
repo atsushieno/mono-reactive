@@ -26,6 +26,7 @@ namespace System.Reactive.Concurrency.Tests
 		}
 
 		[Test]
+		[Ignore ("This breaks NUnit execution")]
 		public void ScheduleErrorneousAction ()
 		{
 			var s = Scheduler.ThreadPool;
