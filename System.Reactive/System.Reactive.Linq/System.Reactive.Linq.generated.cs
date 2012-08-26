@@ -759,6 +759,225 @@ namespace System.Reactive.Linq
 			return (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) => Start (() => function (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16), scheduler);
 		}
 		
+#if REACTIVE_2_0
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, Func<TSource1, TSource2, TSource3,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			return When ((source1).And (source2).And (source3).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, Func<TSource1, TSource2, TSource3, TSource4,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			return When ((source1).And (source2).And (source3).And (source4).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, Func<TSource1, TSource2, TSource3, TSource4, TSource5,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, IObservable<TSource12> source12, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			if (source12 == null) throw new ArgumentNullException ("source12");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).And (source12).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, IObservable<TSource12> source12, IObservable<TSource13> source13, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			if (source12 == null) throw new ArgumentNullException ("source12");
+			if (source13 == null) throw new ArgumentNullException ("source13");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).And (source12).And (source13).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, IObservable<TSource12> source12, IObservable<TSource13> source13, IObservable<TSource14> source14, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			if (source12 == null) throw new ArgumentNullException ("source12");
+			if (source13 == null) throw new ArgumentNullException ("source13");
+			if (source14 == null) throw new ArgumentNullException ("source14");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).And (source12).And (source13).And (source14).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14, TSource15,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, IObservable<TSource12> source12, IObservable<TSource13> source13, IObservable<TSource14> source14, IObservable<TSource15> source15, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14, TSource15,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			if (source12 == null) throw new ArgumentNullException ("source12");
+			if (source13 == null) throw new ArgumentNullException ("source13");
+			if (source14 == null) throw new ArgumentNullException ("source14");
+			if (source15 == null) throw new ArgumentNullException ("source15");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).And (source12).And (source13).And (source14).And (source15).Then (resultSelector));
+		}
+		
+
+		public static IObservable<TResult> Zip<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14, TSource15, TSource16,TResult> (this IObservable<TSource1> source1, IObservable<TSource2> source2, IObservable<TSource3> source3, IObservable<TSource4> source4, IObservable<TSource5> source5, IObservable<TSource6> source6, IObservable<TSource7> source7, IObservable<TSource8> source8, IObservable<TSource9> source9, IObservable<TSource10> source10, IObservable<TSource11> source11, IObservable<TSource12> source12, IObservable<TSource13> source13, IObservable<TSource14> source14, IObservable<TSource15> source15, IObservable<TSource16> source16, Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TSource7, TSource8, TSource9, TSource10, TSource11, TSource12, TSource13, TSource14, TSource15, TSource16,TResult> resultSelector)
+		{
+			if (source1 == null) throw new ArgumentNullException ("source1");
+			if (source2 == null) throw new ArgumentNullException ("source2");
+			if (source3 == null) throw new ArgumentNullException ("source3");
+			if (source4 == null) throw new ArgumentNullException ("source4");
+			if (source5 == null) throw new ArgumentNullException ("source5");
+			if (source6 == null) throw new ArgumentNullException ("source6");
+			if (source7 == null) throw new ArgumentNullException ("source7");
+			if (source8 == null) throw new ArgumentNullException ("source8");
+			if (source9 == null) throw new ArgumentNullException ("source9");
+			if (source10 == null) throw new ArgumentNullException ("source10");
+			if (source11 == null) throw new ArgumentNullException ("source11");
+			if (source12 == null) throw new ArgumentNullException ("source12");
+			if (source13 == null) throw new ArgumentNullException ("source13");
+			if (source14 == null) throw new ArgumentNullException ("source14");
+			if (source15 == null) throw new ArgumentNullException ("source15");
+			if (source16 == null) throw new ArgumentNullException ("source16");
+			return When ((source1).And (source2).And (source3).And (source4).And (source5).And (source6).And (source7).And (source8).And (source9).And (source10).And (source11).And (source12).And (source13).And (source14).And (source15).And (source16).Then (resultSelector));
+		}
+		
+#endif
 
 	}
 }

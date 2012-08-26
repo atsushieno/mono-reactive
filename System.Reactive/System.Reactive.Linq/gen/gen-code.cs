@@ -82,6 +82,24 @@ namespace System.Reactive.Linq
 		", s, s2);
 		}
 
+		Console.WriteLine ("#if REACTIVE_2_0");
+
+		for (int i = 3; i <= 16; i++) {
+			string s = String.Join (", ", (from t in Enumerable.Range (1, i) select "TSource" + t).ToArray ());
+			string s2 = String.Join (", ", (from t in Enumerable.Range (1, i) select "IObservable<TSource" + t + "> source" + t).ToArray ());
+			string s3 = String.Join (", ", (from t in Enumerable.Range (1, i) select "TSource" + t).ToArray ());
+			string s4 = String.Join ("\n\t\t\t", (from t in Enumerable.Range (1, i) select "if (source" + t + " == null) throw new ArgumentNullException (\"source" + t + "\");").ToArray ());
+			string s5 = String.Join (").And (", (from t in Enumerable.Range (1, i) select "source" + t).ToArray ());
+			Console.WriteLine (@"
+		public static IObservable<TResult> Zip<{0},TResult> (this {1}, Func<{0},TResult> resultSelector)
+		{{
+			{3}
+			return When (({4}).Then (resultSelector));
+		}}", s, s2, s3, s4, s5);
+		}
+
+		Console.WriteLine ("#endif");
+
 		Console.WriteLine (@"
 	}
 }
