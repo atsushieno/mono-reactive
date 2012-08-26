@@ -870,6 +870,41 @@ namespace System.Reactive.Linq.Tests
 			Assert.AreEqual (new int [] {0, 1, 2, 3, 4}, l.ToArray (), "#2");
 			Assert.IsTrue (done, "#3");
 		}
+
+#if REACTIVE_2_0		
+		[Test]
+		public void SkipDuration ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler).Take (10).Skip (TimeSpan.FromMilliseconds (300), scheduler).Subscribe (v => l.Add (v));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = Enumerable.Range (2, 8).ToArray ();
+			Assert.AreEqual (array, l.ToArray ());
+		}
+		
+		[Test]
+		public void SkipLastDuration ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler).Take (10).SkipLast (TimeSpan.FromMilliseconds (300), scheduler).Subscribe (v => l.Add (v));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = Enumerable.Range (0, 7).ToArray ();
+			Assert.AreEqual (array, l.ToArray ());
+		}
+
+		[Test]
+		public void SkipUntil ()
+		{
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler).Take (10).SkipUntil (scheduler.Now.AddMilliseconds (300), scheduler).Subscribe (v => l.Add (v));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = Enumerable.Range (2, 8).ToArray ();
+			Assert.AreEqual (array, l.ToArray ());
+		}
+#endif
 		
 		[Test]
 		public void SkipLastErrorSequence ()

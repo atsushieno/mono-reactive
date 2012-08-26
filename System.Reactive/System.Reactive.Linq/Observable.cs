@@ -1956,6 +1956,24 @@ namespace System.Reactive.Linq
 		{
 			return source.SkipWhile ((s, i) => i < count);
 		}
+
+#if REACTIVE_2_0		
+		public static IObservable<TSource> Skip<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan duration)
+		{
+			return source.Skip (duration, Scheduler.Default);
+		}
+		
+		public static IObservable<TSource> Skip<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan duration, IScheduler scheduler)
+		{
+			DateTimeOffset start = scheduler.Now;
+			duration = Scheduler.Normalize (duration);
+			return source.SkipWhile (s => scheduler.Now - start < duration);
+		}
+#endif
 		
 		public static IObservable<TSource> SkipLast<TSource> (
 			this IObservable<TSource> source,
@@ -1975,13 +1993,55 @@ namespace System.Reactive.Linq
 					count--;
 				else
 					sub.OnNext (q.Dequeue ());
-				}, ex => sub.OnError (ex), () => {
+			}, ex => {
+				q.Clear ();
+				sub.OnError (ex);
+			}, () => {
 				q.Clear ();
 				sub.OnCompleted ();
 				});
 			// ----
 			}, DefaultColdScheduler);
 		}
+		
+#if REACTIVE_2_0
+		
+		public static IObservable<TSource> SkipLast<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan duration)
+		{
+			return source.SkipLast (duration, Scheduler.Default);
+		}
+		
+		public static IObservable<TSource> SkipLast<TSource> (
+			this IObservable<TSource> source,
+			TimeSpan duration, IScheduler scheduler)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			if (scheduler == null)
+				throw new ArgumentNullException ("scheduler");
+			duration = Scheduler.Normalize (duration);
+			
+			return new ColdObservableEach<TSource> (sub => {
+				// ----
+				DateTimeOffset start = scheduler.Now;
+				var q = new CompositeDisposable ();
+				return source.Subscribe (Observer.Create<TSource> (s => {
+					IDisposable task = null;
+					task = scheduler.Schedule (duration, () => { sub.OnNext (s); q.Remove (task); });
+					q.Add (task);
+				}, ex => {
+					q.Dispose (); // cancel all existing tasks.
+					sub.OnError (ex);
+				}, () => {
+					q.Dispose (); // cancel all existing tasks.
+					sub.OnCompleted ();
+				}));
+				// ----
+			}, scheduler);
+		}
+#endif
 		
 		static IObservable<TSource> SwitchUntil<TSource, TOther> (this IObservable<TSource> source, IObservable<TOther> other, bool initValue)
 		{
@@ -2028,6 +2088,23 @@ namespace System.Reactive.Linq
 			bool skipDone = false;
 			return source.Where ((s, i) => skipDone || (skipDone = !predicate (s, i)));
 		}
+		
+#if REACTIVE_2_0
+		public static IObservable<TSource> SkipUntil<TSource> (
+			this IObservable<TSource> source,
+			DateTimeOffset startTime)
+		{
+			return source.SkipUntil (startTime, Scheduler.Default);
+		}
+		
+		public static IObservable<TSource> SkipUntil<TSource> (
+			this IObservable<TSource> source,
+			DateTimeOffset startTime,
+			IScheduler scheduler)
+		{
+			return source.SkipWhile (s => scheduler.Now < startTime);
+		}
+#endif
 		
 		public static IObservable<Unit> Start (Action action)
 		{
