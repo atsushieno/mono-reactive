@@ -20,4 +20,9 @@ assemblies (System.Reactive.*.dll). Some of them were however, turned into
 NotImplemented state as they depended on types that are now "external" from
 the implementing assembly.
 
+** Requests for users
+
+Since there are very few usage of Rx that does *not* depend on WPF, I'd be
+very grateful if you could tell me any mono-runnable use of Rx with this.
+
 Atsushi Eno (@atsushi_eno / @atsushieno)
