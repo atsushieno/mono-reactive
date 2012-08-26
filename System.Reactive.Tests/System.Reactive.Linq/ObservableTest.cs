@@ -939,10 +939,35 @@ namespace System.Reactive.Linq.Tests
 		[Test]
 		public void TakeWhile ()
 		{
-			var source = Observable.Range (0, 5).TakeWhile (i => i < 3);
+			var source = Observable.Range (0, 5).TakeWhile (i => i != 3);
 			string s = null;
 			source.Subscribe (i => s += i, () => s += "done");
 			Assert.AreEqual ("012done", s, "#1");
+		}
+		
+		[Test]
+		public void TakeCannotBeSimplyTakeWhileCount ()
+		{
+			// This is how Take() works.
+			var l = new List<long> ();
+			var scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+				.Take (5)
+				.Subscribe (v => l.Add (v), () => l.Add (scheduler.Now.Millisecond));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			var array = new long [] {0, 1, 2, 3, 4, 500};
+			Assert.AreEqual (array, l.ToArray (), "#1");
+			                 
+			// This is how TakeWhile() works. Notice that the completion time differs.
+			l.Clear ();
+			scheduler = new HistoricalScheduler ();
+			Observable.Interval (TimeSpan.FromMilliseconds (100), scheduler)
+				.Take (10)
+				.TakeWhile (i => i != 5)
+				.Subscribe (v => l.Add (v), () => l.Add (scheduler.Now.Millisecond));
+			scheduler.AdvanceBy (TimeSpan.FromSeconds (1));
+			array = new long [] {0, 1, 2, 3, 4, 600};
+			Assert.AreEqual (array, l.ToArray (), "#2");
 		}
 		
 		[Test]

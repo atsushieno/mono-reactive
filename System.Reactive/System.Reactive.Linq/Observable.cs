@@ -2257,7 +2257,6 @@ namespace System.Reactive.Linq
 		{
 			if (source == null)
 				throw new ArgumentNullException ("source");
-
 			return new ColdObservableEach<TSource> (sub => {
 			// ----
 			int idx = 0;
@@ -2337,14 +2336,28 @@ namespace System.Reactive.Linq
 				throw new ArgumentNullException ("source");
 			if (predicate == null)
 				throw new ArgumentNullException ("predicate");
-
-			bool stopped = false;
-			return source.Where ((s, i) => {
-				if (stopped)
-					return false;
-				stopped = !predicate (s, i);
-				return !stopped;
+			return new ColdObservableEach<TSource> (sub => {
+				// ----
+				int idx = 0;
+				bool done = false;
+				return source.Subscribe (s => {
+					if (!done) {
+						if (predicate (s, idx++))
+							sub.OnNext (s);
+						else {
+							done = true;
+							sub.OnCompleted ();
+						}
+					}
+				}, ex => {
+					if (!done)
+						sub.OnError (ex);
+					done = true;
+				}, () => {
+					sub.OnCompleted ();
+					done = true;
 				});
+			}, DefaultColdScheduler);
 		}
 		
 		public static Plan<TResult> Then<TSource, TResult> (
