@@ -11,38 +11,53 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Reactive.Testing", "Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.Providers", "System.Reactive.Providers\System.Reactive.Providers.csproj", "{7034C233-1A37-4466-AC88-C790759D994C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reactive.MonoTouch", "System.Reactive.MonoTouch\System.Reactive.MonoTouch.csproj", "{1B592157-073C-4E93-88F5-C51BC596DAF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 		Android|Any CPU = Android|Any CPU
+		Mac|Any CPU = Mac|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Android|Any CPU.ActiveCfg = Android|Any CPU
 		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
 		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D7D238E-9FB4-4923-99EA-53CC34640235}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B592157-073C-4E93-88F5-C51BC596DAF0}.Android|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B592157-073C-4E93-88F5-C51BC596DAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B592157-073C-4E93-88F5-C51BC596DAF0}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
+		{1B592157-073C-4E93-88F5-C51BC596DAF0}.Mac|Any CPU.Build.0 = Mac|Any CPU
+		{1B592157-073C-4E93-88F5-C51BC596DAF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Android|Any CPU.ActiveCfg = Android|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EF2BF6E-CF73-403B-8C08-753783CA7CCC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Android|Any CPU.ActiveCfg = Debug|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Android|Any CPU.Build.0 = Debug|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7034C233-1A37-4466-AC88-C790759D994C}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
+		{7034C233-1A37-4466-AC88-C790759D994C}.Mac|Any CPU.Build.0 = Mac|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7034C233-1A37-4466-AC88-C790759D994C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Android|Any CPU.ActiveCfg = Debug|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Android|Any CPU.Build.0 = Debug|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
+		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Mac|Any CPU.Build.0 = Mac|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FE08AE0-EF24-4498-A50F-6D314F51F18C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Android|Any CPU.ActiveCfg = Android|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Android|Any CPU.Build.0 = Android|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
 		{C3403D3D-408A-4FD8-8C34-A8CD818D489A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
