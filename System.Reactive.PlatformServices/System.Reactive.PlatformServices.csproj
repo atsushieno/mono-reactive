@@ -46,7 +46,7 @@
       <Link>System.Reactive.Concurrency\ThreadPoolScheduler.cs</Link>
     </Compile>
     <Compile Include="System.Reactive.PlatformServices\EnlightenmentProvider.cs" />
-    <Compile Include="System.Reactive.PlatformServices\CurrentPlatformEnlightenmentProvider.cs" />
+    <Compile Include="System.Reactive.PlatformServices\CurrentPlatformEnlightenmentProvider.Full.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

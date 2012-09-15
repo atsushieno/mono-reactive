@@ -7,8 +7,9 @@ namespace System.Reactive.PlatformServices
 	public class SystemClockChangedEventArgs : EventArgs
 	{
 		public SystemClockChangedEventArgs ()
+			: this (DateTime.MinValue, DateTime.MaxValue)
 		{
-			throw new NotImplementedException ();
+			// what's the point of this ctor?
 		}
 
 		public SystemClockChangedEventArgs (DateTimeOffset oldTime, DateTimeOffset newTime)

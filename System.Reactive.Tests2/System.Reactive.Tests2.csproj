@@ -37,6 +37,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="System.Reactive.Tests\" />
+    <Folder Include="System.Reactive.Tests\System.Reactive.PlatformServices\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\System.Reactive.Tests\Mono.Reactive.Testing\TestSchedulerTest.cs">
@@ -128,6 +129,9 @@
     </Compile>
     <Compile Include="..\System.Reactive.Tests\System.Reactive.Threading.Tasks\TaskObservableExtensionsTest.cs">
       <Link>System.Reactive.Tests\System.Reactive.Threading.Tasks\TaskObservableExtensionsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Reactive.Tests\System.Reactive.PlatformServices\PlatformEnlightenmentProviderTest.cs">
+      <Link>System.Reactive.Tests\System.Reactive.PlatformServices\PlatformEnlightenmentProviderTest.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
