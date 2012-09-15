@@ -10,7 +10,7 @@ namespace System.Reactive.PlatformServices
 		
 		static PlatformEnlightenmentProvider ()
 		{
-			var type = Type.GetType (CommonAssemblyInfo.CoreAssemblyName);
+			var type = Type.GetType ("System.Reactive.PlatformServices.CurrentPlatformEnlightenmentProvider," + CommonAssemblyInfo.PlatformServicesAssemblyName);
 			if (type == null)
 				throw new InvalidOperationException ("Platform services assembly could not be loaded");
 
