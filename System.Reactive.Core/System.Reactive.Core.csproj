@@ -142,6 +142,9 @@
     <Compile Include="System.Reactive.PlatformServices\PlatformEnlightenmentProvider.cs" />
     <Compile Include="System.Reactive.PlatformServices\SystemClock.cs" />
     <Compile Include="System.Reactive.PlatformServices\SystemClockChangedEventArgs.cs" />
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Common\CommonAssemblyInfo.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -152,5 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="System.Reactive.PlatformServices\" />
+    <Folder Include="Common\" />
   </ItemGroup>
 </Project>
