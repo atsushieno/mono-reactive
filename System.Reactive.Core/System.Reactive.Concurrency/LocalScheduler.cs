@@ -1,4 +1,5 @@
 using System;
+using System.Reactive.PlatformServices;
 
 namespace System.Reactive.Concurrency
 {
@@ -33,9 +34,19 @@ namespace System.Reactive.Concurrency
 		}
 
 #if REACTIVE_2_0
-		public object GetService (Type serviceType)
+		static PeriodicTimerSystemClockMonitor timer_clock_monitor = new PeriodicTimerSystemClockMonitor (TimeSpan.FromSeconds (10));
+
+		object IServiceProvider.GetService (Type serviceType)
 		{
-			throw new System.NotImplementedException ();
+			return GetService (serviceType);
+		}
+
+		protected object GetService (Type serviceType)
+		{
+			if (serviceType == typeof (INotifySystemClockChanged))
+				return timer_clock_monitor;
+
+			return null;
 		}
 #endif
 	}
