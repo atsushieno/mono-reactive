@@ -7,7 +7,7 @@ namespace System.Reactive.PlatformServices
 	public class SystemClockChangedEventArgs : EventArgs
 	{
 		public SystemClockChangedEventArgs ()
-			: this (DateTime.MinValue, DateTime.MaxValue)
+			: this (DateTimeOffset.MinValue, DateTimeOffset.MaxValue)
 		{
 			// what's the point of this ctor?
 		}

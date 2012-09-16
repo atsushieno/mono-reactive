@@ -28,7 +28,7 @@ namespace System.Reactive.PlatformServices
 				Thread.Sleep (period);
 				var delta = SystemClock.UtcNow - now - period;
 				if (SystemClockChanged != null && Math.Abs (delta.Ticks) > TimeSpan.TicksPerSecond)
-					SystemClockChanged (this, new SystemClockChangedEventArgs ());
+					SystemClockChanged (this, new SystemClockChangedEventArgs (now + period, SystemClock.UtcNow));
 				now = SystemClock.UtcNow;
 			}
 		}
