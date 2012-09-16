@@ -13,13 +13,18 @@ namespace System.Reactive.Concurrency
 		// static Scheduler properties), I leave them as is.
 		PeriodicTimerSystemClockMonitor timer_clock_monitor;
 
+		List<ScheduledItemImpl<DateTimeOffset>> tasks = new List<ScheduledItemImpl<DateTimeOffset>> ();
+
 		protected LocalScheduler ()
 		{
 			timer_clock_monitor = new PeriodicTimerSystemClockMonitor (TimeSpan.FromSeconds (10));
 			timer_clock_monitor.SystemClockChanged += (o, e) => {
-				var l = new List<ScheduledItem<DateTimeOffset>> ();
-				// TODO: cancel all existing tasks and re-register everything with new dueTime.
-				throw new NotImplementedException ();
+				var future = new List<ScheduledItemImpl<DateTimeOffset>> ();
+				foreach (var task in tasks) {
+					task.Cancel ();
+					future.Add (task.Reschedule (task.DueTime + (e.NewTime - e.OldTime)));
+				}
+				tasks.AddRange (future);
 			};
 		}
 
@@ -30,7 +35,7 @@ namespace System.Reactive.Concurrency
 		
 		public virtual IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			ScheduledItem<DateTimeOffset> task = null;
+			ScheduledItemImpl<DateTimeOffset> task = null;
 			Func<IScheduler, TState, IDisposable> funcRemovingTask = (sch, stat) => { tasks.Remove (task); return action (sch, stat); };
 			task = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => funcRemovingTask (this, state));
 			tasks.Add (task);
@@ -61,8 +66,6 @@ namespace System.Reactive.Concurrency
 
 			return null;
 		}
-
-		List<ScheduledItem<DateTimeOffset>> tasks = new List<ScheduledItem<DateTimeOffset>> ();
 	}
 #else
 	public abstract class LocalScheduler : IScheduler, IStopwatchProvider

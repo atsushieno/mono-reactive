@@ -27,5 +27,12 @@ namespace System.Reactive.Concurrency
 			disposable.Disposable = action ();
 			return disposable;
 		}
+
+#if REACTIVE_2_0
+		internal ScheduledItemImpl<TAbsolute> Reschedule (TAbsolute newDueDate)
+		{
+			return new ScheduledItemImpl<TAbsolute> (newDueDate, this.action);
+		}
+#endif
 	}
 }
