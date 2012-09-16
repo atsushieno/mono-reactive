@@ -67,5 +67,20 @@ namespace System.Reactive.Concurrency.Tests
 			SpinWait.SpinUntil (() => done == true, 1000);
 			dis.Dispose ();
 		}
+
+		[Test]
+		public void ScheduleAbsolute ()
+		{
+			var s = new NewThreadScheduler ();
+			bool flag = false;
+			s.Schedule (s.Now.AddMilliseconds (200), () => flag = true);
+			Thread.Sleep (200);
+			Assert.IsTrue (flag, "#1");
+			flag = false;
+			var dis = s.Schedule (s.Now.AddMilliseconds (200), () => flag = true);
+			dis.Dispose ();
+			Thread.Sleep (200); // make sure to wait for timer
+			Assert.IsFalse (flag, "#2");
+		}
 	}
 }
