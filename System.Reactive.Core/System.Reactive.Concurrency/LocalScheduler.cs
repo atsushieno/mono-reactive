@@ -35,12 +35,20 @@ namespace System.Reactive.Concurrency
 		
 		public virtual IDisposable Schedule<TState> (TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
 		{
-			ScheduledItemImpl<DateTimeOffset> task = null;
-			Func<IScheduler, TState, IDisposable> funcRemovingTask = (sch, stat) => { tasks.Remove (task); return action (sch, stat); };
-			task = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => funcRemovingTask (this, state));
-			tasks.Add (task);
-			var reldis = Schedule (state, dueTime - Now, funcRemovingTask);
-			return Disposable.Create (() => { tasks.Remove (task); reldis.Dispose (); });
+			if (dueTime <= Now)
+				return Schedule (state, TimeSpan.Zero, action);
+			else {
+				ScheduledItemImpl<DateTimeOffset> task = null;
+				Func<IScheduler, TState, IDisposable> funcRemovingTask = (sch, stat) => {
+					tasks.Remove (task);
+					return action (sch, stat); };
+				task = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => funcRemovingTask (this, state));
+				tasks.Add (task);
+				var reldis = Schedule (state, dueTime - Now, funcRemovingTask);
+				return Disposable.Create (() => {
+					tasks.Remove (task);
+					reldis.Dispose (); });
+			}
 		}
 		
 		public abstract IDisposable Schedule<TState> (TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action);
