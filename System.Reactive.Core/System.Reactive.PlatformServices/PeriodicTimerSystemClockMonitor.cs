@@ -10,27 +10,24 @@ namespace System.Reactive.PlatformServices
 		public PeriodicTimerSystemClockMonitor (TimeSpan period)
 		{
 			this.period = period;
-
-			thread = new Thread (Loop) { IsBackground = true };
-			thread.Start ();
+			timer = new Timer (Loop, null, TimeSpan.Zero, period);
+			now = SystemClock.UtcNow;
 		}
 
-		Thread thread;
 		TimeSpan period;
+		Timer timer;
 		DateTimeOffset now;
 
 		public event EventHandler<SystemClockChangedEventArgs> SystemClockChanged;
 
-		void Loop ()
+		void Loop (object state)
 		{
+			if (SystemClockChanged == null)
+				return;
+			var delta = SystemClock.UtcNow - now - period;
+			if (Math.Abs (delta.Ticks) > TimeSpan.TicksPerSecond)
+				SystemClockChanged (this, new SystemClockChangedEventArgs (now + period, SystemClock.UtcNow));
 			now = SystemClock.UtcNow;
-			while (true) {
-				Thread.Sleep (period);
-				var delta = SystemClock.UtcNow - now - period;
-				if (SystemClockChanged != null && Math.Abs (delta.Ticks) > TimeSpan.TicksPerSecond)
-					SystemClockChanged (this, new SystemClockChangedEventArgs (now + period, SystemClock.UtcNow));
-				now = SystemClock.UtcNow;
-			}
 		}
 	}
 }
