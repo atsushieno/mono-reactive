@@ -67,7 +67,7 @@ namespace System.Reactive.Concurrency
 			return GetService (serviceType);
 		}
 
-		protected object GetService (Type serviceType)
+		protected virtual object GetService (Type serviceType)
 		{
 			if (serviceType == typeof (INotifySystemClockChanged))
 				return timer_clock_monitor;

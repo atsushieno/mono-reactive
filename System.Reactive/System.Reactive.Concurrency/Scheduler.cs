@@ -23,9 +23,8 @@ namespace System.Reactive.Concurrency
 		}
 #if REACTIVE_2_0
 
-		// FIXME: find out correct return type and instance
-		public static IScheduler Default {
-			get { return NewThread; }
+		public static DefaultScheduler Default {
+			get { return DefaultScheduler.Instance; }
 		}
 
 		// Those properties are [Obsolete] only in non-portable build...
@@ -138,29 +137,6 @@ namespace System.Reactive.Concurrency
 				return dis;
 			};
 			return scheduler.Schedule<TState> (state, dueTime, f);
-		}
-		
-#if REACTIVE_2_0
-		// FIXME: shouldn't be public.
-		public
-#else
-		internal
-#endif
-		static void InternalAddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
-		{
-			// It is most likely appended in order, so don't use ineffective List.Sort(). Simple comparison makes it faster.
-			// Also, it is important that events are processed *in order* when they are scheduled at the same moment.
-			int pos = -1;
-			DateTimeOffset dueTime = task.DueTime;
-			for (int i = tasks.Count - 1; i >= 0; i--) {
-				if (dueTime >= tasks [i].DueTime) {
-					tasks.Insert (i + 1, task);
-					pos = i;
-					break;
-				}
-			}
-			if (pos < 0)
-				tasks.Insert (0, task);
 		}
 		
 #if REACTIVE_2_0

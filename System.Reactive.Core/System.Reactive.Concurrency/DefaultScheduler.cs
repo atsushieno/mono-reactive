@@ -30,7 +30,7 @@ namespace System.Reactive.Concurrency
 			throw new NotImplementedException ();
 		}
 
-		public object GetService (Type serviceType)
+		protected override object GetService (Type serviceType)
 		{
 			throw new NotImplementedException ();
 		}

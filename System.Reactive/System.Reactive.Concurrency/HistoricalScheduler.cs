@@ -40,9 +40,26 @@ namespace System.Reactive.Concurrency
 			ScheduledItemImpl<DateTimeOffset> t = null;
 			t = new ScheduledItemImpl<DateTimeOffset> (dueTime, () => { tasks.Remove (t); return action (this, state); });
 			
-			Scheduler.InternalAddTask (tasks, t);
+			InternalAddTask (tasks, t);
 			
 			return new CompositeDisposable (Disposable.Create (() => tasks.Remove (t)), t);
+		}
+		
+		internal static void InternalAddTask (IList<ScheduledItem<DateTimeOffset>> tasks, ScheduledItem<DateTimeOffset> task)
+		{
+			// It is most likely appended in order, so don't use ineffective List.Sort(). Simple comparison makes it faster.
+			// Also, it is important that events are processed *in order* when they are scheduled at the same moment.
+			int pos = -1;
+			DateTimeOffset dueTime = task.DueTime;
+			for (int i = tasks.Count - 1; i >= 0; i--) {
+				if (dueTime >= tasks [i].DueTime) {
+					tasks.Insert (i + 1, task);
+					pos = i;
+					break;
+				}
+			}
+			if (pos < 0)
+				tasks.Insert (0, task);
 		}
 	}
 }
