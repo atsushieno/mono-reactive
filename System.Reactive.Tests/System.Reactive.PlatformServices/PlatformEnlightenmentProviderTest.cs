@@ -21,6 +21,9 @@ namespace System.Reactive.PlatformServices.Tests
 #if NET_4_5
 			Assert.IsNotNull (pep.GetService<IExceptionServices> (), "#3");
 #endif
+			// maybe extraneous, but I attempt to keep compatible way to deal with it...
+			Assert.IsNull (pep.GetService<INotifySystemClockChanged> (), "#4");
+			Assert.IsNull (pep.GetService<IHostLifecycleNotifications> (), "#5");
 		}
 	}
 }

@@ -96,5 +96,29 @@ namespace System.Reactive.Concurrency.Tests
 			Assert.AreEqual (10, i, "#1");
 			dis.Dispose ();
 		}
+
+#if REACTIVE_2_0
+		[Test]
+		public void AsLongRunning ()
+		{
+			Assert.IsNull (Scheduler.AsLongRunning (Scheduler.CurrentThread), "#1");
+			Assert.IsNotNull (Scheduler.AsLongRunning (Scheduler.Default), "#2");
+			Assert.IsNull (Scheduler.AsLongRunning (Scheduler.Immediate), "#3");
+			Assert.IsNotNull (Scheduler.AsLongRunning (Scheduler.NewThread), "#4");
+			Assert.IsNotNull (Scheduler.AsLongRunning (Scheduler.TaskPool), "#5");
+			Assert.IsNotNull (Scheduler.AsLongRunning (Scheduler.ThreadPool), "#6");
+		}
+
+		[Test]
+		public void AsPeriodic ()
+		{
+			Assert.IsNull (Scheduler.AsPeriodic (Scheduler.CurrentThread), "#1");
+			Assert.IsNotNull (Scheduler.AsPeriodic (Scheduler.Default), "#2");
+			Assert.IsNull (Scheduler.AsPeriodic (Scheduler.Immediate), "#3");
+			Assert.IsNotNull (Scheduler.AsPeriodic (Scheduler.NewThread), "#4");
+			Assert.IsNotNull (Scheduler.AsPeriodic (Scheduler.TaskPool), "#5");
+			Assert.IsNotNull (Scheduler.AsPeriodic (Scheduler.ThreadPool), "#6");
+		}
+#endif
 	}
 }

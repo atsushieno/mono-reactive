@@ -166,12 +166,14 @@ namespace System.Reactive.Concurrency
 #if REACTIVE_2_0
 		public static ISchedulerLongRunning AsLongRunning (this IScheduler scheduler)
 		{
-			throw new NotImplementedException ();
+			// is this method really just like this...?
+			return scheduler as ISchedulerLongRunning;
 		}
 
 		public static ISchedulerPeriodic AsPeriodic (this IScheduler scheduler)
 		{
-			throw new NotImplementedException ();
+			// is this method really just like this...?
+			return scheduler as ISchedulerPeriodic;
 		}
 
 		public static IStopwatchProvider AsStopwatchProvider (this IScheduler scheduler)
