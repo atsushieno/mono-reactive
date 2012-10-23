@@ -62,17 +62,21 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="Android_System.Reactive.Interfaces.csproj">
+    <ProjectReference Include="..\Android_System.Reactive.Interfaces\Android_System.Reactive.Interfaces.csproj">
       <Project>{0FD37494-B8FD-46DB-8356-B23D2C9D34C8}</Project>
       <Name>Android_System.Reactive.Interfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="Android_System.Reactive.Linq.csproj">
+    <ProjectReference Include="..\Android_System.Reactive.Linq\Android_System.Reactive.Linq.csproj">
       <Project>{3D915092-7092-4A12-BF9A-463AE4522E4C}</Project>
       <Name>Android_System.Reactive.Linq</Name>
     </ProjectReference>
-    <ProjectReference Include="Android_System.Reactive.PlatformServices.csproj">
+    <ProjectReference Include="..\Android_System.Reactive.PlatformServices\Android_System.Reactive.PlatformServices.csproj">
       <Project>{43E855FE-431F-4B3E-8C7F-A6553FAF14B8}</Project>
       <Name>Android_System.Reactive.PlatformServices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Android_System.Reactive.Core\Android_System.Reactive.Core.csproj">
+      <Project>{0565924B-A569-4ED4-B538-FEF130AEBA5A}</Project>
+      <Name>Android_System.Reactive.Core</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

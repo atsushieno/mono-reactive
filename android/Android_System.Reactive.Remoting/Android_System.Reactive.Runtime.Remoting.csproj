@@ -11,14 +11,15 @@
     <RootNamespace>Android_System.Reactive.Remoting</RootNamespace>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AssemblyName>Android_System.Reactive.Remoting</AssemblyName>
+    <AssemblyName>System.Reactive.Runtime.Remoting</AssemblyName>
+    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG;REACTIVE_2_0</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
@@ -36,9 +37,33 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="Mono.Android" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\Android_System.Reactive.Interfaces\Android_System.Reactive.Interfaces.csproj">
+      <Project>{0FD37494-B8FD-46DB-8356-B23D2C9D34C8}</Project>
+      <Name>Android_System.Reactive.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Android_System.Reactive.Linq\Android_System.Reactive.Linq.csproj">
+      <Project>{3D915092-7092-4A12-BF9A-463AE4522E4C}</Project>
+      <Name>Android_System.Reactive.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Android_System.Reactive.PlatformServices\Android_System.Reactive.PlatformServices.csproj">
+      <Project>{43E855FE-431F-4B3E-8C7F-A6553FAF14B8}</Project>
+      <Name>Android_System.Reactive.PlatformServices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Android_System.Reactive.Core\Android_System.Reactive.Core.csproj">
+      <Project>{0565924B-A569-4ED4-B538-FEF130AEBA5A}</Project>
+      <Name>Android_System.Reactive.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="System.Reactive.Linq\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\System.Reactive.Runtime.Remoting\System.Reactive.Linq\RemotingObservable.cs">
+      <Link>System.Reactive.Linq\RemotingObservable.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>

@@ -188,7 +188,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="Android_System.Reactive.Interfaces.csproj">
+    <ProjectReference Include="..\Android_System.Reactive.Interfaces\Android_System.Reactive.Interfaces.csproj">
       <Project>{0FD37494-B8FD-46DB-8356-B23D2C9D34C8}</Project>
       <Name>Android_System.Reactive.Interfaces</Name>
     </ProjectReference>
