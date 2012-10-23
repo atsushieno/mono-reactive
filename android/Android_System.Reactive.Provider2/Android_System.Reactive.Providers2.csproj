@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E9169301-DD86-44DF-BE3F-22ABCBDA503C}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Android_System.Reactive.Provider2</RootNamespace>
+    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
+    <AssemblyName>System.Reactive.Providers</AssemblyName>
+    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;REACTIVE_2_0</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AndroidLinkMode>None</AndroidLinkMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="System.Reactive.Joins\" />
+    <Folder Include="System.Reactive.Linq\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\QueryablePattern.cs">
+      <Link>System.Reactive.Joins\QueryablePattern.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\QueryablePlan.cs">
+      <Link>System.Reactive.Joins\QueryablePlan.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\System.Reactive.Joins.generated.cs">
+      <Link>System.Reactive.Joins\System.Reactive.Joins.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Linq\Qbservable.cs">
+      <Link>System.Reactive.Linq\Qbservable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Linq\System.Reactive.Linq.generated.cs">
+      <Link>System.Reactive.Linq\System.Reactive.Linq.generated.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="Android_System.Reactive.Interfaces.csproj">
+      <Project>{0FD37494-B8FD-46DB-8356-B23D2C9D34C8}</Project>
+      <Name>Android_System.Reactive.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="Android_System.Reactive.Linq.csproj">
+      <Project>{3D915092-7092-4A12-BF9A-463AE4522E4C}</Project>
+      <Name>Android_System.Reactive.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="Android_System.Reactive.PlatformServices.csproj">
+      <Project>{43E855FE-431F-4B3E-8C7F-A6553FAF14B8}</Project>
+      <Name>Android_System.Reactive.PlatformServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
