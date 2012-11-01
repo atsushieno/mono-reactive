@@ -5,10 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AEEBFC85-91B8-410F-BBB7-BD12BBC61BE6}</ProjectGuid>
+    <ProjectGuid>{5D771DC3-C1AC-4C58-827D-F4F148C40998}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>System.Reactive.PlatformServices</RootNamespace>
-    <AssemblyName>System.Reactive.PlatformServices</AssemblyName>
+    <RootNamespace>System.Reactive</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -19,53 +20,58 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.PlatformServices</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <Optimize>False</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.PlatformServices</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'iOS|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\iOS</OutputPath>
     <WarningLevel>4</WarningLevel>
+    <AssemblyName>iOS_SystemReactivePlatformServices</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\EventLoopScheduler.cs">
+    <Compile Include="..\..\System.Reactive\System.Reactive.Concurrency\EventLoopScheduler.cs">
       <Link>System.Reactive.Concurrency\EventLoopScheduler.cs</Link>
     </Compile>
-    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\NewThreadScheduler.cs">
+    <Compile Include="..\..\System.Reactive\System.Reactive.Concurrency\NewThreadScheduler.cs">
       <Link>System.Reactive.Concurrency\NewThreadScheduler.cs</Link>
     </Compile>
-    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\TaskPoolScheduler.cs">
+    <Compile Include="..\..\System.Reactive\System.Reactive.Concurrency\TaskPoolScheduler.cs">
       <Link>System.Reactive.Concurrency\TaskPoolScheduler.cs</Link>
     </Compile>
-    <Compile Include="..\System.Reactive\System.Reactive.Concurrency\ThreadPoolScheduler.cs">
+    <Compile Include="..\..\System.Reactive\System.Reactive.Concurrency\ThreadPoolScheduler.cs">
       <Link>System.Reactive.Concurrency\ThreadPoolScheduler.cs</Link>
     </Compile>
-    <Compile Include="System.Reactive.PlatformServices\EnlightenmentProvider.cs" />
-    <Compile Include="System.Reactive.PlatformServices\CurrentPlatformEnlightenmentProvider.Full.cs" />
+    <Compile Include="..\..\System.Reactive.PlatformServices\System.Reactive.PlatformServices\CurrentPlatformEnlightenmentProvider.Full.cs">
+      <Link>System.Reactive.PlatformServices\CurrentPlatformEnlightenmentProvider.Full.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.PlatformServices\System.Reactive.PlatformServices\EnlightenmentProvider.cs">
+      <Link>System.Reactive.PlatformServices\EnlightenmentProvider.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\System.Reactive.Interfaces\System.Reactive.Interfaces.csproj">
-      <Project>{755E549E-1BDE-4153-A58B-7C969C902CAD}</Project>
-      <Name>System.Reactive.Interfaces</Name>
+    <ProjectReference Include="..\iOS_System.Reactive.Core\iOS_System.Reactive.Core.csproj">
+      <Project>{7AC472A2-DA74-4D53-9B47-0A3617AFDDCE}</Project>
+      <Name>iOS_System.Reactive.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Reactive.Core\System.Reactive.Core.csproj">
-      <Project>{AD27C5E8-8A0C-454D-B7AA-76A54793B81F}</Project>
-      <Name>System.Reactive.Core</Name>
+    <ProjectReference Include="..\iOS_System.Reactive.Interfaces\iOS_System.Reactive.Interfaces.csproj">
+      <Project>{29F000B5-2979-470F-992E-06F42846E18B}</Project>
+      <Name>iOS_System.Reactive.Interfaces</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="System.Reactive.PlatformServices\" />
   </ItemGroup>
 </Project>

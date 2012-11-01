@@ -8,7 +8,6 @@
     <ProjectGuid>{4D16C4BF-1C85-44FA-B93F-EC9B3E80D6D5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Reactive.Tests2</RootNamespace>
-    <AssemblyName>System.Reactive.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -19,6 +18,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -27,6 +27,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.Tests</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'iOS|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\iOS</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <AssemblyName>System.Reactive.Tests2</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

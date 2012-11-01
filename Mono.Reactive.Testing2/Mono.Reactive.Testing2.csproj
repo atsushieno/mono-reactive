@@ -8,7 +8,6 @@
     <ProjectGuid>{25A4B33D-EE55-4F25-98A5-3148A5875247}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono.Reactive.Testing2</RootNamespace>
-    <AssemblyName>Mono.Reactive.Testing</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -19,6 +18,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>Mono.Reactive.Testing</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -27,6 +27,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AssemblyName>Mono.Reactive.Testing</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'iOS|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\iOS</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <AssemblyName>Mono.Reactive.Testing2</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

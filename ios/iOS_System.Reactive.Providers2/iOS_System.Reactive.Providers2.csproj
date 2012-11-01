@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{219E5F1E-9043-4B1F-8A1F-26FED0AD7527}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Reactive</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;REACTIVE_2_0</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.Providers</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AssemblyName>System.Reactive.Providers</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'iOS|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\iOS</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <AssemblyName>iOS_SystemReactiveProviders2</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="System.Reactive.Joins\" />
+    <Folder Include="System.Reactive.Linq\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\QueryablePattern.cs">
+      <Link>System.Reactive.Joins\QueryablePattern.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\QueryablePlan.cs">
+      <Link>System.Reactive.Joins\QueryablePlan.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Joins\System.Reactive.Joins.generated.cs">
+      <Link>System.Reactive.Joins\System.Reactive.Joins.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Linq\Qbservable.cs">
+      <Link>System.Reactive.Linq\Qbservable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.Reactive.Providers\System.Reactive.Linq\System.Reactive.Linq.generated.cs">
+      <Link>System.Reactive.Linq\System.Reactive.Linq.generated.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\iOS_System.Reactive.Core\iOS_System.Reactive.Core.csproj">
+      <Project>{7AC472A2-DA74-4D53-9B47-0A3617AFDDCE}</Project>
+      <Name>iOS_System.Reactive.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\iOS_System.Reactive.Interfaces\iOS_System.Reactive.Interfaces.csproj">
+      <Project>{29F000B5-2979-470F-992E-06F42846E18B}</Project>
+      <Name>iOS_System.Reactive.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\iOS_System.Reactive.Linq\iOS_System.Reactive.Linq.csproj">
+      <Project>{4461A96C-8B04-4803-B771-AE2250A7EB9E}</Project>
+      <Name>iOS_System.Reactive.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\iOS_System.Reactive.PlatformServices\iOS_System.Reactive.PlatformServices.csproj">
+      <Project>{5D771DC3-C1AC-4C58-827D-F4F148C40998}</Project>
+      <Name>iOS_System.Reactive.PlatformServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
