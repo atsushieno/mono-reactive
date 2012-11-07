@@ -1,3 +1,13 @@
+** Important
+
+I happily announce that I'm not going to work on this code base anymore
+now that Microsoft has open-sourced Reactive Extensions in Apache license.
+http://rx.codeplex.com/
+
+Thank you Microsoft!
+
+--------
+
 mono-reactive aims to provide Reactive Extension (Rx) [*1] features to the
 Mono world.
 
