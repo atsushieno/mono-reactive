@@ -6,6 +6,11 @@ http://rx.codeplex.com/
 
 Thank you Microsoft!
 
+I noticed that some people are still forking and/or trying to use it.
+There wouldn't be any need to do so... except for attempt to use Rx on Unity.
+For such use case, check out UniRx:
+https://github.com/neuecc/UniRx
+
 --------
 
 mono-reactive aims to provide Reactive Extension (Rx) [*1] features to the
